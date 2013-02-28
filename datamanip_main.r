@@ -146,7 +146,7 @@ sqlstr = "select PUBID_1997,COLLEGE_SCHOOLID,COLLEGES_APPLY_VECTOR,COLLEGES_ADMI
 
 #application from YCOC-050P==========================================================
   #merge data
-  sqlstr = "select * from YOUNGCOLLEGE_DATA left outer join YCOC_DATA on YOUNGCOLLEGE_DATA.PUBID_1997 = YCOC_DATA.PUBID_1997"
+  sqlstr = "select * from YOUNGCOLLEGE_DATA inner join YCOC_DATA on YOUNGCOLLEGE_DATA.PUBID_1997 = YCOC_DATA.PUBID_1997"
   YOUNGCOLLEGE_DATA <- sqldf(sqlstr)
   #empty vectors for storage
   YOUNGCOLLEGE_DATA["COLLEGES_APPLY_VECTOR2"] <- "" #vector of applied schools
@@ -165,7 +165,7 @@ sqlstr = "select PUBID_1997,COLLEGE_SCHOOLID,COLLEGES_APPLY_VECTOR,COLLEGES_ADMI
     if (YOUNGCOLLEGE_DATA$SCHOOLID_YEAR[m] > 0){
     curMax = YOUNGCOLLEGE_DATA$SCHOOLID_YEAR[m]+2
     }
-    else {curMax = 2013} YCOC-054.01.02
+    else {curMax = 2013}
   }
   for (i in 1:length(school_vect)){ #this loop is only for 2003 since it looks different
     for (k in 1:length(loop_vect)){
