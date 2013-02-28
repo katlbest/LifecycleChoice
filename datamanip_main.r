@@ -1,4 +1,5 @@
 library(sqldf)
+library(plyr)
 
 #notes=======================================================================
 #to clear data: rm(list = ls(all = TRUE))
@@ -43,7 +44,7 @@ for (i in 1:length(school_vect)){
       curstr2 = paste('MERGED_DATA$', curstr2,sep = '')                              
       curstr3 = paste('MERGED_DATA$', curstr3,sep = '')
       for (k in 1:nrow(MERGED_DATA)){
-        curMin = MERGED_DATA$CHOICE_YEAR[k] - 1
+        curMin = MERGED_DATA$CHOICE_YEAR[k] - 2
         if (MERGED_DATA$SCHOOLID_YEAR[k] > 0){
           curMax = MERGED_DATA$SCHOOLID_YEAR[k]+2
         }
@@ -107,26 +108,81 @@ for (i in 1:nrow(YOUNG_DATA)){
 
 #get names of variables related to APPLY/ADMIT vectors and rename for SQL
 year_vect = c('_2004','_2005','_2006','_2007','_2008','_2009','_2010')
-school_vect = c('.01','.02','.03','.04','.05','.06','.07','.08','.09','.10')
+school_vect = c('01','02','03','04','05','06','07','08','09','10')
 for (i in 1:length(school_vect)){
   for (j in 1:length(year_vect)){
-    curstr = paste('PREV_COL_APP_ID',school_vect[i],year_vect[j], sep = "")
+    curstr = paste('PREV_COL_APP_ID.',school_vect[i],year_vect[j], sep = "")
+    strreplace = paste('PREV_COL_APP_ID_',school_vect[i],year_vect[j], sep = "")
     #curstr2 = paste("PREV_COL_APP_TERMNUM",school_vect[i],year_vect[j], sep = "")
     #curstr3 = paste("PREV_COL_APP_ADMIT",school_vect[i],year_vect[j], sep = "")
     if (curstr %in% colnames(MERGED_DATA)){
-      print(curstr)
+      names(YOUNG_DATA)[names(YOUNG_DATA)==curstr] <- strreplace
+      #rename(YOUNGCOLLEGE_DATA, c(curstr =strreplace))
+      print(strreplace)
     }
   }
 }
 
-sqlstr = "select PUBID_1997,COLLEGE_SCHOOLID,COLLEGES_APPLY_VECTOR,COLLEGES_ADMIT_VECTOR from YOUNG_DATA where MISSING_IDS = 1"
+sqlstr = "select PUBID_1997,COLLEGE_SCHOOLID,COLLEGES_APPLY_VECTOR,COLLEGES_ADMIT_VECTOR,PREV_COL_APP_ID_01_2004,PREV_COL_APP_ID_01_2005,PREV_COL_APP_ID_01_2006,PREV_COL_APP_ID_01_2007,PREV_COL_APP_ID_01_2008,PREV_COL_APP_ID_01_2009,PREV_COL_APP_ID_01_2010,PREV_COL_APP_ID_02_2004,PREV_COL_APP_ID_02_2005,PREV_COL_APP_ID_02_2006,PREV_COL_APP_ID_02_2007,PREV_COL_APP_ID_02_2008,PREV_COL_APP_ID_02_2009,PREV_COL_APP_ID_02_2010,PREV_COL_APP_ID_03_2004,PREV_COL_APP_ID_03_2005,PREV_COL_APP_ID_03_2006,PREV_COL_APP_ID_03_2007,PREV_COL_APP_ID_03_2008,PREV_COL_APP_ID_03_2009,PREV_COL_APP_ID_03_2010,PREV_COL_APP_ID_04_2004,PREV_COL_APP_ID_04_2005,PREV_COL_APP_ID_04_2006,PREV_COL_APP_ID_04_2007,PREV_COL_APP_ID_05_2004,PREV_COL_APP_ID_05_2007,PREV_COL_APP_ID_06_2004,PREV_COL_APP_ID_06_2007,PREV_COL_APP_ID_07_2004,PREV_COL_APP_ID_08_2004,PREV_COL_APP_ID_09_2004,PREV_COL_APP_ID_10_2004 from YOUNG_DATA where MISSING_IDS = 1 and COLLEGEGOER_FLAG =1"
 #PREV_COL_APP_ID.01_2004,PREV_COL_APP_ID.01_2005,PREV_COL_APP_ID.01_2006,PREV_COL_APP_ID.01_2007,PREV_COL_APP_ID.01_2008,PREV_COL_APP_ID.01_2009,PREV_COL_APP_ID.01_2010,PREV_COL_APP_ID.02_2004,PREV_COL_APP_ID.02_2005,PREV_COL_APP_ID.02_2006,PREV_COL_APP_ID.02_2007,PREV_COL_APP_ID.02_2008,PREV_COL_APP_ID.02_2009,PREV_COL_APP_ID.02_2010,PREV_COL_APP_ID.03_2004,PREV_COL_APP_ID.03_2005,PREV_COL_APP_ID.03_2006,PREV_COL_APP_ID.03_2007,PREV_COL_APP_ID.03_2008,PREV_COL_APP_ID.03_2009,PREV_COL_APP_ID.03_2010,PREV_COL_APP_ID.04_2004,PREV_COL_APP_ID.04_2005,PREV_COL_APP_ID.04_2006,PREV_COL_APP_ID.04_2007,PREV_COL_APP_ID.05_2004,PREV_COL_APP_ID.05_2007,PREV_COL_APP_ID.06_2004,PREV_COL_APP_ID.06_2007,PREV_COL_APP_ID.07_2004,PREV_COL_APP_ID.08_2004,PREV_COL_APP_ID.09_2004,PREV_COL_APP_ID.10_2004
 TEST <- sqldf(sqlstr)
 TEST$COLLEGE_SCHOOLID <- YOUNG_DATA[YOUNG_DATA$MISSING_IDS ==1,]$COLLEGE_SCHOOLID
 write.csv(TEST, file = "D:/test.csv")
 
-MERGED_DATA[MERGED_DATA$COLLEGES_APPLY_VECTOR == "" & MERGED_DATA$COLLEGE_SCHOOLID > 0,]$KEY.BDATE_Y_1997
-#find term of application to school one went to and check that its in the time frame we want
+#application from YCOC-050P==========================================================
+#empty vectors for storage
+MERGED_DATA["COLLEGES_APPLY_VECTOR2"] <- "" #vector of applied schools
+MERGED_DATA["COLLEGES_APPLYALL_VECTOR"] <- "" #vector of applied schools including outside of term limit
+MERGED_DATA["COLLEGES_ADMIT_VECTOR"] <- "" #vector of admitted schools
+MERGED_DATA["COLLEGES_TERM_VECTOR"] <- "" #vector of admitted schools
+MERGED_DATA["ATTENDED_IN_APPLIED"] <- 0 #indicator of whether you applied where you went
+#create comma-separated list of applied, applied within term limits, and admitted
+i = 1 #school
+j = 1 #year
+year_vect = c('_2004','_2005','_2006','_2007','_2008','_2009','_2010')
+school_vect = c('.01','.02','.03','.04','.05','.06','.07','.08','.09','.10')
+for (i in 1:length(school_vect)){
+  for (j in 1:length(year_vect)){
+    curstr = paste('PREV_COL_APP_ID',school_vect[i],year_vect[j], sep = "")
+    curstr2 = paste("PREV_COL_APP_TERMNUM",school_vect[i],year_vect[j], sep = "")
+    curstr3 = paste("PREV_COL_APP_ADMIT",school_vect[i],year_vect[j], sep = "")
+    if (curstr %in% colnames(MERGED_DATA)){
+      curstr = paste('MERGED_DATA$', curstr,sep = '')
+      curstr2 = paste('MERGED_DATA$', curstr2,sep = '')                              
+      curstr3 = paste('MERGED_DATA$', curstr3,sep = '')
+      for (k in 1:nrow(MERGED_DATA)){
+        curMin = MERGED_DATA$CHOICE_YEAR[k] - 2
+        if (MERGED_DATA$SCHOOLID_YEAR[k] > 0){
+          curMax = MERGED_DATA$SCHOOLID_YEAR[k]+2
+        }
+        else {curMax = 2013}
+        if (eval(parse(text =curstr))[k] > 0){    #check for existence of application ID
+          curTerm = ((eval(parse(text =curstr2))[k] +1) %/% 4) +1997
+          MERGED_DATA$COLLEGES_APPLYALL_VECTOR[k]= paste(MERGED_DATA$COLLEGES_APPLYALL_VECTOR[k], eval(parse(text =curstr))[k], ",", sep = "")
+          MERGED_DATA$COLLEGES_TERM_VECTOR[k]= paste(MERGED_DATA$COLLEGES_TERM_VECTOR[k], toString(curTerm), ",", sep = "")
+          if (curTerm > curMin & curTerm < curMax){
+            MERGED_DATA$COLLEGES_APPLY_VECTOR[k]= paste(MERGED_DATA$COLLEGES_APPLY_VECTOR[k], eval(parse(text =curstr))[k], ",", sep = "")            
+            if (eval(parse(text =curstr3))[k] == 1){ #admitted
+              # print("yes")
+              MERGED_DATA$COLLEGES_ADMIT_VECTOR[k]= paste(MERGED_DATA$COLLEGES_ADMIT_VECTOR[k], "1", ",", sep = "")
+            }
+            else if (eval(parse(text =curstr3))[k] == 0){ #not admitted
+              MERGED_DATA$COLLEGES_ADMIT_VECTOR[k]= paste(MERGED_DATA$COLLEGES_ADMIT_VECTOR[k], "0", ",", sep = "")
+            }
+            else{ #decision pending
+              MERGED_DATA$COLLEGES_ADMIT_VECTOR[k]= paste(MERGED_DATA$COLLEGES_ADMIT_VECTOR[k], "-3", ",", sep = "")
+            }
+          }
+        }  
+      }
+    }
+  }
+}
+
+
+
+
+
 
 #clean up==========================================================
 #create dataset of only the youngest individuals whom we want to match to IPEDS
