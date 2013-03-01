@@ -1,6 +1,7 @@
 library(sqldf)
 library(plyr)
 
+#file should be runnable as is except the CONSOLE portion
 #notes=======================================================================
 #to clear data: rm(list = ls(all = TRUE))
 #to replace missing values: MERGED_DATA[MERGED_DATA < 0] <- NA
@@ -17,10 +18,10 @@ library(plyr)
   #END RUN IN CONSOLE=============
   
   MERGED_DATA <- read.csv("D:/MERGED_DATA_DROPPEDVARS.csv")
-  MERGED_DATA_STORE<-MERGED_DATA
+  #MERGED_DATA_STORE<-MERGED_DATA
   #get smaller test set or go back to full data
-  MERGED_DATA<-MERGED_DATA[1:100,]
-  MERGED_DATA<-MERGED_DATA_STORE
+  #MERGED_DATA<-MERGED_DATA[1:100,]
+  #MERGED_DATA<-MERGED_DATA_STORE
   
   #ycoc data
   YCOC_DATA <- read.csv("C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/ycoc_data.csv")
@@ -79,50 +80,51 @@ library(plyr)
   #determine if any people outside of birth years 1983-84 have school info
   YOUNG_DATA <- MERGED_DATA[MERGED_DATA$KEY.BDATE_Y_1997 > 1982,] #2254 todal, 767 ID'd college-goers
   OLD_DATA <- MERGED_DATA[MERGED_DATA$KEY.BDATE_Y_1997 < 1983,] #confirmed, old data includes no entries that are non-empty, 3808 individuals
-  YOUNGCOLLEGE_DATA <- MERGED_DATA[MERGED_DATA$KEY.BDATE_Y_1997 > 1982 & MERGED_DATA$COLLEGEGOER_FLAG ==1,] #767 ID'd college-goers, 56 missing the school they applied to, 296 missing all info, and 400 have all information
-  
+  #YOUNGCOLLEGE_DATA <- MERGED_DATA[MERGED_DATA$KEY.BDATE_Y_1997 > 1982 & MERGED_DATA$COLLEGEGOER_FLAG ==1,] #767 ID'd college-goers, 56 missing the school they applied to, 296 missing all info, and 400 have all information
+  #YOUNG_DATA is now being rename YOUNGCOLLEGE_DATA so we can run the loops below for everyone (not just college-goers)
+  YOUNGCOLLEGE_DATA <- YOUNG_DATA
   #determine if school attended is in list--often it is not! see if that's true even for my college-goers
-  IDCounter = 0 #they have a list of applied schools, but attended school is not in it
-  FoundCounter = 0
-  AllCounter = 0
-  YOUNGCOLLEGE_DATA$MISSING_ATTENDEDID <- -3 #indicator that you are missing the attended school ID
-  YOUNGCOLLEGE_DATA$MISSING_IDS <- -3 #indicator that you are missing all IDs
-  YOUNGCOLLEGE_DATA$FOUND_ID <- -3 #indicator that have found current ID in vector
-  for (i in 1:nrow(YOUNGCOLLEGE_DATA)){
-    if (YOUNGCOLLEGE_DATA$COLLEGE_SCHOOLID[i] > 0){
-      curID = as.character(YOUNGCOLLEGE_DATA$COLLEGE_SCHOOLID[i])
-      curVector = as.character(YOUNGCOLLEGE_DATA$COLLEGES_APPLYALL_VECTOR[i])
-      if (curVector == ""){
-         AllCounter = AllCounter+1
-         YOUNGCOLLEGE_DATA$MISSING_IDS[i] = 1
-       }
-      else if (length(grep(curID, curVector)) == 0) {
-        IDCounter =IDCounter + 1
-        YOUNGCOLLEGE_DATA$MISSING_ATTENDEDID[i] = 1
-      }
-      else if (length(grep(curID, curVector)) > 0) {
-        FoundCounter = FoundCounter +1
-        YOUNGCOLLEGE_DATA$FOUND_ID[i] = 1
-      }
-    }
-  }
+  #IDCounter = 0 #they have a list of applied schools, but attended school is not in it
+  #FoundCounter = 0
+  #AllCounter = 0
+  #YOUNGCOLLEGE_DATA$MISSING_ATTENDEDID <- -3 #indicator that you are missing the attended school ID
+  #YOUNGCOLLEGE_DATA$MISSING_IDS <- -3 #indicator that you are missing all IDs
+  #YOUNGCOLLEGE_DATA$FOUND_ID <- -3 #indicator that have found current ID in vector
+  #for (i in 1:nrow(YOUNGCOLLEGE_DATA)){
+  #  if (YOUNGCOLLEGE_DATA$COLLEGE_SCHOOLID[i] > 0){
+  #    curID = as.character(YOUNGCOLLEGE_DATA$COLLEGE_SCHOOLID[i])
+  #    curVector = as.character(YOUNGCOLLEGE_DATA$COLLEGES_APPLYALL_VECTOR[i])
+  #    if (curVector == ""){
+  #       AllCounter = AllCounter+1
+  #       YOUNGCOLLEGE_DATA$MISSING_IDS[i] = 1
+  #     }
+   #   else if (length(grep(curID, curVector)) == 0) {
+    #    IDCounter =IDCounter + 1
+    #    YOUNGCOLLEGE_DATA$MISSING_ATTENDEDID[i] = 1
+    #  }
+    #  else if (length(grep(curID, curVector)) > 0) {
+    #    FoundCounter = FoundCounter +1
+    #    YOUNGCOLLEGE_DATA$FOUND_ID[i] = 1
+    #  }
+    #}
+  #}
   
   #get names of variables related to APPLY/ADMIT vectors and rename for SQL
-  year_vect = c('_2004','_2005','_2006','_2007','_2008','_2009','_2010')
-  school_vect = c('01','02','03','04','05','06','07','08','09','10')
-  for (i in 1:length(school_vect)){
-    for (j in 1:length(year_vect)){
-      curstr = paste('PREV_COL_APP_ID.',school_vect[i],year_vect[j], sep = "")
-      strreplace = paste('PREV_COL_APP_ID_',school_vect[i],year_vect[j], sep = "")
-      #curstr2 = paste("PREV_COL_APP_TERMNUM",school_vect[i],year_vect[j], sep = "")
-      #curstr3 = paste("PREV_COL_APP_ADMIT",school_vect[i],year_vect[j], sep = "")
-      if (curstr %in% colnames(MERGED_DATA)){
-        names(YOUNG_DATA)[names(YOUNG_DATA)==curstr] <- strreplace
-        #rename(YOUNGCOLLEGE_DATA, c(curstr =strreplace))
-        print(strreplace)
-      }
-    }
-  }
+ # year_vect = c('_2004','_2005','_2006','_2007','_2008','_2009','_2010')
+#  school_vect = c('01','02','03','04','05','06','07','08','09','10')
+#  for (i in 1:length(school_vect)){
+#    for (j in 1:length(year_vect)){
+#      curstr = paste('PREV_COL_APP_ID.',school_vect[i],year_vect[j], sep = "")
+ #     strreplace = paste('PREV_COL_APP_ID_',school_vect[i],year_vect[j], sep = "")
+  #    #curstr2 = paste("PREV_COL_APP_TERMNUM",school_vect[i],year_vect[j], sep = "")
+  #    #curstr3 = paste("PREV_COL_APP_ADMIT",school_vect[i],year_vect[j], sep = "")
+   #   if (curstr %in% colnames(MERGED_DATA)){
+      #  names(YOUNG_DATA)[names(YOUNG_DATA)==curstr] <- strreplace
+      #  #rename(YOUNGCOLLEGE_DATA, c(curstr =strreplace))
+      #  print(strreplace)
+      #}
+  #  }
+  #}
   
   #view people who are missing all college IDs
   #sqlstr = "select PUBID_1997,COLLEGE_SCHOOLID,COLLEGES_APPLY_VECTOR,COLLEGES_ADMIT_VECTOR,PREV_COL_APP_ID_01_2004,PREV_COL_APP_ID_01_2005,PREV_COL_APP_ID_01_2006,PREV_COL_APP_ID_01_2007,PREV_COL_APP_ID_01_2008,PREV_COL_APP_ID_01_2009,PREV_COL_APP_ID_01_2010,PREV_COL_APP_ID_02_2004,PREV_COL_APP_ID_02_2005,PREV_COL_APP_ID_02_2006,PREV_COL_APP_ID_02_2007,PREV_COL_APP_ID_02_2008,PREV_COL_APP_ID_02_2009,PREV_COL_APP_ID_02_2010,PREV_COL_APP_ID_03_2004,PREV_COL_APP_ID_03_2005,PREV_COL_APP_ID_03_2006,PREV_COL_APP_ID_03_2007,PREV_COL_APP_ID_03_2008,PREV_COL_APP_ID_03_2009,PREV_COL_APP_ID_03_2010,PREV_COL_APP_ID_04_2004,PREV_COL_APP_ID_04_2005,PREV_COL_APP_ID_04_2006,PREV_COL_APP_ID_04_2007,PREV_COL_APP_ID_05_2004,PREV_COL_APP_ID_05_2007,PREV_COL_APP_ID_06_2004,PREV_COL_APP_ID_06_2007,PREV_COL_APP_ID_07_2004,PREV_COL_APP_ID_08_2004,PREV_COL_APP_ID_09_2004,PREV_COL_APP_ID_10_2004 from YOUNG_DATA where MISSING_IDS = 1 and COLLEGEGOER_FLAG =1"
@@ -138,16 +140,19 @@ library(plyr)
   #sqlstr = "select PUBID_1997,CHOICE_YEAR from YOUNG_DATA where MISSING_ATTENDEDID = 1 and COLLEGEGOER_FLAG =1"
   #sqldf(sqlstr) #they are also all before 2004
 
-  write.csv(YOUNGCOLLEGE_DATA, file = "D:/MERGED_DATA_YOUNGCOLLEGE.csv")
+#  write.csv(YOUNGCOLLEGE_DATA, file = "D:/MERGED_DATA_YOUNGCOLLEGE.csv")
 
-  sqlstr = "select PUBID_1997,COLLEGE_SCHOOLID,COLLEGES_APPLYALL_VECTOR, COLLEGES_ADMIT_VECTOR from YOUNGCOLLEGE_DATA where COLLEGEGOER_FLAG =1"
+  #sqlstr = "select PUBID_1997,COLLEGE_SCHOOLID,COLLEGES_APPLYALL_VECTOR, COLLEGES_ADMIT_VECTOR from YOUNGCOLLEGE_DATA where COLLEGEGOER_FLAG =1"
+  sqlstr = "select PUBID_1997,COLLEGEGOER_FLAG,COLLEGE_SCHOOLID,COLLEGES_APPLYALL_VECTOR, COLLEGES_ADMIT_VECTOR from YOUNGCOLLEGE_DATA"
   TEST4 <- sqldf(sqlstr)
   write.csv(TEST4, file = "C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/collegelistfromyprevcol.csv") 
 
 #application from YCOC-050P==========================================================
   #merge data
+  #YOUNGCOLLEGE_DATA <- read.csv("D:/MERGED_DATA_YOUNGCOLLEGE.csv")
   sqlstr = "select * from YOUNGCOLLEGE_DATA inner join YCOC_DATA on YOUNGCOLLEGE_DATA.PUBID_1997 = YCOC_DATA.PUBID_1997"
-  YOUNGCOLLEGE_DATA <- sqldf(sqlstr)
+  YOUNGCOLLEGE_DATA <- sqldf(sqlstr) #all dots now changed to underlines
+  write.csv(YOUNGCOLLEGE_DATA, file ="D:/MERGED_DATA_YOUNGCOLLEGE.csv")
   #empty vectors for storage
   YOUNGCOLLEGE_DATA["COLLEGES_APPLY_VECTOR2"] <- "" #vector of applied schools
   YOUNGCOLLEGE_DATA["COLLEGES_APPLYALL_VECTOR2"] <- "" #vector of applied schools including outside of term limit
@@ -235,39 +240,41 @@ library(plyr)
     }
   }
   
-  sqlstr = "select PUBID_1997,COLLEGE_SCHOOLID,COLLEGES_APPLYALL_VECTOR2, COLLEGES_ADMIT_VECTOR2 from YOUNGCOLLEGE_DATA where COLLEGEGOER_FLAG =1"
+  #sqlstr = "select PUBID_1997,COLLEGE_SCHOOLID,COLLEGES_APPLYALL_VECTOR2, COLLEGES_ADMIT_VECTOR2 from YOUNGCOLLEGE_DATA where COLLEGEGOER_FLAG =1"
+  sqlstr = "select PUBID_1997,COLLEGEGOER_FLAG,COLLEGE_SCHOOLID,COLLEGES_APPLYALL_VECTOR2, COLLEGES_ADMIT_VECTOR2 from YOUNGCOLLEGE_DATA"
   TEST4 <- sqldf(sqlstr)
   write.csv(TEST4, file = "C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/collegelistfromycoc.csv") #ycoc yields strictly more info than previous method, same info
+  write.csv(YOUNGCOLLEGE_DATA)
 
 #sanity check for ycoc============================================================
   #determine if school attended is in list--often it is not! see if that's true even for my college-goers
-  IDCounter = 0 #they have a list of applied schools, but attended school is not in it
-  FoundCounter = 0
-  AllCounter = 0
-  YOUNGCOLLEGE_DATA$MISSING_ATTENDEDIDYCOC <- -3 #indicator that you are missing the attended school ID
-  YOUNGCOLLEGE_DATA$MISSING_IDSYCOC <- -3 #indicator that you are missing all IDs
-  YOUNGCOLLEGE_DATA$FOUND_IDYCOC <- -3 #indicator that have found current ID in vector
-  for (i in 1:nrow(YOUNGCOLLEGE_DATA)){
-    if (YOUNGCOLLEGE_DATA$COLLEGE_SCHOOLID[i] > 0){
-      curID = as.character(YOUNGCOLLEGE_DATA$COLLEGE_SCHOOLID[i])
-      curVector = as.character(YOUNGCOLLEGE_DATA$COLLEGES_APPLYALL_VECTOR2[i])
-      if (curVector == ""){
-        AllCounter = AllCounter+1
-        YOUNGCOLLEGE_DATA$MISSING_IDSYCOC[i] = 1
-      }
-      else if (length(grep(curID, curVector)) == 0) {
-        IDCounter =IDCounter + 1
-        YOUNGCOLLEGE_DATA$MISSING_ATTENDEDIDYCOC[i] = 1
-      }
-      else if (length(grep(curID, curVector)) > 0) {
-        FoundCounter = FoundCounter +1
-        YOUNGCOLLEGE_DATA$FOUND_IDYCOC[i] = 1
-      }
-    }
-  }
+  #IDCounter = 0 #they have a list of applied schools, but attended school is not in it
+  #FoundCounter = 0
+  #AllCounter = 0
+  #YOUNGCOLLEGE_DATA$MISSING_ATTENDEDIDYCOC <- -3 #indicator that you are missing the attended school ID
+  #YOUNGCOLLEGE_DATA$MISSING_IDSYCOC <- -3 #indicator that you are missing all IDs
+  #YOUNGCOLLEGE_DATA$FOUND_IDYCOC <- -3 #indicator that have found current ID in vector
+  #for (i in 1:nrow(YOUNGCOLLEGE_DATA)){
+  #  if (YOUNGCOLLEGE_DATA$COLLEGE_SCHOOLID[i] > 0){
+  #    curID = as.character(YOUNGCOLLEGE_DATA$COLLEGE_SCHOOLID[i])
+  #    curVector = as.character(YOUNGCOLLEGE_DATA$COLLEGES_APPLYALL_VECTOR2[i])
+  #    if (curVector == ""){
+   #     AllCounter = AllCounter+1
+  #      YOUNGCOLLEGE_DATA$MISSING_IDSYCOC[i] = 1
+  #    }
+  #    else if (length(grep(curID, curVector)) == 0) {
+  #      IDCounter =IDCounter + 1
+  #      YOUNGCOLLEGE_DATA$MISSING_ATTENDEDIDYCOC[i] = 1
+  #    }
+  #    else if (length(grep(curID, curVector)) > 0) {
+  #      FoundCounter = FoundCounter +1
+  #      YOUNGCOLLEGE_DATA$FOUND_IDYCOC[i] = 1
+  #    }
+  #  }
+  #}
 
 
-#clean up==========================================================
+#cleaned up vectors==========================================================
 #create dataset of only the youngest individuals whom we want to match to IPEDS
 
 #=======================================================================================
