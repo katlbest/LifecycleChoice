@@ -73,7 +73,7 @@ library(plyr)
       }
     }
   }
-  write.csv(MERGED_DATA, file = "D:/MERGED_DATA_DROPPEDVARS.csv") #write this to reduced dataset so we do not have to run again
+  write.csv(MERGED_DATA, file = "D:/MERGED_DATA_DROPPEDVARS_HASVECTORS.csv") #write this to reduced dataset so we do not have to run again
 
 #sanity checks==========================================================
   #determine if any people outside of birth years 1983-84 have school info
@@ -141,7 +141,7 @@ library(plyr)
   sqlstr = "select PUBID_1997,CHOICE_YEAR from YOUNG_DATA where MISSING_ATTENDEDID = 1 and COLLEGEGOER_FLAG =1"
   sqldf(sqlstr) #they are also all before 2004
 
-sqlstr = "select PUBID_1997,COLLEGE_SCHOOLID,COLLEGES_APPLY_VECTOR,COLLEGES_ADMIT_VECTOR from YOUNG_DATA where COLLEGEGOER_FLAG =1"
+  #sqlstr = "select PUBID_1997,COLLEGE_SCHOOLID,COLLEGES_APPLY_VECTOR,COLLEGES_ADMIT_VECTOR from YOUNG_DATA where COLLEGEGOER_FLAG =1"
   write.csv(YOUNGCOLLEGE_DATA, file = "D:/MERGED_DATA_YOUNGCOLLEGE.csv")
 
 #application from YCOC-050P==========================================================
@@ -154,49 +154,90 @@ sqlstr = "select PUBID_1997,COLLEGE_SCHOOLID,COLLEGES_APPLY_VECTOR,COLLEGES_ADMI
   YOUNGCOLLEGE_DATA["COLLEGES_ADMIT_VECTOR2"] <- "" #vector of admitted schools
   YOUNGCOLLEGE_DATA["COLLEGES_TERM_VECTOR2"] <- "" #vector of admitted schools
   #create comma-separated list of applied, applied within term limits, and admitted
-  i = 1 #school
-  j = 1 #year
-  k = 1 #loop
   year_vect = c('_2004','_2005','_2006','_2007','_2008','_2009','_2010')
   school_vect = c('01','02','03','04','05','06','07','08','09','10')
   loop_vect = c('01','02','03','04','05','06','07','08','09','10')
-  for (m in 1:nrow(YOUNGCOLLEGE_DATA)){ #this is way faster outside the loop! obviously
-    curMin = YOUNGCOLLEGE_DATA$CHOICE_YEAR[m] - 2
-    if (YOUNGCOLLEGE_DATA$SCHOOLID_YEAR[m] > 0){
-    curMax = YOUNGCOLLEGE_DATA$SCHOOLID_YEAR[m]+2
-    }
-    else {curMax = 2013}
-  }
+
+  #i = 1 #school
+  #j = 1 #year
+  #k = 1 #loop
   for (i in 1:length(school_vect)){ #this loop is only for 2003 since it looks different
     for (k in 1:length(loop_vect)){
-    curstr = paste('YCOC_050P.',loop_vect[k],'.',school_vect[i],".000001_2003", sep = "")
-    curstr2 = paste("YCOC_003C.",loop_vect[k],"_2003", sep = "")
-    curstr3 = paste("YCOC_054.",loop_vect[k],".",school_vect[i],"_2003", sep = "") 
+    curstr = paste('YCOC_050P_',loop_vect[k],'_',school_vect[i],"_000001_2003", sep = "")
+    curstr2 = paste("YCOC_003C_",loop_vect[k],"_2003", sep = "")
+    curstr3 = paste("YCOC_054_",loop_vect[k],"_",school_vect[i],"_2003", sep = "") #YCOC_050P_01_01_000001_2003
     if (curstr %in% colnames(YOUNGCOLLEGE_DATA)){
       curstr = paste('YOUNGCOLLEGE_DATA$', curstr,sep = '')
       curstr2 = paste('YOUNGCOLLEGE_DATA$', curstr2,sep = '')
       curstr3 = paste('YOUNGCOLLEGE_DATA$', curstr3,sep = '')
-      if (eval(parse(text =curstr))[m] > 0){    #check for existence of application ID
-        curTerm = ((eval(parse(text =curstr2))[m] +1) %/% 4) +1997
-        YOUNGCOLLEGE_DATA$COLLEGES_APPLYALL_VECTOR[m]= paste(YOUNGCOLLEGE_DATA$COLLEGES_APPLYALL_VECTOR[m], eval(parse(text =curstr))[m], ",", sep = "")
-        YOUNGCOLLEGE_DATA$COLLEGES_TERM_VECTOR[m]= paste(YOUNGCOLLEGE_DATA$COLLEGES_TERM_VECTOR[m], toString(curTerm), ",", sep = "")
-        if (curTerm > curMin & curTerm < curMax){
-          YOUNGCOLLEGE_DATA$COLLEGES_APPLY_VECTOR[m]= paste(YOUNGCOLLEGE_DATA$COLLEGES_APPLY_VECTOR[m], eval(parse(text =curstr))[m], ",", sep = "")            
-          if (eval(parse(text =curstr3))[m] == 1){ #admitted
-            # print("yes")
-            YOUNGCOLLEGE_DATA$COLLEGES_ADMIT_VECTOR[m]= paste(YOUNGCOLLEGE_DATA$COLLEGES_ADMIT_VECTOR[m], "1", ",", sep = "")
-          }
-          else if (eval(parse(text =curstr3))[m] == 0){ #not admitted
-            YOUNGCOLLEGE_DATA$COLLEGES_ADMIT_VECTOR[m]= paste(YOUNGCOLLEGE_DATA$COLLEGES_ADMIT_VECTOR[m], "0", ",", sep = "")
-          }
-          else{ #decision pending
-            YOUNGCOLLEGE_DATA$COLLEGES_ADMIT_VECTOR[m]= paste(YOUNGCOLLEGE_DATA$COLLEGES_ADMIT_VECTOR[m], "-3", ",", sep = "")
-          }
-        } 
+      for (m in 1:nrow(YOUNGCOLLEGE_DATA)){
+        curMin = YOUNGCOLLEGE_DATA$CHOICE_YEAR[m] - 2
+        if (YOUNGCOLLEGE_DATA$SCHOOLID_YEAR[m] > 0){
+          curMax = YOUNGCOLLEGE_DATA$SCHOOLID_YEAR[m]+2
+        } else {curMax = 2013}
+        if (eval(parse(text =curstr))[m] > 0){    #check for existence of application ID
+          curTerm = ((eval(parse(text =curstr2))[m] +1) %/% 4) +1997
+          YOUNGCOLLEGE_DATA$COLLEGES_APPLYALL_VECTOR2[m]= paste(YOUNGCOLLEGE_DATA$COLLEGES_APPLYALL_VECTOR2[m], eval(parse(text =curstr))[m], ",", sep = "")
+          YOUNGCOLLEGE_DATA$COLLEGES_TERM_VECTOR2[m]= paste(YOUNGCOLLEGE_DATA$COLLEGES_TERM_VECTOR2[m], toString(curTerm), ",", sep = "")
+          if (curTerm > curMin & curTerm < curMax){
+            YOUNGCOLLEGE_DATA$COLLEGES_APPLY_VECTOR2[m]= paste(YOUNGCOLLEGE_DATA$COLLEGES_APPLY_VECTOR2[m], eval(parse(text =curstr))[m], ",", sep = "")            
+            if (eval(parse(text =curstr3))[m] == 1){ #admitted
+              YOUNGCOLLEGE_DATA$COLLEGES_ADMIT_VECTOR2[m]= paste(YOUNGCOLLEGE_DATA$COLLEGES_ADMIT_VECTOR2[m], "1", ",", sep = "")
+            }
+            else if (eval(parse(text =curstr3))[m] == 0){ #not admitted
+              YOUNGCOLLEGE_DATA$COLLEGES_ADMIT_VECTOR2[m]= paste(YOUNGCOLLEGE_DATA$COLLEGES_ADMIT_VECTOR2[m], "0", ",", sep = "")
+            }
+            else{ #decision pending
+              YOUNGCOLLEGE_DATA$COLLEGES_ADMIT_VECTOR2[m]= paste(YOUNGCOLLEGE_DATA$COLLEGES_ADMIT_VECTOR2[m], "-3", ",", sep = "")
+            }
+          } 
+        }
       }
     }
   }
 }
+
+for (i in 1:length(school_vect)){ #this loops over the rest of the years
+  for (j in length(year_vect)){
+    for (k in 1:length(loop_vect)){
+      curstr = paste('YCOC_050P_',loop_vect[k],'_',school_vect[i],year_vect[j], sep = "")
+      curstr2 = paste("YCOC_003C_",loop_vect[k],year_vect[j], sep = "")
+      curstr3 = paste("YCOC_054_",loop_vect[k],"_",school_vect[i],year_vect[j], sep = "") #YCOC_050P_01_01_000001_2003
+      if (curstr %in% colnames(YOUNGCOLLEGE_DATA)){
+        curstr = paste('YOUNGCOLLEGE_DATA$', curstr,sep = '')
+        curstr2 = paste('YOUNGCOLLEGE_DATA$', curstr2,sep = '')
+        curstr3 = paste('YOUNGCOLLEGE_DATA$', curstr3,sep = '')
+        for (m in 1:nrow(YOUNGCOLLEGE_DATA)){
+          curMin = YOUNGCOLLEGE_DATA$CHOICE_YEAR[m] - 2
+          if (YOUNGCOLLEGE_DATA$SCHOOLID_YEAR[m] > 0){
+            curMax = YOUNGCOLLEGE_DATA$SCHOOLID_YEAR[m]+2
+          } else {curMax = 2013}
+          if (eval(parse(text =curstr))[m] > 0){    #check for existence of application ID
+            curTerm = ((eval(parse(text =curstr2))[m] +1) %/% 4) +1997
+            YOUNGCOLLEGE_DATA$COLLEGES_APPLYALL_VECTOR2[m]= paste(YOUNGCOLLEGE_DATA$COLLEGES_APPLYALL_VECTOR2[m], eval(parse(text =curstr))[m], ",", sep = "")
+            YOUNGCOLLEGE_DATA$COLLEGES_TERM_VECTOR2[m]= paste(YOUNGCOLLEGE_DATA$COLLEGES_TERM_VECTOR2[m], toString(curTerm), ",", sep = "")
+            if (curTerm > curMin & curTerm < curMax){
+              YOUNGCOLLEGE_DATA$COLLEGES_APPLY_VECTOR2[m]= paste(YOUNGCOLLEGE_DATA$COLLEGES_APPLY_VECTOR2[m], eval(parse(text =curstr))[m], ",", sep = "")            
+              if (eval(parse(text =curstr3))[m] == 1){ #admitted
+                YOUNGCOLLEGE_DATA$COLLEGES_ADMIT_VECTOR2[m]= paste(YOUNGCOLLEGE_DATA$COLLEGES_ADMIT_VECTOR2[m], "1", ",", sep = "")
+              }
+              else if (eval(parse(text =curstr3))[m] == 0){ #not admitted
+                YOUNGCOLLEGE_DATA$COLLEGES_ADMIT_VECTOR2[m]= paste(YOUNGCOLLEGE_DATA$COLLEGES_ADMIT_VECTOR2[m], "0", ",", sep = "")
+              }
+              else{ #decision pending
+                YOUNGCOLLEGE_DATA$COLLEGES_ADMIT_VECTOR2[m]= paste(YOUNGCOLLEGE_DATA$COLLEGES_ADMIT_VECTOR2[m], "-3", ",", sep = "")
+              }
+            } 
+          }
+        }
+      }
+    }
+  }
+}
+
+
+
+
 
 
 for (i in 1:length(school_vect)){ #this loop is only for all other years
@@ -211,19 +252,19 @@ for (i in 1:length(school_vect)){ #this loop is only for all other years
         curstr3 = paste('YOUNGCOLLEGE_DATA$', curstr3,sep = '')
         if (eval(parse(text =curstr))[m] > 0){    #check for existence of application ID
           curTerm = ((eval(parse(text =curstr2))[m] +1) %/% 4) +1997
-          YOUNGCOLLEGE_DATA$COLLEGES_APPLYALL_VECTOR[m]= paste(YOUNGCOLLEGE_DATA$COLLEGES_APPLYALL_VECTOR[m], eval(parse(text =curstr))[m], ",", sep = "")
-          YOUNGCOLLEGE_DATA$COLLEGES_TERM_VECTOR[m]= paste(YOUNGCOLLEGE_DATA$COLLEGES_TERM_VECTOR[m], toString(curTerm), ",", sep = "")
+          YOUNGCOLLEGE_DATA$COLLEGES_APPLYALL_VECTOR2[m]= paste(YOUNGCOLLEGE_DATA$COLLEGES_APPLYALL_VECTOR2[m], eval(parse(text =curstr))[m], ",", sep = "")
+          YOUNGCOLLEGE_DATA$COLLEGES_TERM_VECTOR2[m]= paste(YOUNGCOLLEGE_DATA$COLLEGES_TERM_VECTOR2[m], toString(curTerm), ",", sep = "")
           if (curTerm > curMin & curTerm < curMax){
-            YOUNGCOLLEGE_DATA$COLLEGES_APPLY_VECTOR[m]= paste(YOUNGCOLLEGE_DATA$COLLEGES_APPLY_VECTOR[m], eval(parse(text =curstr))[m], ",", sep = "")            
+            YOUNGCOLLEGE_DATA$COLLEGES_APPLY_VECTOR2[m]= paste(YOUNGCOLLEGE_DATA$COLLEGES_APPLY_VECTOR2[m], eval(parse(text =curstr))[m], ",", sep = "")            
             if (eval(parse(text =curstr3))[m] == 1){ #admitted
               # print("yes")
-              YOUNGCOLLEGE_DATA$COLLEGES_ADMIT_VECTOR[m]= paste(YOUNGCOLLEGE_DATA$COLLEGES_ADMIT_VECTOR[m], "1", ",", sep = "")
+              YOUNGCOLLEGE_DATA$COLLEGES_ADMIT_VECTOR2[m]= paste(YOUNGCOLLEGE_DATA$COLLEGES_ADMIT_VECTOR2[m], "1", ",", sep = "")
             }
             else if (eval(parse(text =curstr3))[m] == 0){ #not admitted
-              YOUNGCOLLEGE_DATA$COLLEGES_ADMIT_VECTOR[m]= paste(YOUNGCOLLEGE_DATA$COLLEGES_ADMIT_VECTOR[m], "0", ",", sep = "")
+              YOUNGCOLLEGE_DATA$COLLEGES_ADMIT_VECTOR2[m]= paste(YOUNGCOLLEGE_DATA$COLLEGES_ADMIT_VECTOR2[m], "0", ",", sep = "")
             }
             else{ #decision pending
-              YOUNGCOLLEGE_DATA$COLLEGES_ADMIT_VECTOR[m]= paste(YOUNGCOLLEGE_DATA$COLLEGES_ADMIT_VECTOR[m], "-3", ",", sep = "")
+              YOUNGCOLLEGE_DATA$COLLEGES_ADMIT_VECTOR2[m]= paste(YOUNGCOLLEGE_DATA$COLLEGES_ADMIT_VECTOR2[m], "-3", ",", sep = "")
             }
           } 
         }
@@ -231,6 +272,10 @@ for (i in 1:length(school_vect)){ #this loop is only for all other years
     }
   }
 }
+
+sqlstr = "select PUBID_1997,COLLEGE_SCHOOLID,COLLEGES_APPLY_VECTOR2,COLLEGES_ADMIT_VECTOR2 from YOUNGCOLLEGE_DATA where COLLEGEGOER_FLAG =1"
+TEST4 <- sqldf(sqlstr)
+write.csv(TEST4, file = "C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/collegelistfromycoc.csv")
 
 
 #clean up==========================================================
