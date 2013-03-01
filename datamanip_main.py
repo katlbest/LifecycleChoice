@@ -14,6 +14,18 @@ def crosswalkSetup():
 		if unitID not in ipedsLookup:
 			ipedsLookup.add(unitID)
 	crosswalkFile.close()
+	#print crosswalkLookup
+	#print ipedsLookup
+
+def ipedsCheckSetup():
+	ipedsFile = open('C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc//ipedsfile.csv', 'r')
+	for line in ipedsFile.readlines():
+		varList = line.split(',')
+		unitID = varList[0]
+		name = varList[1]
+		if unitID not in ipedsLookupfull:
+			ipedsLookupfull.add(unitID)
+	ipedsFile.close()
 
 def collegeListSetup():
 	collegeList = [] #list of colleges
@@ -39,35 +51,46 @@ def collegeListSetup():
 	print len(collegeList)
 	#try to replace missing ones with FICE
 	for i in range(len(collegeList)):
+		collegeList[i]= str.replace(collegeList[i], '\"', '')
 		if collegeList[i] not in ipedsLookup:
-			if collegeList[i] in crosswalkLookup:
-				print len(crosswalkLookup[collegeList[i]]) #none of the mising ones are valid fice IDs according to my crosswalk
-				print crosswalkLookup[collegeList[i]]
-			else:
-				missedCollegeList.append(collegeList[i])
-				collegeList[i] = -3
-	collegeList = list(set(collegeList)) #de-dupe again
-	print (len(collegeList)-1) #minus one because we still have on -3 in here
+			if (collegeList[i]) in crosswalkLookup:
+				print "double foundit" #this doesn't happen -> we don't have any FICE codes
+				collegeList[i] = crosswalkLookup[collegeList[i]]
+	for i in range(len(collegeList)):
+		if collegeList[i] not in ipedsLookupfull:
+			missedCollegeList.append(collegeList[i])
+			collegeList[i] = -3
+	collegeList = list(set(collegeList)) #de-dupe
+	print (len(collegeList)-1)
 	collegeList = str(collegeList)
 	collegeList= str.replace(collegeList, ' ', '')
-	collegeList= str.replace(collegeList, ',-3', '') #get rid of the fake negative 3
+	collegeList= str.replace(collegeList, ',-3', '')
 	collegeList= str.replace(collegeList, '[', '')
 	collegeList= str.replace(collegeList, ']', '')
 	collegeList= str.replace(collegeList, '\'', '')
 	collegeList= str.replace(collegeList, '\"', '')
+	missedCollegeList = str(missedCollegeList)
+	missedCollegeList= str.replace(missedCollegeList, ' ', '')
+	missedCollegeList= str.replace(missedCollegeList, '[', '')
+	missedCollegeList= str.replace(missedCollegeList, ']', '')
+	missedCollegeList= str.replace(missedCollegeList, '\'', '')
+	missedCollegeList= str.replace(missedCollegeList, '\"', '')
 	outFile = open('C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/uniqueColleges.txt', 'w')
 	outFile.write(collegeList)
 	outFile.close()
 	outFile2 = open('C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/missedColleges.txt', 'w')
-	outFile2.write(collegeList)
+	outFile2.write(missedCollegeList)
 	outFile2.close()
 
 if __name__ == '__main__':
 	#setup global variables
-	#collegeList = list() #list of colleges
+	#collegeList = [] #list of colleges
+	#missedCollegeList = []
 	crosswalkLookup = {} #returns an IPEDS ID for a FICE number
-	ipedsLookup = set()
+	ipedsLookup = set() #set of IPEDS numbers that are in the FICE dataset
+	ipedsLookupfull = set() #complete set of IPEDS numbers
 	
 	crosswalkSetup()
+	ipedsCheckSetup()
 	collegeListSetup()
 
