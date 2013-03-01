@@ -1,7 +1,39 @@
 import sys
 #from collections import Counter
 
+#setup global variables
+collegeList = [] #list of colleges
+missedCollegeList = []
+crosswalkLookup = {} #returns an IPEDS ID for a FICE number
+ipedsLookup = set() #set of IPEDS numbers that are in the FICE dataset
+ipedsLookupfull = set() #complete set of IPEDS numbers
+
+def main():
+	
+	#set up lookup tables for IPEDS existence
+	crosswalkSetup()
+	ipedsCheckSetup()
+
+	#get list of colleges for which to extract information, and list missing colleges
+	collegeListSetup()
+
+	#merge with matched information--remove non-4-year schools and investigate public/private distinction
+	#get info at http://nces.ed.gov/ipeds/datacenter/InstitutionByName.aspx?stepId=1
+
+	#get Barron's numbers
+
+	#populate accepted set for each individual (must be correct school type)
+
+	#check that attended school was accepted
+
+	#set highest accepted flag
+
+	#set level of attended flag
+
+
 def crosswalkSetup():
+	global crosswalkLookup
+	global ipedsLookup
 	crosswalkFile = open('C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc//crosswalkfile.txt', 'r')
 	for line in crosswalkFile.readlines():
 		varList = line.split('\t')
@@ -18,6 +50,7 @@ def crosswalkSetup():
 	#print ipedsLookup
 
 def ipedsCheckSetup():
+	global ipedsLookupfull
 	ipedsFile = open('C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc//ipedsfile.csv', 'r')
 	for line in ipedsFile.readlines():
 		varList = line.split(',')
@@ -28,8 +61,10 @@ def ipedsCheckSetup():
 	ipedsFile.close()
 
 def collegeListSetup():
-	collegeList = [] #list of colleges
-	missedCollegeList = [] #list of college we cannot find an ID for
+	global collegeList
+	global missedCollegeList
+	#collegeList = [] #list of colleges
+	#missedCollegeList = [] #list of college we cannot find an ID for
 	vectorList = open('C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/compiledcollegelist.csv', 'r')
 	for line in vectorList.readlines():
 		#read in variables
@@ -83,14 +118,5 @@ def collegeListSetup():
 	outFile2.close()
 
 if __name__ == '__main__':
-	#setup global variables
-	#collegeList = [] #list of colleges
-	#missedCollegeList = []
-	crosswalkLookup = {} #returns an IPEDS ID for a FICE number
-	ipedsLookup = set() #set of IPEDS numbers that are in the FICE dataset
-	ipedsLookupfull = set() #complete set of IPEDS numbers
-	
-	crosswalkSetup()
-	ipedsCheckSetup()
-	collegeListSetup()
 
+	main()
