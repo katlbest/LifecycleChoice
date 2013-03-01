@@ -235,7 +235,7 @@ library(plyr)
     }
   }
   
-  sqlstr = "select PUBID_1997,COLLEGE_SCHOOLID,COLLEGES_APPLYALL_VECTOR2 from YOUNGCOLLEGE_DATA where COLLEGEGOER_FLAG =1"
+  sqlstr = "select PUBID_1997,COLLEGE_SCHOOLID,COLLEGES_APPLYALL_VECTOR2, COLLEGES_ADMIT_VECTOR2 from YOUNGCOLLEGE_DATA where COLLEGEGOER_FLAG =1"
   TEST4 <- sqldf(sqlstr)
   write.csv(TEST4, file = "C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/collegelistfromycoc.csv") #ycoc yields strictly more info than previous method, same info
 
