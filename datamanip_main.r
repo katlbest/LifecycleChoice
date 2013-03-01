@@ -28,10 +28,10 @@ library(plyr)
 
 #application/admission==========================================================
   #empty vectors for storage
-  MERGED_DATA["COLLEGES_APPLY_VECTOR"] <- "" #vector of applied schools
-  MERGED_DATA["COLLEGES_APPLYALL_VECTOR"] <- "" #vector of applied schools including outside of term limit
-  MERGED_DATA["COLLEGES_ADMIT_VECTOR"] <- "" #vector of admitted schools
-  MERGED_DATA["COLLEGES_TERM_VECTOR"] <- "" #vector of admitted schools
+  MERGED_DATA$COLLEGES_APPLY_VECTOR <- "" #vector of applied schools
+  MERGED_DATA$COLLEGES_APPLYALL_VECTOR <- "" #vector of applied schools including outside of term limit
+  MERGED_DATA$COLLEGES_ADMIT_VECTOR <- "" #vector of admitted schools
+  MERGED_DATA$COLLEGES_TERM_VECTOR <- "" #vector of admitted schools
   #create comma-separated list of applied, applied within term limits, and admitted
   i = 1 #school
   j = 1 #year
@@ -154,10 +154,10 @@ library(plyr)
   YOUNGCOLLEGE_DATA <- sqldf(sqlstr) #all dots now changed to underlines
   write.csv(YOUNGCOLLEGE_DATA, file ="D:/MERGED_DATA_YOUNGCOLLEGE.csv")
   #empty vectors for storage
-  YOUNGCOLLEGE_DATA["COLLEGES_APPLY_VECTOR2"] <- "" #vector of applied schools
-  YOUNGCOLLEGE_DATA["COLLEGES_APPLYALL_VECTOR2"] <- "" #vector of applied schools including outside of term limit
-  YOUNGCOLLEGE_DATA["COLLEGES_ADMIT_VECTOR2"] <- "" #vector of admitted schools
-  YOUNGCOLLEGE_DATA["COLLEGES_TERM_VECTOR2"] <- "" #vector of admitted schools
+  YOUNGCOLLEGE_DATA$COLLEGES_APPLY_VECTOR2 <- "" #vector of applied schools
+  YOUNGCOLLEGE_DATA$COLLEGES_APPLYALL_VECTOR2 <- "" #vector of applied schools including outside of term limit
+  YOUNGCOLLEGE_DATA$COLLEGES_ADMIT_VECTOR2 <- "" #vector of admitted schools
+  YOUNGCOLLEGE_DATA$COLLEGES_TERM_VECTOR2 <- "" #vector of admitted schools
   #create comma-separated list of applied, applied within term limits, and admitted--remove term restriction, correct vectors are APPLYALL2 and ADMIT2
   year_vect = c('_2004','_2005','_2006','_2007','_2008','_2009','_2010')
   school_vect = c('01','02','03','04','05','06','07','08','09','10')
@@ -244,7 +244,7 @@ library(plyr)
   sqlstr = "select PUBID_1997,COLLEGEGOER_FLAG,COLLEGE_SCHOOLID,COLLEGES_APPLYALL_VECTOR2, COLLEGES_ADMIT_VECTOR2 from YOUNGCOLLEGE_DATA"
   TEST4 <- sqldf(sqlstr)
   write.csv(TEST4, file = "C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/collegelistfromycoc.csv") #ycoc yields strictly more info than previous method, same info
-  write.csv(YOUNGCOLLEGE_DATA)
+  write.csv(YOUNGCOLLEGE_DATA,"D:/MERGED_DATA_YOUNGCOLLEGE2.csv")
 
 #sanity check for ycoc============================================================
   #determine if school attended is in list--often it is not! see if that's true even for my college-goers
@@ -276,6 +276,43 @@ library(plyr)
 
 #cleaned up vectors==========================================================
 #create dataset of only the youngest individuals whom we want to match to IPEDS
+  #read in compiled data (so we can start here when desired)
+  COMPILED_DATA <- read.csv("D:/MERGED_DATA_YOUNGCOLLEGE2.csv")
+  #COMPILED_DATA <- YOUNGCOLLEGE_DATA
+  #concatenate lists
+  COMPILED_DATA$COMPILED_APPLY <- "" 
+  COMPILED_DATA$COMPILED_ADMIT <- ""
+  for (i in 1:nrow(COMPILED_DATA)){
+    COMPILED_DATA$COMPILED_APPLY[i] <- paste(COMPILED_DATA$COLLEGES_APPLYALL_VECTOR[i],COMPILED_DATA$COLLEGES_APPLYALL_VECTOR2[i], sep = "")
+    COMPILED_DATA$COMPILED_ADMIT[i] <- paste(COMPILED_DATA$COLLEGES_ADMIT_VECTOR[i],COMPILED_DATA$COLLEGES_ADMIT_VECTOR2[i], sep = "")
+    #admithash<-new.env()
+    #admithash[["key"]]<-value
+    #APPLY_ARRAY <- 
+    #ADMIT_ARRAY <- 
+    #for (j in 1:length(APPLY_ARRAY))
+    #create hash table for admission info, use most positive admit resuld
+  }
+  #do string replace so that these can be ID'd by the csv by python
+  for (i in 1:nrow(COMPILED_DATA)){
+    COMPILED_DATA$COMPILED_APPLY[i] <- gsub(",", ";", toString(COMPILED_DATA$COMPILED_APPLY[i]))
+    COMPILED_DATA$COMPILED_ADMIT[i] <- gsub(",", ";", toString(COMPILED_DATA$COMPILED_ADMIT[i]))
+  }
+  #admithash<-new.env()
+  #admithash[["key"]]<-value
+  #APPLY_ARRAY <- 
+  #ADMIT_ARRAY <- 
+  #for (j in 1:length(APPLY_ARRAY))
+  #create hash table for admission info, use most positive admit resuld
+  }
+  #for(i in seq(nrow(lbls)))
+  #{
+  #  someenv[[ lbls[i,1] ]]<- lbls[i,2]
+  #}
+
+  sqlstr = "select PUBID_1997,COLLEGEGOER_FLAG,COLLEGE_SCHOOLID,COMPILED_APPLY,COMPILED_ADMIT from COMPILED_DATA"
+  TEST4 <- sqldf(sqlstr)
+  write.csv(TEST4, file = "C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/compiledcollegelist.csv") #this is the input file for python
+  write.csv(COMPILED_DATA, file ="D:/COMPILED_DATA.csv")
 
 #=======================================================================================
 #old stuff
