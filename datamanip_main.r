@@ -200,9 +200,9 @@ library(plyr)
 for (i in 1:length(school_vect)){ #this loops over the rest of the years
   for (j in length(year_vect)){
     for (k in 1:length(loop_vect)){
-      curstr = paste('YCOC_050P_',loop_vect[k],'_',school_vect[i],year_vect[j], sep = "")
+      curstr = paste('YCOC_050P_000001_',loop_vect[k],'_',school_vect[i],year_vect[j], sep = "")
       curstr2 = paste("YCOC_003C_",loop_vect[k],year_vect[j], sep = "")
-      curstr3 = paste("YCOC_054_",loop_vect[k],"_",school_vect[i],year_vect[j], sep = "") #YCOC_050P_01_01_000001_2003
+      curstr3 = paste("YCOC_054_",loop_vect[k],"_",school_vect[i],year_vect[j], sep = "") #"YCOC_050P_01_01_2004" "YCOC_050P_000001.01.03_2005" 
       if (curstr %in% colnames(YOUNGCOLLEGE_DATA)){
         curstr = paste('YOUNGCOLLEGE_DATA$', curstr,sep = '')
         curstr2 = paste('YOUNGCOLLEGE_DATA$', curstr2,sep = '')
@@ -235,43 +235,6 @@ for (i in 1:length(school_vect)){ #this loops over the rest of the years
   }
 }
 
-
-
-
-
-
-for (i in 1:length(school_vect)){ #this loop is only for all other years
-  for (j in length(year_vect)){
-    for (k in 1:length(loop_vect)){
-      curstr = paste('YCOC_050P_.000001.',loop_vect[k],'.',school_vect[i],year_vect[j], sep = "")
-      curstr2 = paste("YCOC_003C.",loop_vect[k],year_vect[j], sep = "")
-      curstr3 = paste("YCOC_054.",loop_vect[k],".",school_vect[i],year_vect[j], sep = "") 
-      if (curstr %in% colnames(YOUNGCOLLEGE_DATA)){
-        curstr = paste('YOUNGCOLLEGE_DATA$', curstr,sep = '')
-        curstr2 = paste('YOUNGCOLLEGE_DATA$', curstr2,sep = '')
-        curstr3 = paste('YOUNGCOLLEGE_DATA$', curstr3,sep = '')
-        if (eval(parse(text =curstr))[m] > 0){    #check for existence of application ID
-          curTerm = ((eval(parse(text =curstr2))[m] +1) %/% 4) +1997
-          YOUNGCOLLEGE_DATA$COLLEGES_APPLYALL_VECTOR2[m]= paste(YOUNGCOLLEGE_DATA$COLLEGES_APPLYALL_VECTOR2[m], eval(parse(text =curstr))[m], ",", sep = "")
-          YOUNGCOLLEGE_DATA$COLLEGES_TERM_VECTOR2[m]= paste(YOUNGCOLLEGE_DATA$COLLEGES_TERM_VECTOR2[m], toString(curTerm), ",", sep = "")
-          if (curTerm > curMin & curTerm < curMax){
-            YOUNGCOLLEGE_DATA$COLLEGES_APPLY_VECTOR2[m]= paste(YOUNGCOLLEGE_DATA$COLLEGES_APPLY_VECTOR2[m], eval(parse(text =curstr))[m], ",", sep = "")            
-            if (eval(parse(text =curstr3))[m] == 1){ #admitted
-              # print("yes")
-              YOUNGCOLLEGE_DATA$COLLEGES_ADMIT_VECTOR2[m]= paste(YOUNGCOLLEGE_DATA$COLLEGES_ADMIT_VECTOR2[m], "1", ",", sep = "")
-            }
-            else if (eval(parse(text =curstr3))[m] == 0){ #not admitted
-              YOUNGCOLLEGE_DATA$COLLEGES_ADMIT_VECTOR2[m]= paste(YOUNGCOLLEGE_DATA$COLLEGES_ADMIT_VECTOR2[m], "0", ",", sep = "")
-            }
-            else{ #decision pending
-              YOUNGCOLLEGE_DATA$COLLEGES_ADMIT_VECTOR2[m]= paste(YOUNGCOLLEGE_DATA$COLLEGES_ADMIT_VECTOR2[m], "-3", ",", sep = "")
-            }
-          } 
-        }
-      }
-    }
-  }
-}
 
 sqlstr = "select PUBID_1997,COLLEGE_SCHOOLID,COLLEGES_APPLY_VECTOR2,COLLEGES_ADMIT_VECTOR2 from YOUNGCOLLEGE_DATA where COLLEGEGOER_FLAG =1"
 TEST4 <- sqldf(sqlstr)
