@@ -26,6 +26,7 @@ def main():
 	otherIPEDScheck(2002)
 	otherIPEDScheck(2001)
 	otherIPEDScheck(2011)
+	printCollegeList()
 
 	#merge with matched information--remove non-4-year schools and investigate public/private distinction
 	#get info at http://nces.ed.gov/ipeds/datacenter/InstitutionByName.aspx?stepId=1
@@ -116,6 +117,53 @@ def collegeListSetup():
 			collegeList[i] = -3
 	collegeList = list(set(collegeList)) #de-dupe
 	print (len(collegeList)-1)
+	print (len(missedCollegeList))
+
+def OPEIDScheck():
+	global collegeList
+	global missedCollegeList
+	global crosswalkLookupfull
+	global OPEIDcrosswalkLookup
+	for i in range(len(missedCollegeList)):
+		#print missedCollegeList[i]
+		#missedCollegeList[i]= str.replace(missedCollegeList[i], '\"', '') #shouldnt need htis
+		if (missedCollegeList[i]) in OPEIDcrosswalkLookup:
+				print "triple foundit"  #this doesnt happen
+				#missedCollegeList[i] = crosswalkLookup[collegeList[i]]
+
+def otherIPEDScheck(myYear):
+	global collegeList
+	global missedCollegeList
+	global crosswalkLookupfull
+	global OPEIDcrosswalkLookup
+	curIPEDS = open('C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/hd' + str(myYear) + '.txt', 'rb')
+	for line in curIPEDS.readlines():
+		varList = line.split('\t')
+		unitID = varList[0]
+		opeid = varList[15]
+		if unitID not in ipedsLookup:
+			ipedsLookup.add(unitID)
+		if (opeid not in OPEIDcrosswalkLookup):
+			OPEIDcrosswalkLookup[opeid]= unitID
+	curIPEDS.close()
+	missedCollegeListCopy = list(missedCollegeList)
+	collegeListCopy = list(collegeList)
+	for i in range(len(missedCollegeList)):
+		if (missedCollegeList[i]) in ipedsLookup:
+			print "quadruple found it" + str(myYear)
+			collegeListCopy.append(missedCollegeList[i])
+			missedCollegeListCopy.pop(i)
+		elif (missedCollegeList[i]) in OPEIDcrosswalkLookup:
+			print "quintuple found it" + str(myYear)
+			collegeListCopy.append(OPEIDcrosswalkLookup[missedCollegeList[i]])
+			missedCollegeListCopy.pop(i)
+	missedCollegeList = missedCollegeListCopy
+	collegeList = collegeListCopy
+
+def printCollegeList():	
+	global collegeList
+	global missingCollegeList
+	print(len(collegeList)-1)
 	collegeListStr = str(collegeList)
 	collegeListStr= str.replace(collegeListStr, ' ', '')
 	collegeListStr= str.replace(collegeListStr, ',-3', '')
@@ -135,37 +183,6 @@ def collegeListSetup():
 	outFile2 = open('C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/missedColleges.txt', 'w')
 	outFile2.write(missedCollegeListStr)
 	outFile2.close()
-
-def OPEIDScheck():
-	global collegeList
-	global missedCollegeList
-	global crosswalkLookupfull
-	global OPEIDcrosswalkLookup
-	for i in range(len(missedCollegeList)):
-		#print missedCollegeList[i]
-		#missedCollegeList[i]= str.replace(missedCollegeList[i], '\"', '') #shouldnt need htis
-		if (missedCollegeList[i]) in OPEIDcrosswalkLookup:
-				print "triple foundit"  #this doesnt happen
-				#missedCollegeList[i] = crosswalkLookup[collegeList[i]]
-
-def otherIPEDScheck(myYear):
-	global ipedsLookup
-	global OPEIDcrosswalkLookup
-	curIPEDS = open('C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/hd' + str(myYear) + '.txt', 'rb')
-	for line in curIPEDS.readlines():
-		varList = line.split('\t')
-		unitID = varList[0]
-		opeid = varList[15]
-		if unitID not in ipedsLookup:
-			ipedsLookup.add(unitID)
-		if (opeid not in OPEIDcrosswalkLookup):
-			OPEIDcrosswalkLookup[opeid]= unitID
-	curIPEDS.close()
-	for i in range(len(missedCollegeList)):
-		if (missedCollegeList[i]) in ipedsLookup:
-			print "quadruple found it" + str(myYear)
-		elif (missedCollegeList[i]) in OPEIDcrosswalkLookup:
-			print "quintuple found it" + str(myYear)
 
 if __name__ == '__main__':
 	main()
