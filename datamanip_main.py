@@ -7,6 +7,7 @@ missedCollegeList = []
 crosswalkLookup = {} #returns an IPEDS ID for a FICE number
 ipedsLookup = set() #set of IPEDS numbers that are in the FICE dataset
 ipedsLookupfull = set() #complete set of IPEDS numbers
+OPEIDcrosswalkLookup = {} #returns an IPEDS ID for an OPEID number
 
 def main():
 	
@@ -16,6 +17,8 @@ def main():
 
 	#get list of colleges for which to extract information, and list missing colleges
 	collegeListSetup()
+
+	#try to fill in missing colleges using other years of IPEDS files and OPEIDs
 
 	#merge with matched information--remove non-4-year schools and investigate public/private distinction
 	#get info at http://nces.ed.gov/ipeds/datacenter/InstitutionByName.aspx?stepId=1
@@ -51,13 +54,17 @@ def crosswalkSetup():
 
 def ipedsCheckSetup():
 	global ipedsLookupfull
+	global OPERIDcrosswalkLookup
 	ipedsFile = open('C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc//HD2004.csv', 'r')
 	for line in ipedsFile.readlines():
 		varList = line.split(',')
 		unitID = varList[0]
 		name = varList[1]
+		opeid = varList[12]
 		if unitID not in ipedsLookupfull:
 			ipedsLookupfull.add(unitID)
+		if (opeid not in OPEIDcrosswalkLookup):
+			OPEIDcrosswalkLookup[opeid]= unitID
 	ipedsFile.close()
 
 def collegeListSetup():
@@ -117,6 +124,8 @@ def collegeListSetup():
 	outFile2.write(missedCollegeList)
 	outFile2.close()
 
-if __name__ == '__main__':
 
+#def OPEIDScheck():
+
+if __name__ == '__main__':
 	main()
