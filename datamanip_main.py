@@ -62,9 +62,9 @@ def crosswalkSetup():
 def ipedsCheckSetup():
 	global ipedsLookupfull
 	global OPEIDcrosswalkLookup
-	ipedsFile = open('C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc//HD2004.csv', 'r')
+	ipedsFile = open('C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc//HD2004.txt', 'r')
 	for line in ipedsFile.readlines():
-		varList = line.split(',')
+		varList = line.split('\t')
 		unitID = varList[0]
 		name = varList[1]
 		opeid = varList[15] #this changes depending on file we are
@@ -150,16 +150,22 @@ def OPEIDScheck():
 
 def otherIPEDScheck(myYear):
 	global ipedsLookup
-	curIPEDS = open('C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/hd' + str(myYear) + '.csv', 'rb')
+	global OPEIDcrosswalkLookup
+	curIPEDS = open('C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/hd' + str(myYear) + '.txt', 'rb')
 	for line in curIPEDS.readlines():
-		varList = line.split(',')
+		varList = line.split('\t')
 		unitID = varList[0]
+		opeid = varList[15]
 		if unitID not in ipedsLookup:
 			ipedsLookup.add(unitID)
+		if (opeid not in OPEIDcrosswalkLookup):
+			OPEIDcrosswalkLookup[opeid]= unitID
 	curIPEDS.close()
 	for i in range(len(missedCollegeList)):
 		if (missedCollegeList[i]) in ipedsLookup:
 			print "quadruple found it" + str(myYear)
+		elif (missedCollegeList[i]) in OPEIDcrosswalkLookup:
+			print "quintuple found it" + str(myYear)
 
 if __name__ == '__main__':
 	main()
