@@ -20,6 +20,7 @@ def main():
 
 	#try to fill in missing colleges using other years of IPEDS files and OPEIDs
 	OPEIDScheck()
+	otherIPEDScheck(2006)
 
 	#merge with matched information--remove non-4-year schools and investigate public/private distinction
 	#get info at http://nces.ed.gov/ipeds/datacenter/InstitutionByName.aspx?stepId=1
@@ -130,18 +131,32 @@ def collegeListSetup():
 	outFile2.write(missedCollegeListStr)
 	outFile2.close()
 
-
 def OPEIDScheck():
 	global collegeList
 	global missedCollegeList
 	global crosswalkLookupfull
 	global OPEIDcrosswalkLookup
 	for i in range(len(missedCollegeList)):
-		print missedCollegeList[i]
+		#print missedCollegeList[i]
 		#missedCollegeList[i]= str.replace(missedCollegeList[i], '\"', '') #shouldnt need htis
 		if (missedCollegeList[i]) in OPEIDcrosswalkLookup:
 				print "triple foundit"  #this doesnt happen
 				#missedCollegeList[i] = crosswalkLookup[collegeList[i]]
+
+def otherIPEDScheck(myYear):
+	global ipedsLookup
+	curIPEDS = open('C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/hd' + str(myYear) + '.csv', 'rb')
+	for line in curIPEDS.readlines():
+		varList = line.split(',')
+		unitID = varList[0]
+		if unitID not in ipedsLookup:
+			ipedsLookup.add(unitID)
+	curIPEDS.close()
+	for i in range(len(missedCollegeList)):
+		if (missedCollegeList[i]) in ipedsLookup:
+			print "quadruple found it" + str(myYear)
+
+	
 
 if __name__ == '__main__':
 	main()
