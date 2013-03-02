@@ -19,6 +19,7 @@ def main():
 	collegeListSetup()
 
 	#try to fill in missing colleges using other years of IPEDS files and OPEIDs
+	OPEIDScheck()
 
 	#merge with matched information--remove non-4-year schools and investigate public/private distinction
 	#get info at http://nces.ed.gov/ipeds/datacenter/InstitutionByName.aspx?stepId=1
@@ -54,22 +55,27 @@ def crosswalkSetup():
 
 def ipedsCheckSetup():
 	global ipedsLookupfull
-	global OPERIDcrosswalkLookup
+	global OPEIDcrosswalkLookup
 	ipedsFile = open('C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc//HD2004.csv', 'r')
 	for line in ipedsFile.readlines():
 		varList = line.split(',')
 		unitID = varList[0]
 		name = varList[1]
-		opeid = varList[12]
+		opeid = varList[15] #this changes depending on file we are
+		#print opeid
 		if unitID not in ipedsLookupfull:
 			ipedsLookupfull.add(unitID)
 		if (opeid not in OPEIDcrosswalkLookup):
 			OPEIDcrosswalkLookup[opeid]= unitID
 	ipedsFile.close()
+	#print OPEIDcrosswalkLookup
 
 def collegeListSetup():
 	global collegeList
 	global missedCollegeList
+	global ipedsLookup
+	global crosswalkLookup
+	global crosswalkLookupfull
 	#collegeList = [] #list of colleges
 	#missedCollegeList = [] #list of college we cannot find an ID for
 	vectorList = open('C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/compiledcollegelist.csv', 'r')
@@ -104,28 +110,38 @@ def collegeListSetup():
 			collegeList[i] = -3
 	collegeList = list(set(collegeList)) #de-dupe
 	print (len(collegeList)-1)
-	collegeList = str(collegeList)
-	collegeList= str.replace(collegeList, ' ', '')
-	collegeList= str.replace(collegeList, ',-3', '')
-	collegeList= str.replace(collegeList, '[', '')
-	collegeList= str.replace(collegeList, ']', '')
-	collegeList= str.replace(collegeList, '\'', '')
-	collegeList= str.replace(collegeList, '\"', '')
-	missedCollegeList = str(missedCollegeList)
-	missedCollegeList= str.replace(missedCollegeList, ' ', '')
-	missedCollegeList= str.replace(missedCollegeList, '[', '')
-	missedCollegeList= str.replace(missedCollegeList, ']', '')
-	missedCollegeList= str.replace(missedCollegeList, '\'', '')
-	missedCollegeList= str.replace(missedCollegeList, '\"', '')
+	collegeListStr = str(collegeList)
+	collegeListStr= str.replace(collegeListStr, ' ', '')
+	collegeListStr= str.replace(collegeListStr, ',-3', '')
+	collegeListStr= str.replace(collegeListStr, '[', '')
+	collegeListStr= str.replace(collegeListStr, ']', '')
+	collegeListStr= str.replace(collegeListStr, '\'', '')
+	collegeListStr= str.replace(collegeListStr, '\"', '')
+	missedCollegeListStr = str(missedCollegeList)
+	missedCollegeListStr= str.replace(missedCollegeListStr, ' ', '')
+	missedCollegeListStr= str.replace(missedCollegeListStr, '[', '')
+	missedCollegeListStr= str.replace(missedCollegeListStr, ']', '')
+	missedCollegeListStr= str.replace(missedCollegeListStr, '\'', '')
+	missedCollegeListStr= str.replace(missedCollegeListStr, '\"', '')
 	outFile = open('C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/uniqueColleges.txt', 'w')
-	outFile.write(collegeList)
+	outFile.write(collegeListStr)
 	outFile.close()
 	outFile2 = open('C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/missedColleges.txt', 'w')
-	outFile2.write(missedCollegeList)
+	outFile2.write(missedCollegeListStr)
 	outFile2.close()
 
 
-#def OPEIDScheck():
+def OPEIDScheck():
+	global collegeList
+	global missedCollegeList
+	global crosswalkLookupfull
+	global OPEIDcrosswalkLookup
+	for i in range(len(missedCollegeList)):
+		print missedCollegeList[i]
+		#missedCollegeList[i]= str.replace(missedCollegeList[i], '\"', '') #shouldnt need htis
+		if (missedCollegeList[i]) in OPEIDcrosswalkLookup:
+				print "triple foundit"  #this doesnt happen
+				#missedCollegeList[i] = crosswalkLookup[collegeList[i]]
 
 if __name__ == '__main__':
 	main()
