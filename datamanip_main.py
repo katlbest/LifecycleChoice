@@ -86,10 +86,10 @@ def collegeListSetup():
 	global crosswalkLookupfull
 	#collegeList = [] #list of colleges
 	#missedCollegeList = [] #list of college we cannot find an ID for
-	vectorList = open('C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/compiledcollegelist.csv', 'r')
+	vectorList = open('C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/compiledcollegelist.txt', 'r')
 	for line in vectorList.readlines():
 		#read in variables
-		varList = line.split(',')
+		varList = line.split('\t')
 		PUBID_1997 = varList[1]
 		COLLEGEGOER_FLAG = varList[2]
 		COLLEGE_SCHOOLID = varList[3]
@@ -105,9 +105,9 @@ def collegeListSetup():
 	#clean up college list
 	collegeList = list(set(collegeList)) #de-dupe
 	print "Total number of unique IDs: " + str(len(collegeList))
-	#try to replace missing ones with FICE
+	#try to replace missing ones with FICE; for future reference we could do it like this: map((lambda entry: other[entry]), x.intersection(y))
 	for i in range(len(collegeList)):
-		collegeList[i]= str.replace(collegeList[i], '\"', '')
+		#collegeList[i]= str.replace(collegeList[i], '\"', '')
 		if collegeList[i] not in ipedsLookupfull:
 			if (collegeList[i]) in crosswalkLookup:
 				print "double foundit" #this doesn't happen -> we don't have any FICE codes
