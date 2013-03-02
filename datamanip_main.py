@@ -51,7 +51,7 @@ def crosswalkSetup():
 
 def ipedsCheckSetup():
 	global ipedsLookupfull
-	ipedsFile = open('C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc//ipedsfile.csv', 'r')
+	ipedsFile = open('C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc//HD2011.csv', 'r')
 	for line in ipedsFile.readlines():
 		varList = line.split(',')
 		unitID = varList[0]
