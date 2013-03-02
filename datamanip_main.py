@@ -21,6 +21,11 @@ def main():
 	#try to fill in missing colleges using other years of IPEDS files and OPEIDs
 	OPEIDScheck()
 	otherIPEDScheck(2006)
+	otherIPEDScheck(2005)
+	otherIPEDScheck(2003)
+	otherIPEDScheck(2002)
+	otherIPEDScheck(2001)
+	otherIPEDScheck(2011)
 
 	#merge with matched information--remove non-4-year schools and investigate public/private distinction
 	#get info at http://nces.ed.gov/ipeds/datacenter/InstitutionByName.aspx?stepId=1
@@ -155,8 +160,6 @@ def otherIPEDScheck(myYear):
 	for i in range(len(missedCollegeList)):
 		if (missedCollegeList[i]) in ipedsLookup:
 			print "quadruple found it" + str(myYear)
-
-	
 
 if __name__ == '__main__':
 	main()
