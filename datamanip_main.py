@@ -5,8 +5,8 @@ import sys
 collegeList = [] #list of colleges
 missedCollegeList = []
 crosswalkLookup = {} #returns an IPEDS ID for a FICE number
-ipedsLookup = set() #set of IPEDS numbers that are in the FICE dataset
-ipedsLookupfull = set() #complete set of IPEDS numbers
+ipedsSet = set() #set of IPEDS numbers that are in the FICE dataset
+ipedsSetfull = set() #complete set of IPEDS numbers
 OPEIDcrosswalkLookup = {} #returns an IPEDS ID for an OPEID number
 
 def main():
@@ -41,10 +41,9 @@ def main():
 
 	#set level of attended flag
 
-
 def crosswalkSetup():
 	global crosswalkLookup
-	global ipedsLookup
+	global ipedsSet
 	crosswalkFile = open('C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc//crosswalkfile.txt', 'r')
 	for line in crosswalkFile.readlines():
 		varList = line.split('\t')
@@ -54,14 +53,14 @@ def crosswalkSetup():
 		ficeID = str.replace(ficeID, '\n', '')
 		if (len(ficeID) > 0 and ficeID not in crosswalkLookup):
 			crosswalkLookup[ficeID]= unitID
-		if unitID not in ipedsLookup:
-			ipedsLookup.add(unitID)
+		if unitID not in ipedsSet:
+			ipedsSet.add(unitID)
 	crosswalkFile.close()
 	#print crosswalkLookup
-	#print ipedsLookup
+	#print ipedsSet
 
 def ipedsCheckSetup():
-	global ipedsLookupfull
+	global ipedsSetfull
 	global OPEIDcrosswalkLookup
 	ipedsFile = open('C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc//hd2004.txt', 'r')
 	for line in ipedsFile.readlines():
@@ -70,8 +69,8 @@ def ipedsCheckSetup():
 		name = varList[1]
 		opeid = varList[15] #this changes depending on file we are
 		#print opeid
-		if unitID not in ipedsLookupfull:
-			ipedsLookupfull.add(unitID)
+		if unitID not in ipedsSetfull:
+			ipedsSetfull.add(unitID)
 		if (opeid not in OPEIDcrosswalkLookup):
 			OPEIDcrosswalkLookup[opeid]= unitID
 	ipedsFile.close()
@@ -80,8 +79,8 @@ def ipedsCheckSetup():
 def collegeListSetup():
 	global collegeList
 	global missedCollegeList
-	global ipedsLookup
-	global ipedsLookupfull
+	global ipedsSet
+	global ipedsSetfull
 	global crosswalkLookup
 	global crosswalkLookupfull
 	#collegeList = [] #list of colleges
@@ -108,14 +107,14 @@ def collegeListSetup():
 	#try to replace missing ones with FICE; for future reference we could do it like this: map((lambda entry: other[entry]), x.intersection(y))
 	for i in range(len(collegeList)):
 		#collegeList[i]= str.replace(collegeList[i], '\"', '')
-		if collegeList[i] not in ipedsLookupfull:
+		if collegeList[i] not in ipedsSetfull:
 			if (collegeList[i]) in crosswalkLookup:
 				print "double foundit" #this doesn't happen -> we don't have any FICE codes
 				collegeList[i] = crosswalkLookup[collegeList[i]]
 			missedCollegeList.append(collegeList[i])
 			collegeList[i] = -3
 	collegeList = list(set(collegeList)) #de-dupe
-	print "Total number of unique IDs that were in ipedsLookupfull: " + str((len(collegeList)-1))
+	print "Total number of unique IDs that were in ipedsSetfull: " + str((len(collegeList)-1))
 	print "Total number of entries in missed colleges list: " + str((len(missedCollegeList)))
 
 def OPEIDScheck():
@@ -140,15 +139,15 @@ def otherIPEDScheck(myYear):
 		varList = line.split('\t')
 		unitID = varList[0]
 		opeid = varList[15]
-		if unitID not in ipedsLookup:
-			ipedsLookup.add(unitID)
+		if unitID not in ipedsSet:
+			ipedsSet.add(unitID)
 		if (opeid not in OPEIDcrosswalkLookup):
 			OPEIDcrosswalkLookup[opeid]= unitID
 	curIPEDS.close()
 	missedCollegeListCopy = list(missedCollegeList)
 	collegeListCopy = list(collegeList)
 	for i in range(len(missedCollegeList)):
-		if (missedCollegeList[i]) in ipedsLookup:
+		if (missedCollegeList[i]) in ipedsSet:
 			#print "quadruple found it" + str(myYear) #this happens
 			collegeListCopy.append(missedCollegeList[i])
 			missedCollegeListCopy.pop(i)
@@ -169,19 +168,21 @@ def printCollegeList():
 	collegeListStr= str.replace(collegeListStr, '[', '')
 	collegeListStr= str.replace(collegeListStr, ']', '')
 	collegeListStr= str.replace(collegeListStr, '\'', '')
-	collegeListStr= str.replace(collegeListStr, '\"', '')
+	#collegeListStr= str.replace(collegeListStr, '\"', '')
 	missedCollegeListStr = str(missedCollegeList)
 	missedCollegeListStr= str.replace(missedCollegeListStr, ' ', '')
 	missedCollegeListStr= str.replace(missedCollegeListStr, '[', '')
 	missedCollegeListStr= str.replace(missedCollegeListStr, ']', '')
 	missedCollegeListStr= str.replace(missedCollegeListStr, '\'', '')
-	missedCollegeListStr= str.replace(missedCollegeListStr, '\"', '')
+	#missedCollegeListStr= str.replace(missedCollegeListStr, '\"', '')
 	outFile = open('C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/uniqueColleges.txt', 'w')
 	outFile.write(collegeListStr)
 	outFile.close()
 	outFile2 = open('C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/missedColleges.txt', 'w')
 	outFile2.write(missedCollegeListStr)
 	outFile2.close()
+
+#def getSchoolCharacteristics()
 
 if __name__ == '__main__':
 	main()
