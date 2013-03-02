@@ -63,7 +63,7 @@ def crosswalkSetup():
 def ipedsCheckSetup():
 	global ipedsLookupfull
 	global OPEIDcrosswalkLookup
-	ipedsFile = open('C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc//HD2004.txt', 'r')
+	ipedsFile = open('C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc//hd2004.txt', 'r')
 	for line in ipedsFile.readlines():
 		varList = line.split('\t')
 		unitID = varList[0]
@@ -81,6 +81,7 @@ def collegeListSetup():
 	global collegeList
 	global missedCollegeList
 	global ipedsLookup
+	global ipedsLookupfull
 	global crosswalkLookup
 	global crosswalkLookupfull
 	#collegeList = [] #list of colleges
@@ -103,21 +104,19 @@ def collegeListSetup():
 	vectorList.close()
 	#clean up college list
 	collegeList = list(set(collegeList)) #de-dupe
-	print len(collegeList)
+	print "Total number of unique IDs: " + str(len(collegeList))
 	#try to replace missing ones with FICE
 	for i in range(len(collegeList)):
 		collegeList[i]= str.replace(collegeList[i], '\"', '')
-		if collegeList[i] not in ipedsLookup:
+		if collegeList[i] not in ipedsLookupfull:
 			if (collegeList[i]) in crosswalkLookup:
 				print "double foundit" #this doesn't happen -> we don't have any FICE codes
 				collegeList[i] = crosswalkLookup[collegeList[i]]
-	for i in range(len(collegeList)):
-		if collegeList[i] not in ipedsLookupfull:
 			missedCollegeList.append(collegeList[i])
 			collegeList[i] = -3
 	collegeList = list(set(collegeList)) #de-dupe
-	print (len(collegeList)-1)
-	print (len(missedCollegeList))
+	print "Total number of unique IDs that were in ipedsLookupfull: " + str((len(collegeList)-1))
+	print "Total number of entries in missed colleges list: " + str((len(missedCollegeList)))
 
 def OPEIDScheck():
 	global collegeList
@@ -150,11 +149,11 @@ def otherIPEDScheck(myYear):
 	collegeListCopy = list(collegeList)
 	for i in range(len(missedCollegeList)):
 		if (missedCollegeList[i]) in ipedsLookup:
-			print "quadruple found it" + str(myYear)
+			#print "quadruple found it" + str(myYear) #this happens
 			collegeListCopy.append(missedCollegeList[i])
 			missedCollegeListCopy.pop(i)
 		elif (missedCollegeList[i]) in OPEIDcrosswalkLookup:
-			print "quintuple found it" + str(myYear)
+			#print "quintuple found it" + str(myYear) #this happens
 			collegeListCopy.append(OPEIDcrosswalkLookup[missedCollegeList[i]])
 			missedCollegeListCopy.pop(i)
 	missedCollegeList = missedCollegeListCopy
@@ -163,7 +162,7 @@ def otherIPEDScheck(myYear):
 def printCollegeList():	
 	global collegeList
 	global missingCollegeList
-	print(len(collegeList)-1)
+	print "Total number of unique IDs that are found after using all means: " + str((len(collegeList)-1))
 	collegeListStr = str(collegeList)
 	collegeListStr= str.replace(collegeListStr, ' ', '')
 	collegeListStr= str.replace(collegeListStr, ',-3', '')
