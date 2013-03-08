@@ -21,7 +21,7 @@ class CollegeData: #class storing college data
 def main():
 	#get list of colleges for which to extract information
 	collegeListSetup()
-	#try to fill in missing colleges using multiple years of IPEDS files and the OPEIDS crosswalk
+	#try to fill in missing colleges using multiple years of IPEDS files and the OPEIDS crosswalk; populatecolelgedatalookup with data that comes from this file
 	IPEDScheck(2004)
 	IPEDScheck(2006)
 	IPEDScheck(2005)
@@ -32,10 +32,14 @@ def main():
 	#try to replace schools using FICE codes where possible
 	FICEcrosswalkSetup() #set up lookup that returns an IPEDS ID for a FICE number
 	FICEcheck() #do replacement where applicable
-	#print college lists to filed fof future use
+
+
+	#print college lists for future use
 	printCollegeList()
 
-	#getSchoolCharacteristics()
+	#delete colleges from found list that do not indicate having 4-year data
+	deleteNonCollege()
+
 
 	#merge with matched information--remove non-4-year schools and investigate public/private distinction
 	#get info at http://nces.ed.gov/ipeds/datacenter/InstitutionByName.aspx?stepId=1
@@ -141,7 +145,7 @@ def FICEcheck(): #use FICE crosswalk to try to fill in missing information
 
 def printCollegeList():	
 	global collegeList
-	global missingCollegeList
+	global missedCollegeList
 	print "Total number of unique IDs that are found after using all means: " + str((len(collegeList)))
 	print "Total number of entries in missed colleges list: " + str((len(missedCollegeList)))
 	collegeListStr = str(collegeList)
@@ -164,18 +168,16 @@ def printCollegeList():
 	outFile2.write(missedCollegeListStr)
 	outFile2.close()
 
-#def getSchoolCharacteristics(): #TBD create data structure for storing info on relevant schools#
-#	global collegeList
-#	global collegeDataLookup
-	##populate 
-	#for i in range(len(collegeList)):
-	#	if (collegeList[i]) not in collegeDataLookup:
-	#		curBachFlag = 1 #we havent done this yet
-	#		curControl = 1 #we haven't done this yet
-	#		curSelectivity = 1  #we haven't done this yet
-	#		curColData = CollegeData(curBachFlag, curControl, curSelectivity)
-	#		collegeDataLookup[collegeList[i]]= curColData
-
+def deleteNonCollege():
+	global collegeList
+	global collegeDataLookup
+	collegeListCopy = list(collegeList)
+	for i in range(len(collegeList)):
+		#print collegeDataLookup[collegeList[i]].bachFlag
+		if collegeDataLookup[collegeList[i]].bachFlag != "1":
+			collegeListCopy.remove(collegeList[i])
+	collegeList = collegeListCopy
+	print "Total number of unique 4-year IDs that are found after using all means: " + str((len(collegeList)))
 
 if __name__ == '__main__':
 	main()
