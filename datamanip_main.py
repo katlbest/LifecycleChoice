@@ -3,11 +3,19 @@ import sys
 
 #setup global variables
 collegeList = [] #list of colleges
-missedCollegeList = []
+missedCollegeList = [] #list of colleges without info
 crosswalkLookup = {} #returns an IPEDS ID for a FICE number
 ipedsSet = set() #set of IPEDS numbers that are in the FICE dataset
 ipedsSetfull = set() #complete set of IPEDS numbers
 OPEIDcrosswalkLookup = {} #returns an IPEDS ID for an OPEID number
+collegeDataLookup = {} #lookup table storing college info based on IPEDS number
+
+class CollegeData:
+	def __init__(self, bachFlag, control, selectivity):
+		self.bachFlag, self.control, self.selectivity = bachFlag, control, selectivity
+
+	def println(self):
+		print str(self.bachFlag) + "\t" + str(self.control) +  "\t" + str(self.selectivity)
 
 def main():
 	
@@ -27,6 +35,7 @@ def main():
 	otherIPEDScheck(2001)
 	otherIPEDScheck(2011)
 	printCollegeList()
+	getSchoolCharacteristics()
 
 	#merge with matched information--remove non-4-year schools and investigate public/private distinction
 	#get info at http://nces.ed.gov/ipeds/datacenter/InstitutionByName.aspx?stepId=1
@@ -182,7 +191,18 @@ def printCollegeList():
 	outFile2.write(missedCollegeListStr)
 	outFile2.close()
 
-#def getSchoolCharacteristics()
+def getSchoolCharacteristics(): #TBD create data structure for storing info on relevant schools
+	global collegeList
+	global collegeDataLookup
+	#populate 
+	for i in range(len(collegeList)):
+		if (collegeList[i]) not in collegeDataLookup:
+			curBachFlag = 1 #we havent done this yet
+			curControl = 1 #we haven't done this yet
+			curSelectivity = 1  #we haven't done this yet
+			curColData = CollegeData(curBachFlag, curControl, curSelectivity)
+			collegeDataLookup[collegeList[i]]= curColData
+
 
 if __name__ == '__main__':
 	main()
