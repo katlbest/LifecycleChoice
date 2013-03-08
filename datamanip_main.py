@@ -20,20 +20,22 @@ class CollegeData:
 def main():
 	
 	#set up lookup tables for IPEDS existence
-	crosswalkSetup()
+	crosswalkSetup() #set up lookup that returns an IPEDSID for a FICE number
 	ipedsCheckSetup()
 
-	#get list of colleges for which to extract information, and list missing colleges
+	#get list of colleges for which to extract information
 	collegeListSetup()
 
 	#try to fill in missing colleges using other years of IPEDS files and OPEIDs
-	OPEIDScheck()
+	
+	FICEcheck() #TBD
 	otherIPEDScheck(2006)
 	otherIPEDScheck(2005)
 	otherIPEDScheck(2003)
 	otherIPEDScheck(2002)
 	otherIPEDScheck(2001)
 	otherIPEDScheck(2011)
+	OPEIDScheck() #try to fill in college list with opeid id's
 	printCollegeList()
 	getSchoolCharacteristics()
 
@@ -62,11 +64,9 @@ def crosswalkSetup():
 		ficeID = str.replace(ficeID, '\n', '')
 		if (len(ficeID) > 0 and ficeID not in crosswalkLookup):
 			crosswalkLookup[ficeID]= unitID
-		if unitID not in ipedsSet:
+		if unitID not in ipedsSet: #this is a list of iped IDS which are in teh fice crosswalk--TBD
 			ipedsSet.add(unitID)
 	crosswalkFile.close()
-	#print crosswalkLookup
-	#print ipedsSet
 
 def ipedsCheckSetup():
 	global ipedsSetfull
@@ -80,6 +80,7 @@ def ipedsCheckSetup():
 		#print opeid
 		if unitID not in ipedsSetfull:
 			ipedsSetfull.add(unitID)
+		#probably populate the info lookup hereTBD
 		if (opeid not in OPEIDcrosswalkLookup):
 			OPEIDcrosswalkLookup[opeid]= unitID
 	ipedsFile.close()
@@ -88,12 +89,9 @@ def ipedsCheckSetup():
 def collegeListSetup():
 	global collegeList
 	global missedCollegeList
-	global ipedsSet
 	global ipedsSetfull
 	global crosswalkLookup
 	global crosswalkLookupfull
-	#collegeList = [] #list of colleges
-	#missedCollegeList = [] #list of college we cannot find an ID for
 	vectorList = open('C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/compiledcollegelist.txt', 'r')
 	for line in vectorList.readlines():
 		#read in variables
@@ -113,30 +111,11 @@ def collegeListSetup():
 	#clean up college list
 	collegeList = list(set(collegeList)) #de-dupe
 	print "Total number of unique IDs: " + str(len(collegeList))
-	#try to replace missing ones with FICE; for future reference we could do it like this: map((lambda entry: other[entry]), x.intersection(y))
-	for i in range(len(collegeList)):
-		#collegeList[i]= str.replace(collegeList[i], '\"', '')
-		if collegeList[i] not in ipedsSetfull:
-			if (collegeList[i]) in crosswalkLookup:
-				print "double foundit" #this doesn't happen -> we don't have any FICE codes
-				collegeList[i] = crosswalkLookup[collegeList[i]]
-			missedCollegeList.append(collegeList[i])
-			collegeList[i] = -3
-	collegeList = list(set(collegeList)) #de-dupe
-	print "Total number of unique IDs that were in ipedsSetfull: " + str((len(collegeList)-1))
-	print "Total number of entries in missed colleges list: " + str((len(missedCollegeList)))
-
-def OPEIDScheck():
-	global collegeList
-	global missedCollegeList
-	global crosswalkLookupfull
-	global OPEIDcrosswalkLookup
-	for i in range(len(missedCollegeList)):
-		#print missedCollegeList[i]
-		#missedCollegeList[i]= str.replace(missedCollegeList[i], '\"', '') #shouldnt need htis
-		if (missedCollegeList[i]) in OPEIDcrosswalkLookup:
-				print "triple foundit"  #this doesnt happen
-				#missedCollegeList[i] = crosswalkLookup[collegeList[i]]
+	#but we have not found any of these colleges in our list, so change this to missedcollegelist
+	missedCollegeList = list(collegeList)
+	collegeList = ()
+	print len(collegeList)
+	#thing used to go here TBD
 
 def otherIPEDScheck(myYear):
 	global collegeList
@@ -148,8 +127,8 @@ def otherIPEDScheck(myYear):
 		varList = line.split('\t')
 		unitID = varList[0]
 		opeid = varList[15]
-		if unitID not in ipedsSet:
-			ipedsSet.add(unitID)
+		if unitID not in ipedsSetFull:
+			ipedsSetFull.add(unitID)
 		if (opeid not in OPEIDcrosswalkLookup):
 			OPEIDcrosswalkLookup[opeid]= unitID
 	curIPEDS.close()
@@ -166,6 +145,18 @@ def otherIPEDScheck(myYear):
 			missedCollegeListCopy.pop(i)
 	missedCollegeList = missedCollegeListCopy
 	collegeList = collegeListCopy
+
+def OPEIDScheck():
+	global collegeList
+	global missedCollegeList
+	global crosswalkLookupfull
+	global OPEIDcrosswalkLookup
+	for i in range(len(missedCollegeList)):
+		#print missedCollegeList[i]
+		#missedCollegeList[i]= str.replace(missedCollegeList[i], '\"', '') #shouldnt need htis
+		if (missedCollegeList[i]) in OPEIDcrosswalkLookup:
+				print "triple foundit"  #this doesnt happen
+				#missedCollegeList[i] = crosswalkLookup[collegeList[i]]
 
 def printCollegeList():	
 	global collegeList
@@ -206,3 +197,6 @@ def getSchoolCharacteristics(): #TBD create data structure for storing info on r
 
 if __name__ == '__main__':
 	main()
+
+
+
