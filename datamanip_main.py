@@ -21,6 +21,7 @@ class CollegeData: #class storing college data
 def main():
 	#get list of colleges for which to extract information
 	collegeListSetup()
+
 	#try to fill in missing colleges using multiple years of IPEDS files and the OPEIDS crosswalk; populatecolelgedatalookup with data that comes from this file
 	IPEDScheck(2004)
 	IPEDScheck(2006)
@@ -29,17 +30,17 @@ def main():
 	IPEDScheck(2002)
 	IPEDScheck(2001)
 	IPEDScheck(2011)
+	BarronsSetup() #add barron's selectivity to infor we have about schools
+	
 	#try to replace schools using FICE codes where possible
 	FICEcrosswalkSetup() #set up lookup that returns an IPEDS ID for a FICE number
 	FICEcheck() #do replacement where applicable
-
 
 	#print college lists for future use
 	printCollegeList()
 
 	#delete colleges from found list that do not indicate having 4-year data
 	deleteNonCollege()
-
 
 	#merge with matched information--remove non-4-year schools and investigate public/private distinction
 	#get info at http://nces.ed.gov/ipeds/datacenter/InstitutionByName.aspx?stepId=1
@@ -91,8 +92,7 @@ def IPEDScheck(myYear): #look up colleges in the list in myYear's ipeds list and
 		curBachFlag = varList[19]
 		curControl = varList[19]
 		if unitID not in collegeDataLookup: #update current known IPED IDs#
-			#curControl = 1 #we haven't done this yet
-			curSelectivity = 1  #we haven't done this yet
+			curSelectivity = -3  #we haven't done this yet
 			curColData = CollegeData(curBachFlag, curControl, curSelectivity)
 			collegeDataLookup[unitID] = curColData
 			#print collegeDataLookup[unitID]
@@ -142,6 +142,25 @@ def FICEcheck(): #use FICE crosswalk to try to fill in missing information
 	missedCollegeList = missedCollegeListCopy
 	collegeList = collegeListCopy
 	collegeList = list(set(collegeList)) #de-dupe
+
+def BarronsSetup(): #lookup for Barron's selectivity
+	barronsFile = open('C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc//barrons04.txt', 'r')
+	for line in barronsFile.readlines():
+		varList = line.split('\t')
+		unitID = varList[1]
+		curSelectivity = varList[8]
+		if unitID in collegeDataLookup:
+			collegeDataLookup[unitID].selectivity = curSelectivity
+	barronsFile.close()
+	barronsFile2 = open('C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc//barrons08.txt', 'r')
+	for line in barronsFile2.readlines(): #there are no cases where 04 has no data and 08 does, but just checking
+		varList = line.split('\t')
+		unitID = varList[1]
+		curSelectivity = varList[8]
+		if unitID in collegeDataLookup and collegeDataLookup[unitID].selectivity == -3:
+			collegeDataLookup[unitID].selectivity = curSelectivity
+	barronsFile2.close()
+
 
 def printCollegeList():	
 	global collegeList
