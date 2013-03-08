@@ -168,18 +168,13 @@ def printCollegeList():
 	print "Total number of unique IDs that are found after using all means: " + str((len(collegeList)))
 	print "Total number of entries in missed colleges list: " + str((len(missedCollegeList)))
 	collegeListStr = str(collegeList)
-	collegeListStr= str.replace(collegeListStr, ' ', '')
-	collegeListStr= str.replace(collegeListStr, ',-3', '')
 	collegeListStr= str.replace(collegeListStr, '[', '')
 	collegeListStr= str.replace(collegeListStr, ']', '')
 	collegeListStr= str.replace(collegeListStr, '\'', '')
-	#collegeListStr= str.replace(collegeListStr, '\"', '')
 	missedCollegeListStr = str(missedCollegeList)
-	missedCollegeListStr= str.replace(missedCollegeListStr, ' ', '')
 	missedCollegeListStr= str.replace(missedCollegeListStr, '[', '')
 	missedCollegeListStr= str.replace(missedCollegeListStr, ']', '')
 	missedCollegeListStr= str.replace(missedCollegeListStr, '\'', '')
-	#missedCollegeListStr= str.replace(missedCollegeListStr, '\"', '')
 	outFile = open('C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/uniqueColleges.txt', 'w')
 	outFile.write(collegeListStr)
 	outFile.close()
@@ -192,11 +187,16 @@ def deleteNonCollege():
 	global collegeDataLookup
 	collegeListCopy = list(collegeList)
 	for i in range(len(collegeList)):
-		#print collegeDataLookup[collegeList[i]].bachFlag
 		if collegeDataLookup[collegeList[i]].bachFlag != "1":
 			collegeListCopy.remove(collegeList[i])
 	collegeList = collegeListCopy
 	print "Total number of unique 4-year IDs that are found after using all means: " + str((len(collegeList)))
+	collegeListCopy = list(collegeList)
+	for i in range(len(collegeList)):
+		if collegeDataLookup[collegeList[i]].bachFlag == -3:
+			collegeListCopy.remove(collegeList[i])
+	collegeList = collegeListCopy
+	print "Total number of unique 4-year IDs with seelctivity that are found after using all means: " + str((len(collegeList)))
 
 if __name__ == '__main__':
 	main()
