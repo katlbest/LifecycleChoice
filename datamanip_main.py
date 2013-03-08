@@ -5,7 +5,7 @@ import sys
 collegeList = [] #list of colleges
 missedCollegeList = [] #list of colleges without info
 crosswalkLookup = {} #returns an IPEDS ID for a FICE number
-ipedsSetFull = set() #complete set of IPEDS IDs for which we have data
+collegeDataLookup = {} #returns collegeData object for an IPEDS number
 OPEIDcrosswalkLookup = {} #returns an IPEDS ID for an OPEID number
 collegeDataLookup = {} #lookup table storing college info based on IPEDS number
 
@@ -14,8 +14,8 @@ class CollegeData: #class storing college data
 	def __init__(self, bachFlag, control, selectivity):
 		self.bachFlag, self.control, self.selectivity = bachFlag, control, selectivity
 
-	def println(self):
-		print str(self.bachFlag) + "\t" + str(self.control) +  "\t" + str(self.selectivity)
+	def __str__(self):
+		return str(self.bachFlag) + "\t" + str(self.control) +  "\t" + str(self.selectivity)
 
 #main===================================================================================================
 def main():
@@ -77,22 +77,28 @@ def IPEDScheck(myYear): #look up colleges in the list in myYear's ipeds list and
 	global collegeList
 	global missedCollegeList
 	global OPEIDcrosswalkLookup
+	global collegeDataLookup
 	curIPEDS = open('C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/hd' + str(myYear) + '.txt', 'rb')
 	#update set of "known" IDs and OPEID lookup table
 	for line in curIPEDS.readlines():
 		varList = line.split('\t')
 		unitID = varList[0]
 		opeid = varList[15]
-		if unitID not in ipedsSetFull: #update current known IPED IDs
-			ipedsSetFull.add(unitID)
-			#also set up the data structure here, TBD
+		curBachFlag = varList[19]
+		curControl = varList[19]
+		if unitID not in collegeDataLookup: #update current known IPED IDs#
+			#curControl = 1 #we haven't done this yet
+			curSelectivity = 1  #we haven't done this yet
+			curColData = CollegeData(curBachFlag, curControl, curSelectivity)
+			collegeDataLookup[unitID] = curColData
+			#print collegeDataLookup[unitID]
 		if (opeid not in OPEIDcrosswalkLookup): #update OPEID crosswalk
 			OPEIDcrosswalkLookup[opeid]= unitID
 	curIPEDS.close()
 	missedCollegeListCopy = list(missedCollegeList)
 	collegeListCopy = list(collegeList)
 	for i in range(len(missedCollegeList)): #try to ID missed colleges by IPEDS
-		if (missedCollegeList[i]) in ipedsSetFull:
+		if (missedCollegeList[i]) in collegeDataLookup:
 			collegeListCopy.append(missedCollegeList[i])
 			missedCollegeListCopy.remove(missedCollegeList[i])
 		elif (missedCollegeList[i]) in OPEIDcrosswalkLookup: #try to ID missed colleges by OPEID
@@ -158,17 +164,17 @@ def printCollegeList():
 	outFile2.write(missedCollegeListStr)
 	outFile2.close()
 
-def getSchoolCharacteristics(): #TBD create data structure for storing info on relevant schools
-	global collegeList
-	global collegeDataLookup
-	#populate 
-	for i in range(len(collegeList)):
-		if (collegeList[i]) not in collegeDataLookup:
-			curBachFlag = 1 #we havent done this yet
-			curControl = 1 #we haven't done this yet
-			curSelectivity = 1  #we haven't done this yet
-			curColData = CollegeData(curBachFlag, curControl, curSelectivity)
-			collegeDataLookup[collegeList[i]]= curColData
+#def getSchoolCharacteristics(): #TBD create data structure for storing info on relevant schools#
+#	global collegeList
+#	global collegeDataLookup
+	##populate 
+	#for i in range(len(collegeList)):
+	#	if (collegeList[i]) not in collegeDataLookup:
+	#		curBachFlag = 1 #we havent done this yet
+	#		curControl = 1 #we haven't done this yet
+	#		curSelectivity = 1  #we haven't done this yet
+	#		curColData = CollegeData(curBachFlag, curControl, curSelectivity)
+	#		collegeDataLookup[collegeList[i]]= curColData
 
 
 if __name__ == '__main__':
