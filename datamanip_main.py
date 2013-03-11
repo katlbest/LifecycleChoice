@@ -4,6 +4,7 @@ import sys
 #set up global variables===============================================================================
 collegeList = [] #list of colleges
 missedCollegeList = [] #list of colleges without info
+missedSelectivityList = [] #list of schools among 4-year schools for which selectivity is missing
 crosswalkLookup = {} #returns an IPEDS ID for a FICE number
 collegeDataLookup = {} #returns collegeData object for an IPEDS number
 OPEIDcrosswalkLookup = {} #returns an IPEDS ID for an OPEID number
@@ -11,11 +12,11 @@ collegeDataLookup = {} #lookup table storing college info based on IPEDS number
 
 #define classes========================================================================================
 class CollegeData: #class storing college data
-	def __init__(self, bachFlag, control, selectivity):
-		self.bachFlag, self.control, self.selectivity = bachFlag, control, selectivity
+	def __init__(self, colName, bachFlag, control, selectivity):
+		self.colName, self.bachFlag, self.control, self.selectivity = colName, bachFlag, control, selectivity
 
 	def __str__(self):
-		return "Has bachelor: " + str(self.bachFlag) + "\t Control: " + str(self.control) +  "\t Selectivity: " + str(self.selectivity)
+		return str(self.colName) + "\t" + str(self.bachFlag) + "\t" + str(self.control) +  "\t" + str(self.selectivity)
 
 #main===================================================================================================
 def main():
@@ -95,12 +96,13 @@ def IPEDScheck(myYear): #look up colleges in the list in myYear's ipeds list and
 	for line in curIPEDS.readlines():
 		varList = line.split('\t')
 		unitID = varList[0]
+		colName = varList[1]
 		opeid = varList[15]
 		curBachFlag = varList[19]
-		curControl = varList[19]
+		curControl = varList[20]
 		if unitID not in collegeDataLookup: #update current known IPED IDs#
 			curSelectivity = -3  #we haven't done this yet
-			curColData = CollegeData(curBachFlag, curControl, curSelectivity)
+			curColData = CollegeData(colName, curBachFlag, curControl, curSelectivity)
 			collegeDataLookup[unitID] = curColData
 			#print collegeDataLookup[unitID]
 		if (opeid not in OPEIDcrosswalkLookup): #update OPEID crosswalk
@@ -171,8 +173,13 @@ def BarronsSetup(): #lookup for Barron's selectivity
 def printCollegeList():	
 	global collegeList
 	global missedCollegeList
+	global missedSelectivityList
+	for i in collegeList:
+		if collegeDataLookup[i].selectivity == -3:
+			missedSelectivityList.append(i)
 	print "Total number of unique IDs that are found after using all means: " + str((len(collegeList)))
 	print "Total number of entries in missed colleges list: " + str((len(missedCollegeList)))
+	print "Total number of found schools with no selectivity data: " + str((len(missedSelectivityList)))
 	collegeListStr = str(collegeList)
 	collegeListStr= str.replace(collegeListStr, '[', '')
 	collegeListStr= str.replace(collegeListStr, ']', '')
@@ -181,14 +188,21 @@ def printCollegeList():
 	missedCollegeListStr= str.replace(missedCollegeListStr, '[', '')
 	missedCollegeListStr= str.replace(missedCollegeListStr, ']', '')
 	missedCollegeListStr= str.replace(missedCollegeListStr, '\'', '')
+	missedSelectivityListStr = str(missedSelectivityList)
+	missedSelectivityListStr= str.replace(missedSelectivityListStr, '[', '')
+	missedSelectivityListStr= str.replace(missedSelectivityListStr, ']', '')
+	missedSelectivityListStr= str.replace(missedSelectivityListStr, '\'', '')
 	outFile = open('C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/uniqueColleges.txt', 'w')
 	outFile.write(collegeListStr)
 	outFile.close()
 	outFile2 = open('C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/missedColleges.txt', 'w')
 	outFile2.write(missedCollegeListStr)
 	outFile2.close()
+	outFile3 = open('C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/missingSelectivity.txt', 'w')
+	outFile3.write(missedSelectivityListStr)
+	outFile3.close()
 
-def deleteNonCollege():
+def deleteNonCollege(): #note that colleges are still in the lookup table, just not in the college lists
 	global collegeList
 	global collegeDataLookup
 	collegeListCopy = list(collegeList)
@@ -207,9 +221,14 @@ def deleteNonCollege():
 def checkMissings():
 	#all those that are only missing the school they attended are attending invalid schools (schools not in IPEDS list)
 	missingAttendedList = ['191649','214768','190664','194091','190770','110680','123341','110644','123013','186380','170240','170532','232186','199139','139959','178396','200217','217059','216825','196088','191074','193900','243780','169521','176071','178420','221759','187985','234155','163259','421045','176318','157951','179946','222992','228723','127741','127741','115409','127653','155399','200253','157951','175573','126614','227401','229179','180179','200059','209746']
+	missingAttendedList = list(set(missingAttendedList))
 	for i in missingAttendedList:
 		if i in collegeDataLookup:
-			print str(i) + ": " + str(collegeDataLookup[i])
+			is4year = -3
+			if i in collegeList:
+				print "1" + "\t"+ str(i) + "\t" + str(collegeDataLookup[i])
+			else:
+				print "0" + "\t"+ str(i) + "\t" + str(collegeDataLookup[i])
 		else:
 			print "Not found"
 
