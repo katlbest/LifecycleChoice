@@ -58,7 +58,7 @@ def main():
 #function definitions==============================================================================================
 def collegeListSetup(): #extract list of colleges people have attended
 	global missedCollegeList
-	vectorList = open('C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/compiledcollegelist.txt', 'r')
+	vectorList = open('C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/compiledcollegelist-new.txt', 'r')
 	for line in vectorList.readlines():
 		#read in variables
 		varList = line.split('\t')
@@ -75,6 +75,10 @@ def collegeListSetup(): #extract list of colleges people have attended
 			missedCollegeList.append(admitVector[i])
 	vectorList.close()
 	#clean up college list
+	#print "Total number of unique IDs: " + str(len(missedCollegeList))
+	#outFiletest = open('C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/beforededupe.txt', 'w')
+	#outFiletest.write(str(missedCollegeList))
+	#outFiletest.close()
 	missedCollegeList = list(set(missedCollegeList)) #de-dupe
 	print "Total number of unique IDs: " + str(len(missedCollegeList))
 
@@ -160,7 +164,6 @@ def BarronsSetup(): #lookup for Barron's selectivity
 		if unitID in collegeDataLookup and collegeDataLookup[unitID].selectivity == -3:
 			collegeDataLookup[unitID].selectivity = curSelectivity
 	barronsFile2.close()
-
 
 def printCollegeList():	
 	global collegeList
