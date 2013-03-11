@@ -26,6 +26,24 @@ library(plyr)
   #ycoc data
   YCOC_DATA <- read.csv("C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/ycoc_data.csv")
 
+#attendance====================================================================
+#find first fulltime school for each person whose currently listed school is not fulltime
+MERGED_DATA$FULLTIME_SCHOOLID
+for (i in 1:nrow(MERGED_DATA)){
+  year_vect = c('_2004','_2005','_2006','_2007','_2008','_2009','_2010')
+  school_vect = c('.01','.02','.03','.04','.05','.06','.07','.08','.09','.10')
+  if (MERGED_DATA$NOT_FULLTIME_FLAG) == 1 { #then try to find the first fulltime school
+    curYear = match(MERGED_DATA$SCHOOLID_YEAR ,year_vect)
+    for j in (curYear:length(year_vect)
+      if new schoolid != -3{
+        if school id > 0 and fulltime = 0 {
+                
+        }
+    }
+  }
+  
+}
+
 #application/admission==========================================================
   #empty vectors for storage
   MERGED_DATA$COLLEGES_APPLY_VECTOR <- "" #vector of applied schools
