@@ -15,7 +15,7 @@ class CollegeData: #class storing college data
 		self.bachFlag, self.control, self.selectivity = bachFlag, control, selectivity
 
 	def __str__(self):
-		return str(self.bachFlag) + "\t" + str(self.control) +  "\t" + str(self.selectivity)
+		return "Has bachelor: " + str(self.bachFlag) + "\t Control: " + str(self.control) +  "\t Selectivity: " + str(self.selectivity)
 
 #main===================================================================================================
 def main():
@@ -41,6 +41,9 @@ def main():
 
 	#delete colleges from found list that do not indicate having 4-year data
 	deleteNonCollege()
+
+	#check into missing entries
+	checkMissings()
 
 	#merge with matched information--remove non-4-year schools and investigate public/private distinction
 	#get info at http://nces.ed.gov/ipeds/datacenter/InstitutionByName.aspx?stepId=1
@@ -200,6 +203,15 @@ def deleteNonCollege():
 			collegeListCopy.remove(collegeList[i])
 	collegeList = collegeListCopy
 	print "Total number of unique 4-year IDs with seelctivity that are found after using all means: " + str((len(collegeList)))
+
+def checkMissings():
+	#all those that are only missing the school they attended are attending invalid schools (schools not in IPEDS list)
+	missingAttendedList = ['191649','214768','190664','194091','190770','110680','123341','110644','123013','186380','170240','170532','232186','199139','139959','178396','200217','217059','216825','196088','191074','193900','243780','169521','176071','178420','221759','187985','234155','163259','421045','176318','157951','179946','222992','228723','127741','127741','115409','127653','155399','200253','157951','175573','126614','227401','229179','180179','200059','209746']
+	for i in missingAttendedList:
+		if i in collegeDataLookup:
+			print str(i) + ": " + str(collegeDataLookup[i])
+		else:
+			print "Not found"
 
 if __name__ == '__main__':
 	main()
