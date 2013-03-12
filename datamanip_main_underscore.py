@@ -43,6 +43,9 @@ def main():
 	#delete colleges from found list that do not indicate having 4-year data
 	deleteNonCollege()
 
+	#check whether there is anything different about the schools for which people have missing data
+	checkMissings()
+
 	#merge with matched information--remove non-4-year schools and investigate public/private distinction
 	#get info at http://nces.ed.gov/ipeds/datacenter/InstitutionByName.aspx?stepId=1
 
@@ -60,20 +63,23 @@ def main():
 def collegeListSetup(): #extract list of colleges people have attended
 	global missedCollegeList
 	vectorList = open('D:/compiledcollegelist.txt', 'r')
-	for line in vectorList.readlines():
-		str.replace(line, '"', '')
+	lines = vectorList.readlines()
+	for line in lines[1:]:
+	#for line in vectorList:
 		#read in variables
 		varList = line.split('\t')
-		PUBID_1997 = varList[1]
-		COLLEGEGOER_FLAG = varList[2]
-		COLLEGE_SCHOOLID = varList[3]
+		PUBID_1997 = int(varList[1])
+		COLLEGEGOER_FLAG = int(varList[2])
+		COLLEGE_SCHOOLID = int(varList[3])
 		COMPILED_APPLY = varList[4]
 		COMPILED_ADMIT = varList[5]
 		applyVector = COMPILED_APPLY.split(',')
 		admitVector = COMPILED_ADMIT.split(',')
 		for i in range(len(applyVector)):
+			applyVector[i] = applyVector[i].replace('"','')
 			missedCollegeList.append(applyVector[i])
 		for i in range(len(admitVector)):
+			admitVector[i] = admitVector[i].replace('"','')
 			missedCollegeList.append(admitVector[i])
 	vectorList.close()
 	#clean up college list
@@ -82,6 +88,7 @@ def collegeListSetup(): #extract list of colleges people have attended
 	#outFiletest.write(str(missedCollegeList))
 	#outFiletest.close()
 	missedCollegeList = list(set(missedCollegeList)) #de-dupe
+	missedCollegeList.pop(0)
 	print "Total number of unique IDs: " + str(len(missedCollegeList))
 
 def IPEDScheck(myYear): #look up colleges in the list in myYear's ipeds list and this year's OPEID list; create OPEID lookup table based on this year's data
@@ -215,6 +222,20 @@ def deleteNonCollege(): #note that colleges are still in the lookup table, just 
 			collegeListCopy.remove(collegeList[i])
 	collegeList = collegeListCopy
 	print "Total number of unique 4-year IDs with selctivity that are found after using all means: " + str((len(collegeList)))
+
+def checkMissings():
+	#all those that are only missing the school they attended are attending invalid schools (schools not in IPEDS list)
+	missingList = []
+	#missingList = ['191649','214768','190664','194091','190770','110680','123341','110644','123013','186380','170240','170532','232186','199139','139959','178396','200217','217059','216825','196088','191074','193900','243780','169521','176071','178420','221759','187985','234155','163259','421045','176318','157951','179946','222992','228723','127741','127741','115409','127653','155399','200253','157951','175573','126614','227401','229179','180179','200059','209746']
+	missingList = list(set(missingList))
+	for i in missingList:
+		if i in collegeDataLookup:
+			if i in collegeList:
+				print "1" + "\t"+ str(i) + "\t" + str(collegeDataLookup[i])
+			else:
+				print "0" + "\t"+ str(i) + "\t" + str(collegeDataLookup[i])
+		else:
+			print "Not found"
 
 if __name__ == '__main__':
 	main()
