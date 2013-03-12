@@ -19,13 +19,15 @@ library(plyr)
 #TBD-it may be worth getting more data out of this if IPEDS lookups dont yield all we need
 MERGED_DATA$COLLEGES_ATTEND_VECTOR<- "" #vector of attended schools  
 MERGED_DATA$COLLEGEID_YEAR2_VECTOR <- ""  #vector of years of current school
+MERGED_DATA$COLLEGEID_ROSTERNUM2_VECTOR <- "" #rosternum of schools vector
+MERGED_DATA$COLLEGEID_DEGREE2_VECTOR <- "" #degrees at schools vector
 year_vect = c('_1998', '_1999', '_2000', '_2001', '_2002', '_2003','_2004','_2005','_2006','_2007','_2008','_2009','_2010')
 school_vect = c('_01','_02','_03','_04','_05','_06','_07','_08')
 month_vect = c('_01','_02','_03','_04','_05','_06')
 for (i in 1:length(school_vect)){
   for (j in 1:length(year_vect)){
-    curstr = paste('GEO69',school_vect[i],year_vect[j], sep = "")
-    curstr3 = paste('MERGED_DATA$YSCH_27337',school_vect[i],year_vect[j], sep = "")
+    curstr = paste('GEO69',school_vect[i],year_vect[j], sep = "") #school ID
+    curstr3 = paste('MERGED_DATA$YSCH_27337',school_vect[i],year_vect[j], sep = "") #type of degree
     if (curstr %in% colnames(MERGED_DATA)){
       curstr = paste('MERGED_DATA$', curstr,sep = '')
       for (k in 1:nrow(MERGED_DATA)){
@@ -47,6 +49,8 @@ for (i in 1:length(school_vect)){
               if (eval(parse(text =curstr3))[k] > 2){
                 MERGED_DATA$COLLEGES_ATTEND_VECTOR[k]= paste(MERGED_DATA$COLLEGES_ATTEND_VECTOR[k], eval(parse(text =curstr))[k], ",", sep = "")
                 MERGED_DATA$COLLEGEID_YEAR2_VECTOR[k]= paste(MERGED_DATA$COLLEGEID_YEAR2_VECTOR[k], toString(curYearNum), ",", sep = "")
+                MERGED_DATA$COLLEGEID_DEGREE2_VECTOR[k] = paste(MERGED_DATA$COLLEGEID_DEGREE2_VECTOR[k], eval(parse(text =curstr3))[k], ",", sep = "")
+                MERGED_DATA$COLLEGEID_ROSTERNUM2_VECTOR[k] = paste(MERGED_DATA$COLLEGEID_ROSTERNUM2_VECTOR[k], school_vect[i], ",", sep = "")
               }
             }
           }
@@ -58,10 +62,14 @@ for (i in 1:length(school_vect)){
 
 MERGED_DATA$COLLEGES_SCHOOLID2 <- -3 #number of first attended school     
 MERGED_DATA$COLLEGEID_YEAR2 <- -3 #year of first attended school
+MERGED_DATA$COLLEGEID_ROSTERNUM2 <- "" #rosternum of schools vector
+MERGED_DATA$COLLEGEID_DEGREE2 <- -3 #degrees at schools vector
 for (k in 1:nrow(MERGED_DATA)){
   if (MERGED_DATA$COLLEGES_ATTEND_VECTOR[k] != ""){
     MERGED_DATA$COLLEGES_SCHOOLID2[k]= as.integer(strsplit(MERGED_DATA$COLLEGES_ATTEND_VECTOR[k], ",", fixed = FALSE, perl = FALSE, useBytes = FALSE)[[1]][1])
     MERGED_DATA$COLLEGEID_YEAR2[k]= as.integer(strsplit(MERGED_DATA$COLLEGEID_YEAR2_VECTOR[k], ",", fixed = FALSE, perl = FALSE, useBytes = FALSE)[[1]][1])
+    MERGED_DATA$COLLEGEID_ROSTERNUM2[k]= strsplit(MERGED_DATA$COLLEGEID_ROSTERNUM2_VECTOR[k], ",", fixed = FALSE, perl = FALSE, useBytes = FALSE)[[1]][1]
+    MERGED_DATA$COLLEGEID_DEGREE2[k] = as.integer(strsplit(MERGED_DATA$COLLEGEID_DEGREE2_VECTOR[k], ",", fixed = FALSE, perl = FALSE, useBytes = FALSE)[[1]][1])
   }
 }
 
