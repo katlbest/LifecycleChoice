@@ -9,6 +9,7 @@ crosswalkLookup = {} #returns an IPEDS ID for a FICE number
 collegeDataLookup = {} #returns collegeData object for an IPEDS number
 OPEIDcrosswalkLookup = {} #returns an IPEDS ID for an OPEID number
 collegeDataLookup = {} #lookup table storing college info based on IPEDS number
+studentLookup = {} #Lookup table for personal information by PUBID_1997
 
 #define classes========================================================================================
 class CollegeData: #class storing college data
@@ -17,6 +18,14 @@ class CollegeData: #class storing college data
 
 	def __str__(self):
 		return str(self.colName) + "\t" + str(self.bachFlag) + "\t" + str(self.control) +  "\t" + str(self.selectivity)
+
+class StudentData: #class storing studentr data
+	#we may want to add major and other info here.
+	def __init__(self, pubID, maxAttend, maxAdmit, controlAttend):
+		self.pubID, self.maxAttend, self.maxAdmit, self.controlAttend = ubID, maxAttend, maxAdmit, controlAttend
+
+	def __str__(self):
+		return str(self.pubID) + "\t" + str(sself.maxAttend) + "\t" + str(self.maxAdmit) +  "\t" + str(self.controlAttend)
 
 #main===================================================================================================
 def main():
@@ -46,18 +55,8 @@ def main():
 	#check whether there is anything different about the schools for which people have missing data
 	#checkMissings()
 
-	#merge with matched information--remove non-4-year schools and investigate public/private distinction
-	#get info at http://nces.ed.gov/ipeds/datacenter/InstitutionByName.aspx?stepId=1
-
-	#get Barron's numbers
-
-	#populate accepted set for each individual (must be correct school type)
-
-	#check that attended school was accepted
-
-	#set highest accepted flag
-
-	#set level of attended flag
+	#populate accepted and admitted set for each individual (must be correct school type)
+	setupIndividualData()
 
 #function definitions==============================================================================================
 def collegeListSetup(): #extract list of colleges people have attended
@@ -84,21 +83,9 @@ def collegeListSetup(): #extract list of colleges people have attended
 			if applyVector[i] > 999999:
 				applyVector[i] = applyVector[i]/100
 			missedCollegeList.append(str(applyVector[i]))
-		#for i in range(0,len(admitVector)-1):
-		#	admitVector[i] = admitVector[i].replace('"','')
-		#	admitVector[i] = int(admitVector[i])
-		#	if admitVector[i] > 999999:
-		#		admitVector[i] = admitVector[i]/100	
-		#	missedCollegeList.append(str(admitVector[i]))
 	vectorList.close()
 	#clean up college list
-	#print "Total number of unique IDs: " + str(len(missedCollegeList))
-	#outFiletest = open('C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/beforededupe.txt', 'w')
-	#outFiletest.write(str(missedCollegeList))
-	#outFiletest.close()
-	#print "test" + str(len(missedCollegeList))
 	missedCollegeList = list(set(missedCollegeList)) #de-dupe
-	#missedCollegeList.pop(0)
 	print "Total number of unique IDs: " + str(len(missedCollegeList))
 
 def IPEDScheck(myYear): #look up colleges in the list in myYear's ipeds list and this year's OPEID list; create OPEID lookup table based on this year's data
@@ -250,20 +237,22 @@ def checkMissings():
 			print "Not found"
 
 def setupIndividualData():
+	global studentLookup
 	vectorList = open('D:/compiledcollegelist.txt', 'r')
 	lines = vectorList.readlines()
 	for line in lines[1:]:
+	#once we do the cleanup everyone in this file should be an applier, so we wont have to do checks for length zero
 	#for line in vectorList:
 		#read in variables
 		varList = line.split('\t')
+		admitLookup = {} #stores admission by school ID for this individual
 		PUBID_1997 = int(varList[1])
 		COLLEGEGOER_FLAG = int(varList[2])
 		COLLEGE_SCHOOLID = int(varList[3])
 		if COLLEGE_SCHOOLID > 999999:
 			COLLEGE_SCHOOLID = COLLEGE_SCHOOLID/100 #adjust for unncessary trailing zeros in some cases
-		missedCollegeList.append(str(COLLEGE_SCHOOLID))
-		COMPILED_APPLY = varList[4]
-		COMPILED_ADMIT = varList[5]
+		COMPILED_APPLY = varList[5]
+		COMPILED_ADMIT = varList[6]
 		applyVector = COMPILED_APPLY.split(',')
 		admitVector = COMPILED_ADMIT.split(',')
 		for i in range(0,len(applyVector)-1):
@@ -271,13 +260,18 @@ def setupIndividualData():
 			applyVector[i] = int(applyVector[i])
 			if applyVector[i] > 999999:
 				applyVector[i] = applyVector[i]/100
-			missedCollegeList.append(str(applyVector[i]))
 		for i in range(0,len(admitVector)-1):
 			admitVector[i] = admitVector[i].replace('"','')
 			admitVector[i] = int(admitVector[i])
-			if admitVector[i] > 999999:
-				admitVector[i] = admitVector[i]/100	
-			missedCollegeList.append(str(admitVector[i]))
+		for i in range(0,len(admitVector)-1): #this now loops through both apply and admit and creates a lookup
+			if str(applyVector[i]) in collegeList: #this is a school that is relevant
+				if applyVector[i] not in admitLookup:
+					admitLookup[applyVector[i]] = -3
+				if admitVector[i] > admitLookup[applyVector[i]]:
+					admitLookup[applyVector[i]] = admitVector[i]
+				#if you attended you were definitely admitted
+				if admitVector[i] == COLLEGE_SCHOOLID:
+					admitLookup[applyVector[i]] = 1
 	vectorList.close()
 
 
