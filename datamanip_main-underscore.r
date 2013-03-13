@@ -113,18 +113,18 @@ write.csv(MERGED_DATA, file = "D:/MERGED_DATA_REDUCED_ATTENDANCE.csv") #write th
             curTerm = ((eval(parse(text =curstr2))[k] +1) %/% 4) +1997
             MERGED_DATA$COLLEGES_APPLYALL_VECTOR[k]= paste(MERGED_DATA$COLLEGES_APPLYALL_VECTOR[k], eval(parse(text =curstr))[k], ",", sep = "")
             MERGED_DATA$COLLEGES_TERM_VECTOR[k]= paste(MERGED_DATA$COLLEGES_TERM_VECTOR[k], toString(curTerm), ",", sep = "")
+            if (eval(parse(text =curstr3))[k] == 1){ #admitted
+              # print("yes")
+              MERGED_DATA$COLLEGES_ADMIT_VECTOR[k]= paste(MERGED_DATA$COLLEGES_ADMIT_VECTOR[k], "1", ",", sep = "")
+            }
+            else if (eval(parse(text =curstr3))[k] == 0){ #not admitted
+              MERGED_DATA$COLLEGES_ADMIT_VECTOR[k]= paste(MERGED_DATA$COLLEGES_ADMIT_VECTOR[k], "0", ",", sep = "")
+            }
+            else{ #decision pending
+              MERGED_DATA$COLLEGES_ADMIT_VECTOR[k]= paste(MERGED_DATA$COLLEGES_ADMIT_VECTOR[k], "-3", ",", sep = "")
+            }
             if (curTerm > curMin & curTerm < curMax){
               MERGED_DATA$COLLEGES_APPLY_VECTOR[k]= paste(MERGED_DATA$COLLEGES_APPLY_VECTOR[k], eval(parse(text =curstr))[k], ",", sep = "")            
-              if (eval(parse(text =curstr3))[k] == 1){ #admitted
-               # print("yes")
-                MERGED_DATA$COLLEGES_ADMIT_VECTOR[k]= paste(MERGED_DATA$COLLEGES_ADMIT_VECTOR[k], "1", ",", sep = "")
-              }
-              else if (eval(parse(text =curstr3))[k] == 0){ #not admitted
-                MERGED_DATA$COLLEGES_ADMIT_VECTOR[k]= paste(MERGED_DATA$COLLEGES_ADMIT_VECTOR[k], "0", ",", sep = "")
-              }
-              else{ #decision pending
-                MERGED_DATA$COLLEGES_ADMIT_VECTOR[k]= paste(MERGED_DATA$COLLEGES_ADMIT_VECTOR[k], "-3", ",", sep = "")
-              }
             }
           }  
         }
@@ -161,17 +161,17 @@ write.csv(MERGED_DATA, file = "D:/MERGED_DATA_REDUCED_ATTENDANCE.csv") #write th
           curTerm = ((eval(parse(text =curstr2))[m] +1) %/% 4) +1997
           MERGED_DATA$COLLEGES_APPLYALL_VECTOR2[m]= paste(MERGED_DATA$COLLEGES_APPLYALL_VECTOR2[m], eval(parse(text =curstr))[m], ",", sep = "")
           MERGED_DATA$COLLEGES_TERM_VECTOR2[m]= paste(MERGED_DATA$COLLEGES_TERM_VECTOR2[m], toString(curTerm), ",", sep = "")
+          if (eval(parse(text =curstr3))[m] == 1){ #admitted
+            MERGED_DATA$COLLEGES_ADMIT_VECTOR2[m]= paste(MERGED_DATA$COLLEGES_ADMIT_VECTOR2[m], "1", ",", sep = "")
+          }
+          else if (eval(parse(text =curstr3))[m] == 0){ #not admitted
+            MERGED_DATA$COLLEGES_ADMIT_VECTOR2[m]= paste(MERGED_DATA$COLLEGES_ADMIT_VECTOR2[m], "0", ",", sep = "")
+          }
+          else{ #decision pending
+            MERGED_DATA$COLLEGES_ADMIT_VECTOR2[m]= paste(MERGED_DATA$COLLEGES_ADMIT_VECTOR2[m], "-3", ",", sep = "")
+          }
           if (curTerm > curMin & curTerm < curMax){
             MERGED_DATA$COLLEGES_APPLY_VECTOR2[m]= paste(MERGED_DATA$COLLEGES_APPLY_VECTOR2[m], eval(parse(text =curstr))[m], ",", sep = "")            
-            if (eval(parse(text =curstr3))[m] == 1){ #admitted
-              MERGED_DATA$COLLEGES_ADMIT_VECTOR2[m]= paste(MERGED_DATA$COLLEGES_ADMIT_VECTOR2[m], "1", ",", sep = "")
-            }
-            else if (eval(parse(text =curstr3))[m] == 0){ #not admitted
-              MERGED_DATA$COLLEGES_ADMIT_VECTOR2[m]= paste(MERGED_DATA$COLLEGES_ADMIT_VECTOR2[m], "0", ",", sep = "")
-            }
-            else{ #decision pending
-              MERGED_DATA$COLLEGES_ADMIT_VECTOR2[m]= paste(MERGED_DATA$COLLEGES_ADMIT_VECTOR2[m], "-3", ",", sep = "")
-            }
           } 
         }
       }
@@ -198,17 +198,17 @@ write.csv(MERGED_DATA, file = "D:/MERGED_DATA_REDUCED_ATTENDANCE.csv") #write th
               curTerm = ((eval(parse(text =curstr2))[m] +1) %/% 4) +1997
               MERGED_DATA$COLLEGES_APPLYALL_VECTOR2[m]= paste(MERGED_DATA$COLLEGES_APPLYALL_VECTOR2[m], eval(parse(text =curstr))[m], ",", sep = "")
               MERGED_DATA$COLLEGES_TERM_VECTOR2[m]= paste(MERGED_DATA$COLLEGES_TERM_VECTOR2[m], toString(curTerm), ",", sep = "")
+              if (eval(parse(text =curstr3))[m] == 1){ #admitted
+                MERGED_DATA$COLLEGES_ADMIT_VECTOR2[m]= paste(MERGED_DATA$COLLEGES_ADMIT_VECTOR2[m], "1", ",", sep = "")
+              }
+              else if (eval(parse(text =curstr3))[m] == 0){ #not admitted
+                MERGED_DATA$COLLEGES_ADMIT_VECTOR2[m]= paste(MERGED_DATA$COLLEGES_ADMIT_VECTOR2[m], "0", ",", sep = "")
+              }
+              else{ #decision pending
+                MERGED_DATA$COLLEGES_ADMIT_VECTOR2[m]= paste(MERGED_DATA$COLLEGES_ADMIT_VECTOR2[m], "-3", ",", sep = "")
+              }
               if (curTerm > curMin & curTerm < curMax){
                 MERGED_DATA$COLLEGES_APPLY_VECTOR2[m]= paste(MERGED_DATA$COLLEGES_APPLY_VECTOR2[m], eval(parse(text =curstr))[m], ",", sep = "")            
-                if (eval(parse(text =curstr3))[m] == 1){ #admitted
-                  MERGED_DATA$COLLEGES_ADMIT_VECTOR2[m]= paste(MERGED_DATA$COLLEGES_ADMIT_VECTOR2[m], "1", ",", sep = "")
-                }
-                else if (eval(parse(text =curstr3))[m] == 0){ #not admitted
-                  MERGED_DATA$COLLEGES_ADMIT_VECTOR2[m]= paste(MERGED_DATA$COLLEGES_ADMIT_VECTOR2[m], "0", ",", sep = "")
-                }
-                else{ #decision pending
-                  MERGED_DATA$COLLEGES_ADMIT_VECTOR2[m]= paste(MERGED_DATA$COLLEGES_ADMIT_VECTOR2[m], "-3", ",", sep = "")
-                }
               } 
             }
           }
