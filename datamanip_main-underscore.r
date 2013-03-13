@@ -366,7 +366,7 @@ for (i in 1:length(school_vect)){ #this loop is only for 2003 since it looks dif
   }
 }
 
-relvars = c('PUBID_1997','COLLEGES_SCHOOLID2', 'CHOICE_YEAR','COLLEGEID_YEAR2','YCOC_002_2003','YCOC_002_2004','YCOC_002_2005','YCOC_002_2006','YCOC_002_2007','YCOC_002_2008','YCOC_002_2009','YCOC_002_2010','YCOC_003A_2003','YCOC_003A_2004','YCOC_003A_2005','YCOC_002_2005','YCOC_003A_2006','YCOC_003A_2007','YCOC_003A_2008','YCOC_003A_2009','YCOC_003A_2010',relvars)
+relvars = c('PUBID_1997','COLLEGES_SCHOOLID2', 'COLLEGEID_DEGREE2', 'CHOICE_YEAR','COLLEGEID_YEAR2','YCOC_002_2003','YCOC_002_2004','YCOC_002_2005','YCOC_002_2006','YCOC_002_2007','YCOC_002_2008','YCOC_002_2009','YCOC_002_2010','YCOC_003A_2003','YCOC_003A_2004','YCOC_003A_2005','YCOC_003A_2006','YCOC_003A_2007','YCOC_003A_2008','YCOC_003A_2009','YCOC_003A_2010',relvars)
 MISSING_ALL_CHECK <- MISSING_ALL_DATA[,relvars]
 MISSING_ALL_UNRESTRICTED_CHECK <- MISSING_ALL_UNRESTRICTED_DATA[,relvars]
 MISSING_ATTENDED_CHECK <- MISSING_ATTENDED_DATA[,relvars]
@@ -377,7 +377,11 @@ write.csv(MISSING_ALL_UNRESTRICTED_CHECK, file = "D:/missing_all_unrestricted_ch
 write.csv(MISSING_ATTENDED_CHECK, file = "D:/missing_attended_check.csv")
 write.csv(MISSING_ATTENDED_UNRESTRICTED_CHECK, file = "D:/missing_attended_unrestricted_check.csv")
 
+#ycoc-002: eligibility for YCOC section, want 1
+#ycoc-003A: ever applied to college or technical school
+#
+
 #delete those with no application data===============================================================================
 COMPILED_DATA_APPSONLY <- COMPILED_DATA[COMPILED_DATA$APPLYER ==1,]
-dim(COMPILED_DATA_APPLYER)
-write.csv(COMPILED_DATA_APPLYER, file = "D:/COMPILED_DATA_APPLYER.csv")
+dim(COMPILED_DATA_APPSONLY)
+write.csv(COMPILED_DATA_APPSONLY, file = "D:/COMPILED_DATA_APPLYER.csv")
