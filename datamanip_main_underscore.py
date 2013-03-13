@@ -8,7 +8,7 @@ missedSelectivityList = [] #list of schools among 4-year schools for which selec
 crosswalkLookup = {} #returns an IPEDS ID for a FICE number
 collegeDataLookup = {} #returns collegeData object for an IPEDS number
 OPEIDcrosswalkLookup = {} #returns an IPEDS ID for an OPEID number
-collegeDataLookup = {} #lookup table storing college info based on IPEDS number
+#collegeDataLookup = {} #lookup table storing college info based on IPEDS number
 studentLookup = {} #Lookup table for personal information by PUBID_1997
 
 #define classes========================================================================================
@@ -22,7 +22,7 @@ class CollegeData: #class storing college data
 class StudentData: #class storing studentr data
 	#we may want to add major and other info here.
 	def __init__(self, pubID, maxAttend, maxAdmit, controlAttend):
-		self.pubID, self.maxAttend, self.maxAdmit, self.controlAttend = ubID, maxAttend, maxAdmit, controlAttend
+		self.pubID, self.maxAttend, self.maxAdmit, self.controlAttend = pubID, maxAttend, maxAdmit, controlAttend
 
 	def __str__(self):
 		return str(self.pubID) + "\t" + str(sself.maxAttend) + "\t" + str(self.maxAdmit) +  "\t" + str(self.controlAttend)
@@ -119,6 +119,8 @@ def IPEDScheck(myYear): #look up colleges in the list in myYear's ipeds list and
 			print "code 1: found college by OPEID lookup in year " + str(myYear) #this happens once
 			collegeListCopy.append(OPEIDcrosswalkLookup[missedCollegeList[i]])
 			missedCollegeListCopy.remove(missedCollegeList[i])
+			collegeDataLookup[missedCollegeList[i]] = collegeDataLookup[OPEIDcrosswalkLookup[missedCollegeList[i]]]
+			#but the selectivity data probably gets lost
 	missedCollegeList = missedCollegeListCopy
 	collegeList = collegeListCopy
 	collegeList = list(set(collegeList)) #de-dupe
@@ -149,6 +151,7 @@ def FICEcheck(): #use FICE crosswalk to try to fill in missing information
 				print "code 2: found college by FICE check" #this doesn't happen
 				collegeListCopy.append(crosswalkLookup[missedCollegeList[i]])
 				missedCollegeListCopy.remove(missedCollegeList[i])
+				collegeDataLookup[missedCollegeList[i]] = collegeDataLookup[crosswalkLookup[missedCollegeList[i]]]
 	missedCollegeList = missedCollegeListCopy
 	collegeList = collegeListCopy
 	collegeList = list(set(collegeList)) #de-dupe
@@ -238,12 +241,14 @@ def checkMissings():
 
 def setupIndividualData():
 	global studentLookup
+	global collegeList
+	global collegeDataLookup
 	vectorList = open('D:/compiledcollegelist.txt', 'r')
 	lines = vectorList.readlines()
 	for line in lines[1:]:
 	#once we do the cleanup everyone in this file should be an applier, so we wont have to do checks for length zero
 	#for line in vectorList:
-		#read in variables
+		#read in variables and set up relevant tables
 		varList = line.split('\t')
 		admitLookup = {} #stores admission by school ID for this individual
 		PUBID_1997 = int(varList[1])
@@ -272,8 +277,20 @@ def setupIndividualData():
 				#if you attended you were definitely admitted
 				if admitVector[i] == COLLEGE_SCHOOLID:
 					admitLookup[applyVector[i]] = 1
+		#create output
+		#pubID, maxAttend, maxAdmit, controlAttend
+		curMaxAdmit = 100
+		if COLLEGE_SCHOOLID in collegeList:
+			curMaxAttend = collegeDataLookup[COLLEGE_SCHOOLID].selectivity
+			curControlAttend = collegeDataLookup[COLLEGE_SCHOOLID].control
+		else:
+			curMaxAttend = -3
+			curControlAttend = -3
+		for i in admitLookup:
+			curMaxAdmit = min(collegeDataLookup[i].selectivity, curMaxAdmit)
+		curStudentData = StudentData(PUBID_1997, curMaxAttend, curMaxAdmit, curControlAttend)
+		studentDataLookup[PUBID_1997] = curStudentData
 	vectorList.close()
-
 
 if __name__ == '__main__':
 	main()
