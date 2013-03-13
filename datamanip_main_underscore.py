@@ -71,6 +71,7 @@ def collegeListSetup(): #extract list of colleges people have attended
 		PUBID_1997 = int(varList[1])
 		COLLEGEGOER_FLAG = int(varList[2])
 		COLLEGE_SCHOOLID = int(varList[3])
+		missedCollegeList.append(str(COLLEGE_SCHOOLID))
 		COMPILED_APPLY = varList[4]
 		COMPILED_ADMIT = varList[5]
 		applyVector = COMPILED_APPLY.split(',')
@@ -87,6 +88,7 @@ def collegeListSetup(): #extract list of colleges people have attended
 	#outFiletest = open('C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/beforededupe.txt', 'w')
 	#outFiletest.write(str(missedCollegeList))
 	#outFiletest.close()
+	#print "test" + str(len(missedCollegeList))
 	missedCollegeList = list(set(missedCollegeList)) #de-dupe
 	missedCollegeList.pop(0)
 	print "Total number of unique IDs: " + str(len(missedCollegeList))
@@ -214,19 +216,22 @@ def deleteNonCollege(): #note that colleges are still in the lookup table, just 
 	for i in range(len(collegeList)):
 		if collegeDataLookup[collegeList[i]].bachFlag != "1":
 			collegeListCopy.remove(collegeList[i])
+			#print("im here")
 	collegeList = collegeListCopy
-	print "Total number of unique 4-year IDs that are found after using all means: " + str((len(collegeList)))
+	print "Total number of unique 4-year IDs that are found after using all means: " + str(len(collegeList))
+	#print(collegeList)
 	collegeListCopy = list(collegeList)
 	for i in range(len(collegeList)):
-		if collegeDataLookup[collegeList[i]].bachFlag == -3:
+		if collegeDataLookup[collegeList[i]].selectivity == -3:
 			collegeListCopy.remove(collegeList[i])
+			#print("im here 2")
 	collegeList = collegeListCopy
-	print "Total number of unique 4-year IDs with selctivity that are found after using all means: " + str((len(collegeList)))
+	print "Total number of unique 4-year IDs with selctivity that are found after using all means: " + str(len(collegeList))
 
 def checkMissings():
 	#all those that are only missing the school they attended are attending invalid schools (schools not in IPEDS list)
-	missingList = []
-	#missingList = ['191649','214768','190664','194091','190770','110680','123341','110644','123013','186380','170240','170532','232186','199139','139959','178396','200217','217059','216825','196088','191074','193900','243780','169521','176071','178420','221759','187985','234155','163259','421045','176318','157951','179946','222992','228723','127741','127741','115409','127653','155399','200253','157951','175573','126614','227401','229179','180179','200059','209746']
+	#missingList = []
+	missingList = ['193308','190594','190655','191649','214768','162706','190664','190594','190770','3022','115001','113856','117788','121619','110680','110510','121901','119137','110422','151351','144892','152248','112190','210401','110635','113634','113634','123341','110662','112190','122791','122791','122791','122755','115047','122728','110644','235097','212054','365268','184791','170532','198507','232186','199139','227182','129020','139959','153162','178396','381413','126614','174783','200217','121901','162706','3006','216825','196088','196088','191074','195474','139959','161864','193900','213349','150066','243780','142522','764','204635','3024','169521','178022','178420','178396','247296','163259','133508','132903','199139','199218','198154','133951','3044','3043','234155','163259','221768','421045','176318','101480','157951','206941','179946','207209','222992','159939','228723','4000','128106','128106','420574','127741','127741','381787','115409','234687','237011','118976','118718','196246','202541','127653','145813','155399','174792','174792','207263','200253','201432','152530','206011','206011','141334','441','157951','157951','175573','176372','198987','126614','226204','227401','227401','229179','199193','170976','105330','200280','210429','200059','420556','209746','209533','209825','102553','4000','195960','105330','217907']
 	missingList = list(set(missingList))
 	for i in missingList:
 		if i in collegeDataLookup:
