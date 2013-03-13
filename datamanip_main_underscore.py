@@ -223,11 +223,11 @@ def deleteNonCollege(): #note that colleges are still in the lookup table, just 
 	print "Total number of unique 4-year IDs that are found after using all means: " + str(len(collegeList))
 	#print(collegeList)
 	collegeListCopy = list(collegeList)
-	for i in range(len(collegeList)):
-		if collegeDataLookup[collegeList[i]].selectivity == -3:
-			collegeListCopy.remove(collegeList[i])
-	collegeList = collegeListCopy
-	print "Total number of unique 4-year IDs with selectivity that are found after using all means: " + str(len(collegeList))
+	#for i in range(len(collegeList)):
+	#	if collegeDataLookup[collegeList[i]].selectivity == -3:
+#			collegeListCopy.remove(collegeList[i])
+	#collegeList = collegeListCopy
+	#print "Total number of unique 4-year IDs with selectivity that are found after using all means: " + str(len(collegeList))
 
 def checkMissings():
 	#all those that are only missing the school they attended are attending invalid schools (schools not in IPEDS list)
@@ -247,6 +247,8 @@ def setupIndividualData():
 	attenderCount = 0
 	applierCount = 0
 	missingAdmitCount = 0
+	#missAdmitSelect = 0
+	#missAttendSelect  = 0 
 	#counter = 0
 	#counter2 = 0
 	global studentLookup
@@ -296,7 +298,6 @@ def setupIndividualData():
 				#if admitLookup[applyVector[i]] ==-3:
 				#	counter2 = counter2+1
 
-
 		#create output
 		#minim = 0
 		#if len(admitLookup) > 0:
@@ -318,6 +319,8 @@ def setupIndividualData():
 			attenderCount = attenderCount +1
 			attenderFlag = 1
 			curMaxAttend = collegeDataLookup[str(COLLEGE_SCHOOLID)].selectivity
+			#if curMaxAttend == -3:
+				#missAttendSelect = missAttendSelect + 1
 			curControlAttend = collegeDataLookup[str(COLLEGE_SCHOOLID)].control
 		else:
 			curMaxAttend = -3
@@ -333,20 +336,29 @@ def setupIndividualData():
 
 		#set up application info
 		curMaxAdmit = 100
+		#missingSomeSelect = 0
 		for i in admitLookup:
-			curMaxAdmit = min(int(collegeDataLookup[str(i)].selectivity), curMaxAdmit)
+			if int(collegeDataLookup[str(i)].selectivity) > 0: #since 7 is the highest possible number, you get "specialty" value only if that is the only place you applied
+				curMaxAdmit = min(int(collegeDataLookup[str(i)].selectivity), curMaxAdmit) #this might set some to -3!
+			#elif admitLookup[i]==1:
+				#missingSomeSelect = 1
+		#missAdmitSelect = missAdmitSelect + missingSomeSelect
 		curStudentData = StudentData(PUBID_1997, curMaxAttend, curMaxAdmit, curControlAttend)
 		studentLookup[PUBID_1997] = curStudentData
 		#print if you are an applicant
 		if applierFlag ==1:
 			outstr= str(curStudentData)  +  "\t" + str(attenderFlag) + "\t" + str(COLLEGEGOER_FLAG)+ "\n"
 			open("C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/studentdata.txt","a").write(outstr)
+		#if missingAdmitCheck < 0:
+		#	print str(curMaxAdmit)
 	vectorList.close()
 	#print counter
 	#print counter2
 	print "Total number of attenders at 4-year IPEDS universities: " + str(attenderCount)
 	print "Total number of applicants to 4-year IPEDS universities: " + str(applierCount)
 	print "Total number of applicants for whom some admission data is missing: " + str(missingAdmitCount)
+	#print missAttendSelect  #these only work if i remove the deletion of schools with no selectivity
+	#print missAdmitSelect 
 if __name__ == '__main__':
 	main()
 
