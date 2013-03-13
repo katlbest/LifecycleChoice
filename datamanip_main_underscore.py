@@ -44,7 +44,7 @@ def main():
 	deleteNonCollege()
 
 	#check whether there is anything different about the schools for which people have missing data
-	checkMissings()
+	#checkMissings()
 
 	#merge with matched information--remove non-4-year schools and investigate public/private distinction
 	#get info at http://nces.ed.gov/ipeds/datacenter/InstitutionByName.aspx?stepId=1
@@ -71,17 +71,28 @@ def collegeListSetup(): #extract list of colleges people have attended
 		PUBID_1997 = int(varList[1])
 		COLLEGEGOER_FLAG = int(varList[2])
 		COLLEGE_SCHOOLID = int(varList[3])
+		if COLLEGE_SCHOOLID > 999999:
+			COLLEGE_SCHOOLID = COLLEGE_SCHOOLID/100 #adjust for unncessary trailing zeros in some cases
 		missedCollegeList.append(str(COLLEGE_SCHOOLID))
 		COMPILED_APPLY = varList[4]
 		COMPILED_ADMIT = varList[5]
 		applyVector = COMPILED_APPLY.split(',')
 		admitVector = COMPILED_ADMIT.split(',')
-		for i in range(len(applyVector)):
+		for i in range(0,len(applyVector)-1):
 			applyVector[i] = applyVector[i].replace('"','')
-			missedCollegeList.append(applyVector[i])
-		for i in range(len(admitVector)):
+			applyVector[i] = int(applyVector[i])
+			if applyVector[i] > 999999:
+				applyVector[i] = applyVector[i]/100
+			missedCollegeList.append(str(applyVector[i]))
+		for i in range(0,len(admitVector)-1):
 			admitVector[i] = admitVector[i].replace('"','')
-			missedCollegeList.append(admitVector[i])
+			try:
+				admitVector[i] = int(admitVector[i])
+			except:
+				print "error: " + admitVector[i]
+			if admitVector[i] > 999999:
+				admitVector[i] = admitVector[i]/100	
+			missedCollegeList.append(str(admitVector[i]))
 	vectorList.close()
 	#clean up college list
 	#print "Total number of unique IDs: " + str(len(missedCollegeList))
@@ -90,7 +101,7 @@ def collegeListSetup(): #extract list of colleges people have attended
 	#outFiletest.close()
 	#print "test" + str(len(missedCollegeList))
 	missedCollegeList = list(set(missedCollegeList)) #de-dupe
-	missedCollegeList.pop(0)
+	#missedCollegeList.pop(0)
 	print "Total number of unique IDs: " + str(len(missedCollegeList))
 
 def IPEDScheck(myYear): #look up colleges in the list in myYear's ipeds list and this year's OPEID list; create OPEID lookup table based on this year's data
@@ -111,7 +122,6 @@ def IPEDScheck(myYear): #look up colleges in the list in myYear's ipeds list and
 			curSelectivity = -3  #we haven't done this yet
 			curColData = CollegeData(colName, curBachFlag, curControl, curSelectivity)
 			collegeDataLookup[unitID] = curColData
-			#print collegeDataLookup[unitID]
 		if (opeid not in OPEIDcrosswalkLookup): #update OPEID crosswalk
 			OPEIDcrosswalkLookup[opeid]= unitID
 	curIPEDS.close()
