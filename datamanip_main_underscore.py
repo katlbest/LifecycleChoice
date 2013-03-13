@@ -74,8 +74,8 @@ def collegeListSetup(): #extract list of colleges people have attended
 		if COLLEGE_SCHOOLID > 999999:
 			COLLEGE_SCHOOLID = COLLEGE_SCHOOLID/100 #adjust for unncessary trailing zeros in some cases
 		missedCollegeList.append(str(COLLEGE_SCHOOLID))
-		COMPILED_APPLY = varList[4]
-		COMPILED_ADMIT = varList[5]
+		COMPILED_APPLY = varList[5]
+		COMPILED_ADMIT = varList[6]
 		applyVector = COMPILED_APPLY.split(',')
 		admitVector = COMPILED_ADMIT.split(',')
 		for i in range(0,len(applyVector)-1):
@@ -84,15 +84,12 @@ def collegeListSetup(): #extract list of colleges people have attended
 			if applyVector[i] > 999999:
 				applyVector[i] = applyVector[i]/100
 			missedCollegeList.append(str(applyVector[i]))
-		for i in range(0,len(admitVector)-1):
-			admitVector[i] = admitVector[i].replace('"','')
-			try:
-				admitVector[i] = int(admitVector[i])
-			except:
-				print "error: " + admitVector[i]
-			if admitVector[i] > 999999:
-				admitVector[i] = admitVector[i]/100	
-			missedCollegeList.append(str(admitVector[i]))
+		#for i in range(0,len(admitVector)-1):
+		#	admitVector[i] = admitVector[i].replace('"','')
+		#	admitVector[i] = int(admitVector[i])
+		#	if admitVector[i] > 999999:
+		#		admitVector[i] = admitVector[i]/100	
+		#	missedCollegeList.append(str(admitVector[i]))
 	vectorList.close()
 	#clean up college list
 	#print "Total number of unique IDs: " + str(len(missedCollegeList))
@@ -251,6 +248,38 @@ def checkMissings():
 				print "0" + "\t"+ str(i) + "\t" + str(collegeDataLookup[i])
 		else:
 			print "Not found"
+
+def setupIndividualData():
+	vectorList = open('D:/compiledcollegelist.txt', 'r')
+	lines = vectorList.readlines()
+	for line in lines[1:]:
+	#for line in vectorList:
+		#read in variables
+		varList = line.split('\t')
+		PUBID_1997 = int(varList[1])
+		COLLEGEGOER_FLAG = int(varList[2])
+		COLLEGE_SCHOOLID = int(varList[3])
+		if COLLEGE_SCHOOLID > 999999:
+			COLLEGE_SCHOOLID = COLLEGE_SCHOOLID/100 #adjust for unncessary trailing zeros in some cases
+		missedCollegeList.append(str(COLLEGE_SCHOOLID))
+		COMPILED_APPLY = varList[4]
+		COMPILED_ADMIT = varList[5]
+		applyVector = COMPILED_APPLY.split(',')
+		admitVector = COMPILED_ADMIT.split(',')
+		for i in range(0,len(applyVector)-1):
+			applyVector[i] = applyVector[i].replace('"','')
+			applyVector[i] = int(applyVector[i])
+			if applyVector[i] > 999999:
+				applyVector[i] = applyVector[i]/100
+			missedCollegeList.append(str(applyVector[i]))
+		for i in range(0,len(admitVector)-1):
+			admitVector[i] = admitVector[i].replace('"','')
+			admitVector[i] = int(admitVector[i])
+			if admitVector[i] > 999999:
+				admitVector[i] = admitVector[i]/100	
+			missedCollegeList.append(str(admitVector[i]))
+	vectorList.close()
+
 
 if __name__ == '__main__':
 	main()
