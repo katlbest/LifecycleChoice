@@ -116,10 +116,10 @@ def IPEDScheck(myYear): #look up colleges in the list in myYear's ipeds list and
 			collegeListCopy.append(missedCollegeList[i])
 			missedCollegeListCopy.remove(missedCollegeList[i])
 		elif (missedCollegeList[i]) in OPEIDcrosswalkLookup: #try to ID missed colleges by OPEID
-			print "code 1: found college by OPEID lookup in year " + str(myYear) #this happens once
+			print "code 1: found college by OPEID lookup in year " + str(myYear) + ", " + missedCollegeList[i] #this happens once
 			collegeListCopy.append(OPEIDcrosswalkLookup[missedCollegeList[i]])
 			missedCollegeListCopy.remove(missedCollegeList[i])
-			collegeDataLookup[missedCollegeList[i]] = collegeDataLookup[OPEIDcrosswalkLookup[missedCollegeList[i]]]
+			collegeDataLookup[int(missedCollegeList[i])] = collegeDataLookup[OPEIDcrosswalkLookup[missedCollegeList[i]]]
 			#but the selectivity data probably gets lost
 	missedCollegeList = missedCollegeListCopy
 	collegeList = collegeListCopy
@@ -148,10 +148,10 @@ def FICEcheck(): #use FICE crosswalk to try to fill in missing information
 	collegeListCopy = list(collegeList)
 	for i in range(len(missedCollegeList)):
 		if (missedCollegeList[i]) in crosswalkLookup:
-				print "code 2: found college by FICE check" #this doesn't happen
+				print "code 2: found college by FICE check, " + missedCollegeList[i] #this doesn't happen
 				collegeListCopy.append(crosswalkLookup[missedCollegeList[i]])
 				missedCollegeListCopy.remove(missedCollegeList[i])
-				collegeDataLookup[missedCollegeList[i]] = collegeDataLookup[crosswalkLookup[missedCollegeList[i]]]
+				collegeDataLookup[int(missedCollegeList[i])] = collegeDataLookup[crosswalkLookup[missedCollegeList[i]]]
 	missedCollegeList = missedCollegeListCopy
 	collegeList = collegeListCopy
 	collegeList = list(set(collegeList)) #de-dupe
@@ -286,10 +286,10 @@ def setupIndividualData():
 		else:
 			curMaxAttend = -3
 			curControlAttend = -3
-		for i in admitLookup:
-			curMaxAdmit = min(collegeDataLookup[i].selectivity, curMaxAdmit)
-		curStudentData = StudentData(PUBID_1997, curMaxAttend, curMaxAdmit, curControlAttend)
-		studentDataLookup[PUBID_1997] = curStudentData
+		#for i in admitLookup:
+	#		curMaxAdmit = min(collegeDataLookup[i].selectivity, curMaxAdmit)
+	#	curStudentData = StudentData(PUBID_1997, curMaxAttend, curMaxAdmit, curControlAttend)
+	#	studentDataLookup[PUBID_1997] = curStudentData
 	vectorList.close()
 
 if __name__ == '__main__':
