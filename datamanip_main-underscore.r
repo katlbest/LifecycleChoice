@@ -236,6 +236,7 @@ COMPILED_DATA <-MERGED_DATA
     
   write.csv(COMPILED_DATA, file ="D:/COMPILED_DATA.csv")
 
+#I GUESS THIS PART FAILS IF YOU READ FROM FILE!
 #count total appliers===============================================================================================================
 COMPILED_DATA$APPLYER <- 0 #whether you applied
 for (i in 1:nrow(COMPILED_DATA)){
@@ -251,10 +252,10 @@ COMPILED_DATA$MISSING_ALL_UNRESTRICTED <- 0 #missing all indicator when using un
 COMPILED_DATA$MISSING_ATTENDED <- 0
 COMPILED_DATA$MISSING_ATTENDED_UNRESTRICTED <- 0
 for (i in 1:nrow(COMPILED_DATA)){
-  if (MERGED_DATA$COLLEGES_SCHOOLID2[i]>0){
+  if (COMPILED_DATA$COLLEGES_SCHOOLID2[i]>0){
     numApplyVect <- strsplit(COMPILED_DATA$COMPILED_APPLY[i], ",", fixed = FALSE, perl = FALSE, useBytes = FALSE)[[1]]
     numApplyAllVect <- strsplit(COMPILED_DATA$COMPILED_APPLYALL[i], ",", fixed = FALSE, perl = FALSE, useBytes = FALSE)[[1]]
-    curID <- MERGED_DATA$COLLEGES_SCHOOLID2[i]
+    curID <- COMPILED_DATA$COLLEGES_SCHOOLID2[i]
     if (length(numApplyVect) < 1){
       COMPILED_DATA$MISSING_ALL[i] = 1
     } else if (!(curID %in% numApplyVect)) {
@@ -267,6 +268,8 @@ for (i in 1:nrow(COMPILED_DATA)){
     }
     }
 }
+
+write.csv(COMPILED_DATA, file = "D:/compiled_data.csv")
 
 MISSING_ALL_DATA <- COMPILED_DATA[COMPILED_DATA$MISSING_ALL ==1,] #56 infividuals are missing all data
 dim(MISSING_ALL_DATA)
@@ -379,9 +382,13 @@ write.csv(MISSING_ATTENDED_UNRESTRICTED_CHECK, file = "D:/missing_attended_unres
 
 #ycoc-002: eligibility for YCOC section, want 1
 #ycoc-003A: ever applied to college or technical school
-#
 
 #delete those with no application data===============================================================================
 COMPILED_DATA_APPSONLY <- COMPILED_DATA[COMPILED_DATA$APPLYER ==1,]
 dim(COMPILED_DATA_APPSONLY)
 write.csv(COMPILED_DATA_APPSONLY, file = "D:/COMPILED_DATA_APPLYER.csv")
+
+
+#getting the application info for the missings to check for trailing zero issue
+#myList = c(15,35,40,158,180,221,245,286,300,305,396,459,472,548,555,561,562,632,633,638,650,827,853,865,878,911,916,917,929,936,948,950,957,969,988,989,1007,1013,1086,1114,1119,1243,1478,1483,1486,1590,1617,1656,1781,1812,1883,1885,1904,1969,2025,2055,2090,2109,2298,2338,2344,2467,2472,2537,2557,2563,2683,2756,2818,2877,2898,2951,3068,3107,3210,3211,3229,3245,3341,3378,3408,3456,3469,3683,3684,3703,3712,3771,3843,3847,3866,3898,3960,4013,4017,4047,4217,4239,4278,4300,4372,4375,4407,4437,4448,4458,4525,4599,4642,4702,4763,4885,4983,4994,5030,5151,5238,5268,5309,5381,5442,5446,5474,5478,5646,5702,5714,5733,5794,5855,5898,6048,6075,6133,6135,6164,6262,6263,6279,6375,6385,6429,6453,6458,6461,6493,6555,8796,8870,8909,8919)
+#COMPILED_DATA[COMPILED_DATA$PUBID_1997 %in% myList,]$COMPILED_APPLYALL
