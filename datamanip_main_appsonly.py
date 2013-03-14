@@ -15,8 +15,8 @@ studentLookup = {} #Lookup table for personal information by PUBID_1997
 
 #define classes========================================================================================
 class CollegeData: #class storing college data
-	def __init__(self, colName, bachFlag, control, selectivity):
-		self.colName, self.bachFlag, self.control, self.selectivity = colName, bachFlag, control, selectivity
+	def __init__(self, colName, bachFlag, control, selectivity, sat25, sat75, admitperc):
+		self.colName, self.bachFlag, self.control, self.selectivity, self.sat25, self.sat75, self.admitperc = colName, bachFlag, control, selectivity, sat25, sat75, admitperc
 
 	def __str__(self):
 		return str(self.colName) + "\t" + str(self.bachFlag) + "\t" + str(self.control) +  "\t" + str(self.selectivity)
@@ -56,7 +56,16 @@ def main():
 	deleteNonCollege()
 
 	#print college lists for future use
-	printCollegeList()
+	printCollegeList()	
+
+	#pull data needed to fill int missing selectivity (and possibly other data in the future)
+	populateCollegeData(2004)
+	#populateCollegeData(2006)
+	#populateCollegeData(2005)
+	#populateCollegeData(2003)
+	#populateCollegeData(2002)
+	#populateCollegeData(2001)
+	#populateCollegeData(2011)
 
 	#check whether there is anything different about the schools for which people have missing data
 	#checkMissings()
@@ -108,16 +117,20 @@ def IPEDScheck(myYear): #look up colleges in the list in myYear's ipeds list and
 		opeid = varList[15]
 		curBachFlag = varList[19]
 		curControl = varList[20]
+		#TBD setup read-in of these relevant variables, probabaly as separate function
+		curSat25 = -3
+		curSat75 = -3
+		curAdmitperc = -3
 		if unitID not in collegeDataLookup: #update current known IPED IDs#
 			curSelectivity = -3  #we haven't done this yet
-			curColData = CollegeData(colName, curBachFlag, curControl, curSelectivity)
+			curColData = CollegeData(colName, curBachFlag, curControl, curSelectivity, curSat25, curSat75, curAdmitperc)
 			collegeDataLookup[unitID] = curColData
 		if (opeid not in OPEIDcrosswalkLookup): #update OPEID crosswalk
 			OPEIDcrosswalkLookup[opeid]= unitID
 	curIPEDS.close()
 	missedCollegeListCopy = list(missedCollegeList)
 	collegeListCopy = list(collegeList)
-	for i in range(len(missedCollegeList)): #try to ID missed colleges by IPEDS
+	for i in range(len(missedCollegeList)): #try to ID missed colleges by OPEID
 		if (missedCollegeList[i]) in collegeDataLookup:
 			collegeListCopy.append(missedCollegeList[i])
 			missedCollegeListCopy.remove(missedCollegeList[i])
@@ -179,11 +192,69 @@ def BarronsSetup(): #lookup for Barron's selectivity
 			collegeDataLookup[unitID].selectivity = curSelectivity
 	barronsFile2.close()
 
+def populateCollegeData(myYear):
+	outstr= "SCHOOL_ID" + "\t" + "SAT 25 Perc."+ "\t" +"SAT 75 Perc."+ "\t" + "Admit percentage" + "\t" + "Needs Data Flag"+ "\n"
+	open("C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/findSelect.txt","wb").write(outstr)
+	global collegeList
+	global missedCollegeList
+	global OPEIDcrosswalkLookup
+	global collegeDataLookup
+	curIPEDS = open('C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/ic' + str(myYear) + '.txt', 'rb')
+	linecount = 1
+	stringList = ['satmt25', 'satmt75', 'satvr25', 'satvr75', 'actcm25', 'actcm75', 'acten25', 'acten75', 'applcn', 'admssn']
+	indexVector = [0]*len(stringList)
+	for line in curIPEDS.readlines():
+		#find index for each item we want
+		if linecount ==1:
+			linecount = linecount+1
+			varNameList = line.split('\t')
+			for i in range(0,len(varNameList)):
+				j = 0
+				while j < len(stringList):
+					if varNameList[i] == stringList[j]:
+						indexVector[j] = i
+						j = len(stringList)
+					else: 
+						j = j+1
+			#print indexVector
+		#get info on each school
+		else:
+			varList = line.split('\t')
+			unitID = varList[0]
+			varVector = [0]*len(stringList)
+			for i in range(0,len(varVector)):
+				if varList[indexVector[i]] == "":
+					varVector[i]= 0
+				else:
+					varVector[i] = int(varList[indexVector[i]])
+			curCollege = collegeDataLookup[unitID]
+			if curCollege.sat25 == -3:
+				if varVector[0] >0: #have SAT scores
+					curCollege.sat25 = varVector[0]+ varVector[2]
+				elif varVector[4] >0: #have ACT scores
+					curCollege.sat25 = 41.084*(varVector[4]+varVector[6]) +116.45
+			if curCollege.sat75 == -3:
+				if varVector[1] >0: #have SAT scores
+					curCollege.sat25 = varVector[1]+ varVector[3]
+				elif varVector[5] >0: #have ACT scores
+					curCollege.sat75 = 41.084*(varVector[5]+varVector[7]) +116.45
+				#print str(unitID)+ ","  + str(collegeDataLookup[unitID].sat75)
+			if curCollege.admitperc == -3:
+				if varVector[8]>0 and varVector[9]>0:
+					curCollege.admitperc = float(float(varVector[9])/float(varVector[8]))
+			if str(unitID) in missedSelectivityList:
+				needsSelect =1
+			else:
+				needsSelect = 0
+			outstr = str(unitID)+ "\t" + str(curCollege.sat25)+ "\t" +str(curCollege.sat75)+ "\t" +str(curCollege.admitperc) + "\t" +str(needsSelect) + "\n"
+			open("C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/findSelect.txt","a").write(outstr)
+	curIPEDS.close()
+
 def printCollegeList():	
 	global collegeList
 	global missedCollegeList
 	global missedSelectivityList
-	global c
+	global collegeDataLookup
 	for i in collegeList:
 		if collegeDataLookup[i].selectivity == -3: #update selectivity list so that only the 4-year schools are counted
 			missedSelectivityList.append(i)
@@ -354,7 +425,7 @@ def setupIndividualData():
 	print "Total number of applicants for whom some admission data is missing: " + str(missingAdmitCount)
 	print "Total number of applicants who have some admission information: " + str(applierWithAdmitCount)
 	print "Total number of attenders at 4-year IPEDS universities: " + str(attenderCount)
-	
+
 if __name__ == '__main__':
 	main()
 
