@@ -216,7 +216,7 @@ def populateCollegeData(myYear):
 				j = 0
 				while j < len(stringList):
 					if varNameList[i] == stringList[j]:
-						print "found "+ str(j) + "," + str(myYear)
+						#print "found "+ str(j) + "," + str(myYear)
 						indexVector[j] = i
 						j = len(stringList)
 					else: 
@@ -247,13 +247,21 @@ def populateCollegeData(myYear):
 			if curCollege.admitperc == -3:
 				if varVector[8]>0 and varVector[9]>0:
 					curCollege.admitperc = float(float(varVector[9])/float(varVector[8]))
-			if str(unitID) in missedSelectivityList:
-				needsSelect =1
+		curIPEDS.close()
+		#write to output file
+		for i in collegeList:
+			if i in collegeDataLookup:
+				print "yes:" + str(i)
+				#curCollege = collegeDataLookup[i]
+				#if str(i) in missedSelectivityList:
+				#	needsSelect = 1
+				#else:
+				#	needsSelect = 0
+				#outstr = str(i)+ "\t" + str(curCollege.sat25)+ "\t" +str(curCollege.sat75)+ "\t" +str(curCollege.admitperc)+ "\t" +str(curCollege.selectivity) + "\t" +str(needsSelect) + "\n"
+				#open("C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/findSelect.txt","a").write(outstr)
 			else:
-				needsSelect = 0
-			outstr = str(unitID)+ "\t" + str(curCollege.sat25)+ "\t" +str(curCollege.sat75)+ "\t" +str(curCollege.admitperc)+ "\t" +str(curCollege.selectivity) + "\t" +str(needsSelect) + "\n"
-			open("C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/findSelect.txt","a").write(outstr)
-	curIPEDS.close()
+				print "no"+str(i)
+
 
 def printCollegeList():	
 	global collegeList
