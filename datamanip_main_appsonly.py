@@ -60,12 +60,12 @@ def main():
 
 	#pull data needed to fill int missing selectivity (and possibly other data in the future)
 	populateCollegeData(2004)
-	#populateCollegeData(2006)
-	#populateCollegeData(2005)
-	#populateCollegeData(2003)
-	#populateCollegeData(2002)
-	#populateCollegeData(2001)
-	#populateCollegeData(2011)
+	populateCollegeData(2006)
+	populateCollegeData(2005)
+	populateCollegeData(2003)
+	populateCollegeData(2002)
+	populateCollegeData(2001)
+	populateCollegeData(2011)
 
 	#check whether there is anything different about the schools for which people have missing data
 	#checkMissings()
@@ -193,15 +193,19 @@ def BarronsSetup(): #lookup for Barron's selectivity
 	barronsFile2.close()
 
 def populateCollegeData(myYear):
-	outstr= "SCHOOL_ID" + "\t" + "SAT 25 Perc."+ "\t" +"SAT 75 Perc."+ "\t" + "Admit percentage" + "\t" +"Selectivity"+ "\t" + "Needs Data Flag"+ "\n"
-	open("C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/findSelect.txt","wb").write(outstr)
+	if myYear == 2004:
+		outstr= "SCHOOL_ID" + "\t" + "SAT 25 Perc."+ "\t" +"SAT 75 Perc."+ "\t" + "Admit percentage" + "\t" +"Selectivity"+ "\t" + "Needs Data Flag"+ "\n"
+		open("C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/findSelect.txt","wb").write(outstr)
 	global collegeList
 	global missedCollegeList
 	global OPEIDcrosswalkLookup
 	global collegeDataLookup
 	curIPEDS = open('C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/ic' + str(myYear) + '.txt', 'rb')
 	linecount = 1
-	stringList = ['satmt25', 'satmt75', 'satvr25', 'satvr75', 'actcm25', 'actcm75', 'acten25', 'acten75', 'applcn', 'admssn']
+	if myYear == 2011:
+		stringList = ['SATMT25', 'SATMT75', 'SATVR25', 'SATVR75', 'ACTCM25', 'ACTCM75', 'ACTEN25', 'ACTEN75', 'APPLCN', 'ADMSSN']
+	else:
+		stringList = ['satmt25', 'satmt75', 'satvr25', 'satvr75', 'actcm25', 'actcm75', 'acten25', 'acten75', 'applcn', 'admssn']
 	indexVector = [0]*len(stringList)
 	for line in curIPEDS.readlines():
 		#find index for each item we want
@@ -212,6 +216,7 @@ def populateCollegeData(myYear):
 				j = 0
 				while j < len(stringList):
 					if varNameList[i] == stringList[j]:
+						print "found "+ str(j) + "," + str(myYear)
 						indexVector[j] = i
 						j = len(stringList)
 					else: 
@@ -223,7 +228,7 @@ def populateCollegeData(myYear):
 			unitID = varList[0]
 			varVector = [0]*len(stringList)
 			for i in range(0,len(varVector)):
-				if varList[indexVector[i]] == "":
+				if varList[indexVector[i]] == "" or varList[indexVector[i]] == ".":
 					varVector[i]= 0
 				else:
 					varVector[i] = int(varList[indexVector[i]])
