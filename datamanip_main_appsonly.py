@@ -193,7 +193,7 @@ def BarronsSetup(): #lookup for Barron's selectivity
 	barronsFile2.close()
 
 def populateCollegeData(myYear):
-	outstr= "SCHOOL_ID" + "\t" + "SAT 25 Perc."+ "\t" +"SAT 75 Perc."+ "\t" + "Admit percentage" + "\t" + "Needs Data Flag"+ "\n"
+	outstr= "SCHOOL_ID" + "\t" + "SAT 25 Perc."+ "\t" +"SAT 75 Perc."+ "\t" + "Admit percentage" + "\t" +"Selectivity"+ "\t" + "Needs Data Flag"+ "\n"
 	open("C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/findSelect.txt","wb").write(outstr)
 	global collegeList
 	global missedCollegeList
@@ -235,7 +235,7 @@ def populateCollegeData(myYear):
 					curCollege.sat25 = 41.084*(varVector[4]+varVector[6]) +116.45
 			if curCollege.sat75 == -3:
 				if varVector[1] >0: #have SAT scores
-					curCollege.sat25 = varVector[1]+ varVector[3]
+					curCollege.sat75 = varVector[1]+ varVector[3]
 				elif varVector[5] >0: #have ACT scores
 					curCollege.sat75 = 41.084*(varVector[5]+varVector[7]) +116.45
 				#print str(unitID)+ ","  + str(collegeDataLookup[unitID].sat75)
@@ -246,7 +246,7 @@ def populateCollegeData(myYear):
 				needsSelect =1
 			else:
 				needsSelect = 0
-			outstr = str(unitID)+ "\t" + str(curCollege.sat25)+ "\t" +str(curCollege.sat75)+ "\t" +str(curCollege.admitperc) + "\t" +str(needsSelect) + "\n"
+			outstr = str(unitID)+ "\t" + str(curCollege.sat25)+ "\t" +str(curCollege.sat75)+ "\t" +str(curCollege.admitperc)+ "\t" +str(curCollege.selectivity) + "\t" +str(needsSelect) + "\n"
 			open("C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/findSelect.txt","a").write(outstr)
 	curIPEDS.close()
 
