@@ -15,8 +15,8 @@ studentLookup = {} #Lookup table for personal information by PUBID_1997
 
 #define classes========================================================================================
 class CollegeData: #class storing college data
-	def __init__(self, colName, bachFlag, control, selectivity, sat25, sat75, admitperc):
-		self.colName, self.bachFlag, self.control, self.selectivity, self.sat25, self.sat75, self.admitperc = colName, bachFlag, control, selectivity, sat25, sat75, admitperc
+	def __init__(self, colName, bachFlag, control, selectivity, sat25, sat75, admitperc, carnegie):
+		self.colName, self.bachFlag, self.control, self.selectivity, self.sat25, self.sat75, self.admitperc, self.carnegie = colName, bachFlag, control, selectivity, sat25, sat75, admitperc, carnegie
 
 	def __str__(self):
 		return str(self.colName) + "\t" + str(self.bachFlag) + "\t" + str(self.control) +  "\t" + str(self.selectivity)
@@ -66,6 +66,7 @@ def main():
 	populateCollegeData(2002)
 	populateCollegeData(2001)
 	populateCollegeData(2011)
+	writeMissingSelect()
 
 	#check whether there is anything different about the schools for which people have missing data
 	#checkMissings()
@@ -121,9 +122,15 @@ def IPEDScheck(myYear): #look up colleges in the list in myYear's ipeds list and
 		curSat25 = -3
 		curSat75 = -3
 		curAdmitperc = -3
+		if myYear < 2005:
+			curCarnegie = varList[36]
+		elif myYear <2007:
+			curCarnegie = varList[49]
+		else:
+			curCarnegie = -3
 		if unitID not in collegeDataLookup: #update current known IPED IDs#
 			curSelectivity = -3  #we haven't done this yet
-			curColData = CollegeData(colName, curBachFlag, curControl, curSelectivity, curSat25, curSat75, curAdmitperc)
+			curColData = CollegeData(colName, curBachFlag, curControl, curSelectivity, curSat25, curSat75, curAdmitperc, curCarnegie)
 			collegeDataLookup[unitID] = curColData
 		if (opeid not in OPEIDcrosswalkLookup): #update OPEID crosswalk
 			OPEIDcrosswalkLookup[opeid]= unitID
@@ -193,9 +200,6 @@ def BarronsSetup(): #lookup for Barron's selectivity
 	barronsFile2.close()
 
 def populateCollegeData(myYear):
-	if myYear == 2004:
-		outstr= "SCHOOL_ID" + "\t" + "SAT 25 Perc."+ "\t" +"SAT 75 Perc."+ "\t" + "Admit percentage" + "\t" +"Selectivity"+ "\t" + "Needs Data Flag"+ "\n"
-		open("C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/findSelect.txt","wb").write(outstr)
 	global collegeList
 	global missedCollegeList
 	global OPEIDcrosswalkLookup
@@ -248,20 +252,23 @@ def populateCollegeData(myYear):
 				if varVector[8]>0 and varVector[9]>0:
 					curCollege.admitperc = float(float(varVector[9])/float(varVector[8]))
 		curIPEDS.close()
-		#write to output file
-		for i in collegeList:
-			if i in collegeDataLookup:
-				print "yes:" + str(i)
-				#curCollege = collegeDataLookup[i]
-				#if str(i) in missedSelectivityList:
-				#	needsSelect = 1
-				#else:
-				#	needsSelect = 0
-				#outstr = str(i)+ "\t" + str(curCollege.sat25)+ "\t" +str(curCollege.sat75)+ "\t" +str(curCollege.admitperc)+ "\t" +str(curCollege.selectivity) + "\t" +str(needsSelect) + "\n"
-				#open("C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/findSelect.txt","a").write(outstr)
-			else:
-				print "no"+str(i)
 
+
+def writeMissingSelect():
+#write to output file
+	outstr= "SCHOOL_ID" + "\t" + "SAT 25 Perc."+ "\t" +"SAT 75 Perc."+ "\t" + "Admit percentage" + "\t" +"Selectivity"+ "\t" +"Carnegie class" + "\t"+ "Needs Data Flag" + "\n"
+	open("C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/findSelect.txt","wb").write(outstr)
+	for i in collegeList:
+		if i in collegeDataLookup:
+			curCollege = collegeDataLookup[i]
+			if str(i) in missedSelectivityList:
+				needsSelect = 1
+			else:
+				needsSelect = 0
+			outstr = str(i)+ "\t" + str(curCollege.sat25)+ "\t" +str(curCollege.sat75)+ "\t" +str(curCollege.admitperc)+ "\t" +str(curCollege.selectivity) + "\t" + str(curCollege.carnegie) + "\t" + str(needsSelect) + "\n"
+			open("C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/findSelect.txt","a").write(outstr)
+		else:
+			print "no"+str(i)
 
 def printCollegeList():	
 	global collegeList
