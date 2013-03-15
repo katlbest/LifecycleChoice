@@ -10,6 +10,7 @@ missedSelectivityList = [] #list of schools among 4-year schools for which selec
 crosswalkLookup = {} #returns an IPEDS ID for a FICE number
 collegeDataLookup = {} #returns collegeData object for an IPEDS number
 OPEIDcrosswalkLookup = {} #returns an IPEDS ID for an OPEID number
+selectivityEstLookup = {} #returns selectivity estimate for IPEDS number
 #collegeDataLookup = {} #lookup table storing college info based on IPEDS number
 studentLookup = {} #Lookup table for personal information by PUBID_1997
 
@@ -52,24 +53,29 @@ def main():
 	FICEcrosswalkSetup() #set up lookup that returns an IPEDS ID for a FICE number
 	FICEcheck() #do replacement where applicable
 
-	#delete colleges from found list that do not indicate having 4-year data
-	deleteNonCollege()
-
 	#print college lists for future use
 	printCollegeList()	
 
+	#delete colleges from found list that do not indicate having 4-year data
+	deleteNonCollege()
+
 	#pull data needed to fill int missing selectivity (and possibly other data in the future)
-	populateCollegeData(2004)
-	populateCollegeData(2006)
-	populateCollegeData(2005)
-	populateCollegeData(2003)
-	populateCollegeData(2002)
-	populateCollegeData(2001)
-	populateCollegeData(2011)
-	writeMissingSelect()
+	#we only need this for the selectivity regression, so do not run every time
+	#populateCollegeData(2004)
+	#populateCollegeData(2006)
+	#populateCollegeData(2005)
+	#populateCollegeData(2003)
+	#populateCollegeData(2002)
+	#populateCollegeData(2001)
+	#populateCollegeData(2011)
+	#writeMissingSelect()
 
 	#check whether there is anything different about the schools for which people have missing data
+	#we do not need to run this every time
 	#checkMissings()
+
+	#set up lookup for estimated selectivities
+	setupSelectivityEst()
 
 	#populate accepted and admitted set for each individual (must be correct school type)
 	setupIndividualData()
@@ -253,7 +259,6 @@ def populateCollegeData(myYear):
 					curCollege.admitperc = float(float(varVector[9])/float(varVector[8]))
 		curIPEDS.close()
 
-
 def writeMissingSelect():
 #write to output file
 	outstr= "SCHOOL_ID" + "\t" + "SAT 25 Perc."+ "\t" +"SAT 75 Perc."+ "\t" + "Admit percentage" + "\t" +"Selectivity"+ "\t" +"Carnegie class" + "\t"+ "Needs Data Flag" + "\n"
@@ -334,15 +339,28 @@ def checkMissings():
 		else:
 			print "Not found"
 
+def setupSelectivityEst():
+	global selectivityEstLookup
+	myFile = open('C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/selectest.txt', 'rb')
+	for line in myFile.readlines():
+		varList = line.split('\t')
+		unitID = int(varList[0])
+		selectEst = int(varList[1])
+		selectivityEstLookup[unitID]= selectEst
+	myFile.close()
+
 def setupIndividualData():
 	attenderCount = 0
 	applierCount = 0
 	applierWithAdmitCount = 0
 	missingAllAdmitCount = 0
 	missingAdmitCount = 0
+	noSelectCounter = 0
+	noSelectCounter2 = 0
 	global studentLookup
 	global collegeList
 	global collegeDataLookup
+	global selectivityEstLookup
 	vectorList = open('D:/compiledcollegelist.txt', 'r')
 	lines = vectorList.readlines()
 	outstr= "PUBID_1997" + "\t" + "Best Attended"+ "\t" +"Best Admitted"+ "\t" + "Attended control" + "\t" + "New Collegegoer Flag" + "\t" + "Old Collegegoer Flag" + "\n"
@@ -382,8 +400,6 @@ def setupIndividualData():
 				#if you attended you were definitely admitted
 				if applyVector[i] == COLLEGE_SCHOOLID:
 					admitLookup[applyVector[i]] = 1
-				#if admitLookup[applyVector[i]] ==-3:
-				#	counter2 = counter2+1
 		#even if you did not apply, you were admitted where you attended
 		if ((COLLEGE_SCHOOLID > 0) & (str(COLLEGE_SCHOOLID) in collegeList) & (COLLEGE_SCHOOLID not in admitLookup)):
 			admitLookup[COLLEGE_SCHOOLID] = 1
@@ -420,6 +436,9 @@ def setupIndividualData():
 			attenderCount = attenderCount +1
 			attenderFlag = 1
 			curMaxAttend = collegeDataLookup[str(COLLEGE_SCHOOLID)].selectivity
+			if curMaxAttend <0:
+				if COLLEGE_SCHOOLID in selectivityEstLookup: #use estimate if you dont have a selectivity for this person
+					curMaxAttend = selectivityEstLookup[COLLEGE_SCHOOLID]
 			curControlAttend = collegeDataLookup[str(COLLEGE_SCHOOLID)].control
 		else:
 			curMaxAttend = -3
@@ -430,22 +449,35 @@ def setupIndividualData():
 		curMaxAdmit = 100
 		for i in admitLookup:
 			if int(collegeDataLookup[str(i)].selectivity) > 0: #since 7 is the highest possible number, you get "specialty" value only if that is the only place you applied
-				if int(collegeDataLookup[str(i)].selectivity) > 0:
-					curMaxAdmit = min(int(collegeDataLookup[str(i)].selectivity), curMaxAdmit)
+				curMaxAdmit = min(int(collegeDataLookup[str(i)].selectivity), curMaxAdmit)
+		if curMaxAdmit == 100:
+			if COLLEGE_SCHOOLID in selectivityEstLookup:
+				for i in admitLookup:
+					curMaxAdmit = min(selectivityEstLookup[i], curMaxAdmit)
+		if curMaxAdmit == 100:
+			curMaxAdmit = curMaxAttend
+		#populate curStudentData
 		curStudentData = StudentData(PUBID_1997, curMaxAttend, curMaxAdmit, curControlAttend)
 		studentLookup[PUBID_1997] = curStudentData
 		#print if you are an applicant
 		#if applierFlag ==1: #this implies you applied to a school; we only care about those who are admitted to at least one college
 		if applierWithAdmitFlag ==1:
-			outstr= str(curStudentData)  +  "\t" + str(attenderFlag) + "\t" + str(COLLEGEGOER_FLAG)+ "\n"
-			open("C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/studentdata2.txt","a").write(outstr)
+			#if curMaxAdmit == -3 and curMaxAttend == -3:
+			if attenderFlag == 1  and curMaxAttend == -3:
+				noSelectCounter = noSelectCounter + 1
+			elif attenderFlag == 0  and curMaxAdmit== -3:
+				noSelectCounter2 = noSelectCounter2 + 1
+			else:
+				outstr= str(curStudentData)  +  "\t" + str(attenderFlag) + "\t" + str(COLLEGEGOER_FLAG)+ "\n"
+				open("C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/studentdata2.txt","a").write(outstr)
 	vectorList.close()
 	print "Total number of applicants to 4-year IPEDS universities: " + str(applierCount)
 	print "Total number of applicants for whom all admission data is missing: " + str(missingAllAdmitCount)
 	print "Total number of applicants for whom some admission data is missing: " + str(missingAdmitCount)
 	print "Total number of applicants who have some admission information: " + str(applierWithAdmitCount)
 	print "Total number of attenders at 4-year IPEDS universities: " + str(attenderCount)
-
+	print "Total number of attenders without a max selectivity: " + str(noSelectCounter)
+	print "Total number of non-attendee applicants without a max selectivity: " + str(noSelectCounter2)
 if __name__ == '__main__':
 	main()
 
