@@ -405,3 +405,6 @@ write.table(PYTHON_OUT, file = "D:/compiledcollegelist-app.txt", sep = "\t") #th
 #fill in missing selectivity regression===============================================================================
 SELECT_DATA <- read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Ycoc/Rinputmissingselect.csv")
 testall <- lm(Selectivity ~ SAT_25+SAT_75+ADMIT_PER, data = SELECT_DATA)
+summary(testall)
+testsome <- lm(Selectivity ~ADMIT_PER, data = SELECT_DATA)
+summary(testsome)
