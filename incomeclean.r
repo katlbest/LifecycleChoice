@@ -24,7 +24,6 @@ INCOME_DATA$INC_2007 <- 0
 INCOME_DATA$INC_2008 <- 0
 INCOME_DATA$INC_2009 <- 0
 
-
 #functions=====================================================================
 getTotal <- function(data, indicator, mainvar, secondvar, clarify, lookupType) { #data frame, indicator var name, main var name, secondary var name, clarify var name or none
   totalVect <- rep(0, nrow(data))
@@ -125,4 +124,6 @@ for (i in 1:length(year_vect)){
   }
 }
 
+
+#write to file ========================================================================
 write.csv(INCOME_DATA, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/INCOME_DATA2.csv")
