@@ -43,13 +43,17 @@ getTotal <- function(data, indicator, mainvar, secondvar, clarify, lookupType) {
       else if(data[j, secondvar] > 0){
         totalVect[j]= lookupCategory(lookupType, data[j, secondvar])
       }
-    }
-    if (realIndicator==-1 | realIndicator == -2 | realIndicator == -5){ #when this is used, we check that no one refused or don't know for income variable indicator
-      if (lookupType ==1){ 
-        totalVect[j]= -100000000 #very negativenumber so it doesn't become positive
-        print(paste("Missing data in", toString(j),year_vect[i],sep = ",")) #this doesn't happen, no unjustified skip values
-      }
-    }
+     #else if (lookupType ==1){ #we don't use this check
+      #totalVect[j]= -100000000 #very negativenumber so it doesn't become positive
+      #print("yes")
+    #}
+  }
+    #if (realIndicator==-1 | realIndicator == -2 | realIndicator == -5){ #when this is used, we check that no one refused or don't know for income variable indicator
+     # if (lookupType ==1){ 
+      #  totalVect[j]= -100000000 #very negativenumber so it doesn't become positive
+       # print(paste("Missing data in", toString(j),year_vect[i],sep = ",")) #this doesn't happen, no unjustified skip values
+      #}
+    #}
   }
   invisible(return(totalVect))
 }
@@ -108,8 +112,8 @@ for (i in 1:length(year_vect)){
   farmMain = paste("YINC_2100_", year_vect[i], sep = "") 
   farmSecond =paste("YINC_2200_", year_vect[i], sep = "") 
   farmClarify = paste("YINC_2000_", year_vect[i], sep = "") 
-  farm_cur = getTotal(INCOME_DATA,farmIndicator, farmMain, farmSecond, farmClarify, 1)
   
+  farm_cur = getTotal(INCOME_DATA,farmIndicator, farmMain, farmSecond, farmClarify, 1)
   #other
   ssIndicator =paste("YINC_7600_", year_vect[i], sep = "") 
   ssMain = paste("YINC_7700_", year_vect[i], sep = "") #i forgot these
