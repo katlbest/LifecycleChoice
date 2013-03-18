@@ -198,3 +198,15 @@ for (i in 1:nrow(INCOME_DATA2)){
   }
 }
 
+#populate categories=======================================================================
+admit_cats <- c('1','2', '3', '4', '5', '6', '7')
+apply_cats <- c('-3','1','2', '3', '4', '5', '6', '7')
+cat_vector <- rep(NA, length(admit_cats)*length(apply_cats))
+k = 1
+for (i in 1:length(admit_cats)){
+  for (j in 1:length(apply_cats)){
+    cat_vector[k]= paste(admit_cats[i],apply_cats[j], sep = "")
+    k = k+1
+  }
+}
+
