@@ -141,6 +141,37 @@ for (i in 1:length(year_vect)){
   }
 }
 
-
 #write to file ========================================================================
 write.csv(INCOME_DATA, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/INCOME_DATA2.csv")
+
+#read in categorical data =======================================================================
+INCOME_DATA2 <- read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/INCOME_DATA2input.csv")
+INCOME_DATA2$START_YEAR <- 0
+INCOME_DATA2$y1 <- 0
+INCOME_DATA2$y2 <- 0
+INCOME_DATA2$y3 <- 0
+INCOME_DATA2$y4 <- 0
+INCOME_DATA2$y5 <- 0
+INCOME_DATA2$y6 <- 0
+INCOME_DATA2$y7 <- 0
+INCOME_DATA2$y8 <- 0
+
+#if not an attender, first year of earning is choice year plus 1
+INCOME_DATA2[INCOME_DATA2$Best.Attended == -3,]$START_YEAR <- INCOME_DATA2[INCOME_DATA2$Best.Attended == -3,]$CHOICE_YEAR +1 
+#otherwise, it is school ID year
+INCOME_DATA2[INCOME_DATA2$Best.Attended != -3,]$START_YEAR <- INCOME_DATA2[INCOME_DATA2$Best.Attended != -3,]$COLLEGEID_YEAR2 +1
+
+for (i in 1:nrow(INCOME_DATA2)){
+  curStr = paste('INC_',toString(INCOME_DATA2$START_YEAR[i]),'b',sep = "")
+  colIndex = grep(curStr, colnames(INCOME_DATA2))
+  for (j in 0:7){
+    if (colIndex + j <= dim(INCOME_DATA2)[2]){
+      INCOME_DATA2[i,42+j] <- INCOME_DATA2[i, colIndex + j]
+    }
+    else {
+      INCOME_DATA2[i,42+j] <- -3
+    }
+  }
+}
+
+write.csv(INCOME_DATA2, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/incomeadjusted.csv")
