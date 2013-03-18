@@ -27,19 +27,25 @@ INCOME_DATA$INC_2009 <- 0
 #functions=====================================================================
 getTotal <- function(data, indicator, mainvar, secondvar, clarify, lookupType) { #data frame, indicator var name, main var name, secondary var name, clarify var name or none
   totalVect <- rep(0, nrow(data))
-  for (i in 1:nrow(data)){
+  for (j in 1:nrow(data)){
     #if indicator is positive
     if (clarify == "None"){#this means we dont have a clarifying question
-      realIndicator = data[i, indicator]
+      realIndicator = data[j, indicator]
     } else {
-        realIndicator = max(data[i, indicator],data[i, clarify])
+        realIndicator = max(data[j, indicator],data[j, clarify])
     }
     if (realIndicator == 1){#some income received
-      if (data[i, mainvar] > 0){
-        totalVect[i]= data[i, mainvar]
+      if (data[j, mainvar] > 0){
+        totalVect[j]= data[i, mainvar]
       }
-      else if(data[i, secondvar] > 0){
-        totalVect[i]= lookupCategory(lookupType, data[i, secondvar])
+      else if(data[j, secondvar] > 0){
+        totalVect[j]= lookupCategory(lookupType, data[j, secondvar])
+      }
+      else {
+        if lookupType ==1{ 
+          #totalVect[j]= -100000000 #very negativenumber so it doesn't become positive
+          print(paste("Missing data in", str(j),year_vect[i],sep = ",")
+        }
       }
     }
   }
@@ -89,11 +95,12 @@ for (i in 1:length(year_vect)){
   }
   
   #salary from two years ago
-  if (as.integer(year_vect[i])> 1998)
-  salTwoYearInd=paste("YINC_1400A_", year_vect[i], sep = "")
-  salTwoYearMain = paste("YINC_1700A_", year_vect[i], sep = "") 
-  salTwoYearSecond = paste("YINC_1800A_", year_vect[i], sep = "")
-  salary_twoyear = getTotal(INCOME_DATA, salTwoYearInd, salTwoYearMain, salTwoYearSecond, "None", 1)
+  if (as.integer(year_vect[i])> 1998){
+    salTwoYearInd=paste("YINC_1400A_", year_vect[i], sep = "")
+    salTwoYearMain = paste("YINC_1700A_", year_vect[i], sep = "") 
+    salTwoYearSecond = paste("YINC_1800A_", year_vect[i], sep = "")
+    salary_twoyear = getTotal(INCOME_DATA, salTwoYearInd, salTwoYearMain, salTwoYearSecond, "None", 1)
+  }
   
   #farm
   farmIndicator =paste("YINC_1900_", year_vect[i], sep = "") 
