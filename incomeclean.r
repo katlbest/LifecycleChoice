@@ -144,7 +144,7 @@ for (i in 1:length(year_vect)){
 #write to file ========================================================================
 write.csv(INCOME_DATA, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/INCOME_DATA2.csv")
 
-#read in categorical data =======================================================================
+#adjust timing of income data =======================================================================
 INCOME_DATA2 <- read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/INCOME_DATA2input.csv")
 INCOME_DATA2$START_YEAR <- 0
 INCOME_DATA2$y1 <- 0
@@ -164,14 +164,37 @@ INCOME_DATA2[INCOME_DATA2$Best.Attended != -3,]$START_YEAR <- INCOME_DATA2[INCOM
 for (i in 1:nrow(INCOME_DATA2)){
   curStr = paste('INC_',toString(INCOME_DATA2$START_YEAR[i]),'b',sep = "")
   colIndex = grep(curStr, colnames(INCOME_DATA2))
+  startYs = grep("y1", colnames(INCOME_DATA2))
   for (j in 0:7){
     if (colIndex + j <= dim(INCOME_DATA2)[2]){
-      INCOME_DATA2[i,42+j] <- INCOME_DATA2[i, colIndex + j]
+      INCOME_DATA2[i,startYs+j] <- INCOME_DATA2[i, colIndex + j]
     }
     else {
-      INCOME_DATA2[i,42+j] <- -3
+      INCOME_DATA2[i,startYs+j] <- -3
+    }
+  }
+}
+write.csv(INCOME_DATA2, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/incomeadjusted.csv")
+
+#calculate growth rates=======================================================================
+INCOME_DATA2$g1 <- 0
+INCOME_DATA2$g2 <- 0
+INCOME_DATA2$g3 <- 0
+INCOME_DATA2$g4 <- 0
+INCOME_DATA2$g5 <- 0
+INCOME_DATA2$g6 <- 0
+INCOME_DATA2$g7 <- 0
+
+for (i in 1:nrow(INCOME_DATA2)){
+  startYs = grep("y1", colnames(INCOME_DATA2))
+  startGs = grep("g1", colnames(INCOME_DATA2))
+  for (j in 0:6){
+    if (INCOME_DATA2[i,startYs+j] >0 & INCOME_DATA2[i,startYs+j+1] >0){
+      INCOME_DATA2[i,startGs+j]= INCOME_DATA2[i,startYs+j+1]/INCOME_DATA2[i,startYs+j]
+    }
+    else {
+      INCOME_DATA2[i,startGs+j]=-3
     }
   }
 }
 
-write.csv(INCOME_DATA2, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/incomeadjusted.csv")
