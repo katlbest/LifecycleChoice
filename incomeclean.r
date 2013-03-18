@@ -7,6 +7,8 @@ library(plyr)
 
 #data i/o=======================================================================
 INCOME_DATA <- read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/INCOME_DATA.csv")
+#store_data <- INCOME_DATA
+#INCOME_DATA<- INCOME_DATA[1,]
 
 #setup variables================================================================
 INCOME_DATA$INC_1996 <- 0
@@ -36,17 +38,16 @@ getTotal <- function(data, indicator, mainvar, secondvar, clarify, lookupType) {
     }
     if (realIndicator == 1){#some income received
       if (data[j, mainvar] > 0){
-        totalVect[j]= data[i, mainvar]
+        totalVect[j]= data[j, mainvar]
       }
       else if(data[j, secondvar] > 0){
         totalVect[j]= lookupCategory(lookupType, data[j, secondvar])
       }
-      if (realIndicator==-1 | realIndicator == -2 | realIndicator == -5){ #when this is used, we check that no one refused or don't know for income variable indicator
-      #else { #when this is used, we are checking to make sure no one has a missing value in the income variables when they indicated having income
-        if lookupType ==1{ 
-          #totalVect[j]= -100000000 #very negativenumber so it doesn't become positive
-          print(paste("Missing data in", str(j),year_vect[i],sep = ",")) #this doesn't happen, no unjustified skip values
-        }
+    }
+    if (realIndicator==-1 | realIndicator == -2 | realIndicator == -5){ #when this is used, we check that no one refused or don't know for income variable indicator
+      if (lookupType ==1){ 
+        totalVect[j]= -100000000 #very negativenumber so it doesn't become positive
+        print(paste("Missing data in", toString(j),year_vect[i],sep = ",")) #this doesn't happen, no unjustified skip values
       }
     }
   }
@@ -56,7 +57,7 @@ getTotal <- function(data, indicator, mainvar, secondvar, clarify, lookupType) {
 
 lookupCategory <- function(varType, curValue){ #varType 1 =  biggest range, 3 = smallers
   if (varType ==1){
-    lookupvect = c(2501, 7501, 17501, 37501, 75001, 175001, 300000)
+    lookupVect = c(2501, 7501, 17501, 37501, 75001, 175001, 300000)
   } else if (varType ==2){
     lookupVect = c(251, 751, 1751, 3751, 6251, 8751, 12000)
   } else if (varType == 3){
@@ -71,7 +72,6 @@ lookupCategory <- function(varType, curValue){ #varType 1 =  biggest range, 3 = 
   invisible(return(lookupVect[curValue]))
   }
 }
-  
 
 #populate incomes 1996==================================================================
 #syntax: data frame, indicator, main variable, secondary (refuser) variable, clarification question indicator or "None"
@@ -125,10 +125,15 @@ for (i in 1:length(year_vect)){
   
   outString = paste("INC_", toString(as.integer(year_vect[i])-1), sep = "") #store in last year's income variable
   INCOME_DATA[,outString]<- salary_cur + farm_cur + other_cur
+  #print(paste("salary",year_vect[i], salary_cur, sep = ","))
+  #print(paste("farm",year_vect[i], farm_cur, sep = ","))
+  #print(paste("other",year_vect[i], other_cur, sep = ","))
   
   if (as.integer(year_vect[i])> 1998){
     outString2 = paste("INC_", toString(as.integer(year_vect[i])-2), sep = "") #store in last year's income variable
-    INCOME_DATA[,outString2]<- INCOME_DATA[,outString2] + salary_twoyear
+    for (k in 1: nrow(INCOME_DATA)){
+      INCOME_DATA[k,outString2]<- max(0,INCOME_DATA[k,outString2]) + salary_twoyear[k]
+    }
   }
 }
 
