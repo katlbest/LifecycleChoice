@@ -93,7 +93,7 @@ for (i in 1:length(year_vect)){
   if (as.integer(year_vect[i])> 1998)
   salTwoYearInd=paste("YINC_1400A_", year_vect[i], sep = "")
   salTwoYearMain = paste("YINC_1700A_", year_vect[i], sep = "") 
-  SalTwoYearSecond = paste("YINC_1800A_", year_vect[i], sep = "")
+  salTwoYearSecond = paste("YINC_1800A_", year_vect[i], sep = "")
   salary_twoyear = getTotal(INCOME_DATA, salTwoYearInd, salTwoYearMain, salTwoYearSecond, "None", 1)
   
   #farm
@@ -117,9 +117,12 @@ for (i in 1:length(year_vect)){
   }
   
   outString = paste("INC_", toString(as.integer(year_vect[i])-1), sep = "") #store in last year's income variable
-  outString2 = paste("INC_", toString(as.integer(year_vect[i])-2), sep = "") #store in last year's income variable
   INCOME_DATA[,outString]<- salary_cur + farm_cur + other_cur
-  INCOME_DATA[,outString2]<- INCOME_DATA[,outString2] + salary_twoyear
+  
+  if (as.integer(year_vect[i])> 1998){
+    outString2 = paste("INC_", toString(as.integer(year_vect[i])-2), sep = "") #store in last year's income variable
+    INCOME_DATA[,outString2]<- INCOME_DATA[,outString2] + salary_twoyear
+  }
 }
 
 write.csv(INCOME_DATA, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/INCOME_DATA2.csv")
