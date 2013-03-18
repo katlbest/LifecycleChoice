@@ -41,10 +41,11 @@ getTotal <- function(data, indicator, mainvar, secondvar, clarify, lookupType) {
       else if(data[j, secondvar] > 0){
         totalVect[j]= lookupCategory(lookupType, data[j, secondvar])
       }
-      else {
+      if (realIndicator==-1 | realIndicator == -2 | realIndicator == -5){ #when this is used, we check that no one refused or don't know for income variable indicator
+      #else { #when this is used, we are checking to make sure no one has a missing value in the income variables when they indicated having income
         if lookupType ==1{ 
           #totalVect[j]= -100000000 #very negativenumber so it doesn't become positive
-          print(paste("Missing data in", str(j),year_vect[i],sep = ",")
+          print(paste("Missing data in", str(j),year_vect[i],sep = ",")) #this doesn't happen, no unjustified skip values
         }
       }
     }
