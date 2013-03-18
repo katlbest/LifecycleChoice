@@ -202,11 +202,35 @@ for (i in 1:nrow(INCOME_DATA2)){
 admit_cats <- c('1','2', '3', '4', '5', '6', '7')
 apply_cats <- c('-3','1','2', '3', '4', '5', '6', '7')
 cat_vector <- rep(NA, length(admit_cats)*length(apply_cats))
+pop_counter <- matrix(ncol = 7, nrow = length(admit_cats)*length(apply_cats))
+pop_counter[is.na(pop_counter)]<-0
+#pop_counter <- rep(rep(0,  length(admit_cats)*length(apply_cats)),7) #counts the number of people in each category
+sum_gamma <- matrix(ncol = 7, nrow = length(admit_cats)*length(apply_cats))
+sum_gamma[is.na(sum_gamma)] <- 0
+#to replace missing values: MERGED_DATA[MERGED_DATA < 0] <- NA
 k = 1
-for (i in 1:length(admit_cats)){
+for (i in 1:length(admit_cats)){#populate what will be the "lookup vector"
   for (j in 1:length(apply_cats)){
     cat_vector[k]= paste(admit_cats[i],apply_cats[j], sep = "")
     k = k+1
   }
 }
 
+startGs = grep("g1", colnames(INCOME_DATA2))
+for (i in 1:nrow(INCOME_DATA2)){
+  curCat = toString(paste(INCOME_DATA2$Best.Admitted[i],INCOME_DATA2$Best.Attended[i], sep = ""))
+  curIndex = match(curCat, cat_vector)
+  for (j in 0:6){
+    if (INCOME_DATA2[i,startGs+j] >0){
+      pop_counter[curIndex,j+1]= pop_counter[curIndex,j+1]+1
+      sum_gamma[curIndex,j+1] =sum_gamma[curIndex,j+1]+INCOME_DATA2[i,startGs+j]
+    }
+  }
+}
+
+avg_gamma <- matrix(ncol = 7, nrow = length(admit_cats)*length(apply_cats))
+avg_gamma[is.na(avg_gamma)] <- 0
+avg_gamma = sum_gamma/pop_counter
+
+write.csv(avg_gamma, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/avg_gamma.csv")
+write.csv(pop_counter, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/pop_counter.csv")
