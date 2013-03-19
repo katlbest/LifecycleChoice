@@ -62,7 +62,7 @@ def main():
 #function definitions==============================================================================================
 def collegeListSetup(): #extract list of colleges people have attended
 	global missedCollegeList
-	vectorList = open('C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/compiledcollegelist-new.txt', 'r')
+	vectorList = open('D:/compiledcollegelist.txt', 'r')
 	for line in vectorList.readlines():
 		#read in variables
 		varList = line.split('\t')

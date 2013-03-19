@@ -389,8 +389,8 @@ dim(COMPILED_DATA_APPSONLY)
 write.csv(COMPILED_DATA_APPSONLY, file = "D:/COMPILED_DATA_APPLYER.csv")
 
 #create applier-only output file for python college lookup==========================================================
-for (i in 1:nrow(COMPILED_DATA_APPSONLY)){
   COMPILED_DATA_APPSONLY$COMPILED_APPLY[i] <-toString(COMPILED_DATA_APPSONLY$COMPILED_APPLY[i])
+for (i in 1:nrow(COMPILED_DATA_APPSONLY)){
   COMPILED_DATA_APPSONLY$COMPILED_ADMIT[i] <-toString(COMPILED_DATA_APPSONLY$COMPILED_ADMIT[i])
 }
 PYTHON_OUT <- COMPILED_DATA_APPSONLY[,c('PUBID_1997','COLLEGE_GOER_FLAG','COLLEGES_SCHOOLID2','COMPILED_APPLY','COMPILED_APPLYALL','COMPILED_ADMIT')]
@@ -404,7 +404,18 @@ write.table(PYTHON_OUT, file = "D:/compiledcollegelist-app.txt", sep = "\t") #th
 
 #fill in missing selectivity regression===============================================================================
 SELECT_DATA <- read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Ycoc/Rinputmissingselect.csv")
-testall <- lm(Selectivity ~ SAT_25+SAT_75+ADMIT_PER, data = SELECT_DATA)
-summary(testall)
-testsome <- lm(Selectivity ~ADMIT_PER, data = SELECT_DATA)
-summary(testsome)
+testall <- lm(Selectivity ~ SAT_25+SAT_75+ADMIT_PER+Carnegie.class, data = SELECT_DATA)
+summary(testall) #.47
+testadmitper <- lm(Selectivity ~ADMIT_PER, data = SELECT_DATA)
+summary(testadmitper)#.27
+testcarnegie <- lm(Selectivity ~Carnegie.class, data = SELECT_DATA)
+summary(testcarnegie)#.001
+testsat <- lm(Selectivity ~SAT_25+SAT_75, data = SELECT_DATA)
+summary(testsat)#.39
+testsatandadmit <- lm(Selectivity ~SAT_25+SAT_75+ADMIT_PER, data = SELECT_DATA) 
+summary(testsatandadmit)#.47
+
+#print out data we need for determining choice year
+TEST <- read.csv("D:/compiled_data.csv")
+write.csv(TEST[,c('PUBID_1997', 'COLLEGEID_YEAR2','CHOICE_YEAR')], "D:/dates.csv")
+

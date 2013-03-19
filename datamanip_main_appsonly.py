@@ -1,4 +1,5 @@
 #input file has appliers only, all assumptions made that are required to get full data
+#correct file
 
 #import modules========================================================================================
 import sys
@@ -22,7 +23,7 @@ class CollegeData: #class storing college data
 	def __str__(self):
 		return str(self.colName) + "\t" + str(self.bachFlag) + "\t" + str(self.control) +  "\t" + str(self.selectivity)
 
-class StudentData: #class storing studentr data
+class StudentData: #class storing student data
 	#we may want to add major and other info here.
 	def __init__(self, pubID, maxAttend, maxAdmit, controlAttend):
 		self.pubID, self.maxAttend, self.maxAdmit, self.controlAttend = pubID, maxAttend, maxAdmit, controlAttend

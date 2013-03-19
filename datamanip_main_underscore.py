@@ -183,7 +183,7 @@ def printCollegeList():
 	global collegeList
 	global missedCollegeList
 	global missedSelectivityList
-	global c
+	global collegeDataLookup
 	for i in collegeList:
 		if collegeDataLookup[i].selectivity == -3: #update selectivity list so that only the 4-year schools are counted
 			missedSelectivityList.append(i)
