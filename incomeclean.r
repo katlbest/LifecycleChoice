@@ -257,14 +257,10 @@ for (i in 1:nrow(INCOME_DATA2)){
     print(returnObj[1:length(returnObj)-1])
     incVect <- returnObj[1:length(returnObj)-1] #note: a second pass doesn't help if you OR the requirement
     fixedCount = fixedCount + returnObj[length(returnObj)]
-    if (min(incVect)>=0){
-      INCOME_DATA2$COMPLETE_INC[i]<- 1 #if incVect now has no zeros, we are complete!
-    }
   }
-}
-print(fixedCount) #with OR you fix 127, with AND you only fix 50; number of people for whom at least one enty is filled in
- 
-  
+  if (min(incVect)>=0){
+    INCOME_DATA2$COMPLETE_INC[i]<- 1 #if incVect now has no zeros, we are complete!
+  }
   else { #must project income
     misCount = misCount +1
     #check if only terminal values are missing
@@ -281,14 +277,17 @@ print(fixedCount) #with OR you fix 127, with AND you only fix 50; number of peop
         lengthCounter = lengthCounter + 1
       }
     }
-    if (checkRestFlag ==1 & lengthCounter >3){
+    if (checkRestFlag ==1 & lengthCounter >3){ #has at least four values
       INCOME_DATA2$COMPLETE_INC[i]<- 1 
     }
     else{
       missCompletelyCount = missCompletelyCount +1
     }
   }
-
+}
+print(fixedCount) #with OR you fix 127, with AND you only fix 50; number of people for whom at least one enty is filled in
+print(missCompletelyCount)
+print(misCount)
 
 write.csv(INCOME_DATA2[INCOME_DATA2$COMPLETE_INC ==0,], "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/projectincome.csv")
 
