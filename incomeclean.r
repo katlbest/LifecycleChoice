@@ -162,19 +162,26 @@ INCOME_DATA2[INCOME_DATA2$Best.Attended == -3,]$START_YEAR <- INCOME_DATA2[INCOM
 INCOME_DATA2[INCOME_DATA2$Best.Attended != -3,]$START_YEAR <- INCOME_DATA2[INCOME_DATA2$Best.Attended != -3,]$COLLEGEID_YEAR2 +1
 
 for (i in 1:nrow(INCOME_DATA2)){
-  curStr = paste('INC_',toString(INCOME_DATA2$START_YEAR[i]),'b',sep = "")
-  colIndex = grep(curStr, colnames(INCOME_DATA2))
+  curStr = paste('INC_',toString(INCOME_DATA2$START_YEAR[i]),'b',sep = "") #pulls data with no missing values
+  #curStr = paste('INC_',toString(INCOME_DATA2$START_YEAR[i]),sep = "") #pulls data with missing values
+  colIndex = grep(curStr, colnames(INCOME_DATA2))[1] #use the first occurence
+  #firstIndex = grep("INC_1996", colnames(INCOME_DATA2))[1] #use if doing with missing
+  firstIndex = grep("INC_1996b", colnames(INCOME_DATA2)) #use if doing no missing
   startYs = grep("y1", colnames(INCOME_DATA2))
   for (j in 0:7){
-    if (colIndex + j <= dim(INCOME_DATA2)[2]){
+    if (colIndex + j <= firstIndex + 13){ #this adjusment needs to be better
+      #print(colIndex)
+      #print(colIndex+j)
+      #print(colnames(INCOME_DATA2)[colIndex+j])
       INCOME_DATA2[i,startYs+j] <- INCOME_DATA2[i, colIndex + j]
     }
     else {
-      INCOME_DATA2[i,startYs+j] <- -3
+      INCOME_DATA2[i,startYs+j] <- -4 
     }
   }
 }
-write.csv(INCOME_DATA2, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/incomeadjusted.csv")
+write.csv(INCOME_DATA2, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/incomeadjusted.csv") #saves with no missing values
+#write.csv(INCOME_DATA2, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/incomeadjustedwmissing.csv") #saves with missing values
 
 #calculate growth rates=======================================================================
 INCOME_DATA2$g1 <- 0
