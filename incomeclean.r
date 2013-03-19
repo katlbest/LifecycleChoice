@@ -205,15 +205,48 @@ misCount = 0
 missCompletelyCount = 0
 for (i in 1:nrow(INCOME_DATA2)){
   incVect <- c(INCOME_DATA2$y1[i], INCOME_DATA2$y2[i], INCOME_DATA2$y3[i], INCOME_DATA2$y4[i], INCOME_DATA2$y5[i], INCOME_DATA2$y6[i], INCOME_DATA2$y7[i], INCOME_DATA2$y8[i])
+  incVectNM <- c(INCOME_DATA2$ynm1[i], INCOME_DATA2$ynm2[i], INCOME_DATA2$ynm3[i], INCOME_DATA2$ynm4[i], INCOME_DATA2$ynm5[i], INCOME_DATA2$ynm6[i], INCOME_DATA2$ynm7[i], INCOME_DATA2$ynm8[i])
   #drop terminal negative 4's
   for (j in length(incVect):1){
     if (incVect[j]==-4){
       incVect <- incVect[1:length(incVect)-1]
     } 
   }
+  print(incVect)
   if (min(incVect)>=0){
     INCOME_DATA2$COMPLETE_INC[i]<- 1 #this person has complete data
   }
+  else { #try to fill in missing values with non-missing ones}
+    for (j in 1:length(incVect)){
+      if (incVect[j]==-3){ #assume we filled in last one
+        if (incVectNM[j] > 0){#means we have data in the non-missing vector
+          useOther = 0
+          if (j == 1){
+            if(incVectNM[j] <= incVect[j+1]*1.2){
+              useOther = 1
+            }
+          }
+          else if (j == length(incVect)){
+            if(incVect[j-1]*.80 <= incVectNM[j]){
+              useOther = 1
+            }
+          }
+          else if(incVect[j-1]*.80 <= incVectNM[j] & incVectNM[j] <= incVect[j+1]*1.2){
+              useOther = 1
+            }
+          if (useOther == 1) {
+            incVect[j] = incVectNM[j]
+          }
+        }
+      } 
+    }
+  }
+  print(incVect)
+}
+  
+  
+ #this part doesnt work now 
+  
   else { #must project income
     misCount = misCount +1
     #check if only terminal values are missing
@@ -237,7 +270,7 @@ for (i in 1:nrow(INCOME_DATA2)){
       missCompletelyCount = missCompletelyCount +1
     }
   }
-}
+
 
 write.csv(INCOME_DATA2[INCOME_DATA2$COMPLETE_INC ==0,], "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/projectincome.csv")
 
