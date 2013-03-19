@@ -77,6 +77,40 @@ lookupCategory <- function(varType, curValue){ #varType 1 =  biggest range, 3 = 
   }
 }
 
+fillMissing <- function(missingVect, fillVect, lastRoundInd){
+  counter = 0
+  for (j in 1:length(missingVect)){
+    if (missingVect[j]==-3){
+      if (fillVect[j] > 0){
+        useOther = 0
+        if (j == 1){
+          if(fillVect[j] <= missingVect[j+1]*1.2){
+            useOther = 1
+          }
+        }
+        else if (j == length(missingVect)){
+          if(missingVect[j-1]*.80 <= fillVect[j]){
+            useOther = 1
+          }
+        }
+        else if(missingVect[j-1]*.80 <= fillVect[j] | fillVect[j] <= missingVect[j+1]*1.2){ #if its close enough to either adjoining number, fillit
+          useOther = 1
+        }
+        if (useOther == 1) {
+          missingVect[j] = fillVect[j]
+          counter = counter +1
+        }
+      }
+    } 
+  }
+  invisible(return(missingVect))
+  print("yes")
+  if(lastRoundInd ==1){
+    print(toString(counter))
+    
+  }
+}
+
 #populate incomes 1996==================================================================
 #syntax: data frame, indicator, main variable, secondary (refuser) variable, clarification question indicator or "None"
 salary_96 = getTotal(INCOME_DATA, "P5_010_1997", "P5_016_1997", "P5_017_1997", "P5_011_1997", 1)
@@ -198,7 +232,6 @@ write.csv(INCOME_DATA2, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Dat
 #NOMISS_INCOME_DATA <- INCOME_DATA2
 
 #fill in missing income======================================================================
-#NOTE: MUST USE MISSING DATA HERE!
 
 INCOME_DATA2$COMPLETE_INC <- 0
 misCount = 0
@@ -212,36 +245,12 @@ for (i in 1:nrow(INCOME_DATA2)){
       incVect <- incVect[1:length(incVect)-1]
     } 
   }
-  print(incVect)
   if (min(incVect)>=0){
     INCOME_DATA2$COMPLETE_INC[i]<- 1 #this person has complete data
   }
-  else { #try to fill in missing values with non-missing ones}
-    for (j in 1:length(incVect)){
-      if (incVect[j]==-3){ #assume we filled in last one
-        if (incVectNM[j] > 0){#means we have data in the non-missing vector
-          useOther = 0
-          if (j == 1){
-            if(incVectNM[j] <= incVect[j+1]*1.2){
-              useOther = 1
-            }
-          }
-          else if (j == length(incVect)){
-            if(incVect[j-1]*.80 <= incVectNM[j]){
-              useOther = 1
-            }
-          }
-          else if(incVect[j-1]*.80 <= incVectNM[j] & incVectNM[j] <= incVect[j+1]*1.2){
-              useOther = 1
-            }
-          if (useOther == 1) {
-            incVect[j] = incVectNM[j]
-          }
-        }
-      } 
-    }
+  else { #try to fill in missing values with non-missing ones, pass 1
+    incVect <- fillMissing(incVect, incVectNM, 1) #note: a second pass doesn't help if you OR the requirement
   }
-  print(incVect)
 }
   
   
