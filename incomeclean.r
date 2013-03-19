@@ -155,6 +155,14 @@ INCOME_DATA2$y5 <- 0
 INCOME_DATA2$y6 <- 0
 INCOME_DATA2$y7 <- 0
 INCOME_DATA2$y8 <- 0
+INCOME_DATA2$ynm1 <- 0
+INCOME_DATA2$ynm2 <- 0
+INCOME_DATA2$ynm3 <- 0
+INCOME_DATA2$ynm4 <- 0
+INCOME_DATA2$ynm5 <- 0
+INCOME_DATA2$ynm6 <- 0
+INCOME_DATA2$ynm7 <- 0
+INCOME_DATA2$ynm8 <- 0
 
 #if not an attender, first year of earning is choice year plus 1
 INCOME_DATA2[INCOME_DATA2$Best.Attended == -3,]$START_YEAR <- INCOME_DATA2[INCOME_DATA2$Best.Attended == -3,]$CHOICE_YEAR +1 
@@ -162,26 +170,30 @@ INCOME_DATA2[INCOME_DATA2$Best.Attended == -3,]$START_YEAR <- INCOME_DATA2[INCOM
 INCOME_DATA2[INCOME_DATA2$Best.Attended != -3,]$START_YEAR <- INCOME_DATA2[INCOME_DATA2$Best.Attended != -3,]$COLLEGEID_YEAR2 +1
 
 for (i in 1:nrow(INCOME_DATA2)){
-  #curStr = paste('INC_',toString(INCOME_DATA2$START_YEAR[i]),'b',sep = "") #pulls data with no missing values
+  curStrNM = paste('INC_',toString(INCOME_DATA2$START_YEAR[i]),'b',sep = "") #pulls data with no missing values
   curStr = paste('INC_',toString(INCOME_DATA2$START_YEAR[i]),sep = "") #pulls data with missing values
   colIndex = grep(curStr, colnames(INCOME_DATA2))[1] #use the first occurence
+  colIndexNM = grep(curStrNM, colnames(INCOME_DATA2))[1] #use the first occurence
   firstIndex = grep("INC_1996", colnames(INCOME_DATA2))[1] #use if doing with missing
-  #firstIndex = grep("INC_1996b", colnames(INCOME_DATA2)) #use if doing no missing
+  firstIndexNM = grep("INC_1996b", colnames(INCOME_DATA2)) #use if doing no missing
   startYs = grep("y1", colnames(INCOME_DATA2))
+  startYsNM = grep("ynm1", colnames(INCOME_DATA2))
   for (j in 0:7){
     if (colIndex + j <= firstIndex + 13){ #this adjusment needs to be better
       #print(colIndex)
       #print(colIndex+j)
       #print(colnames(INCOME_DATA2)[colIndex+j])
       INCOME_DATA2[i,startYs+j] <- INCOME_DATA2[i, colIndex + j]
+      INCOME_DATA2[i,startYsNM+j] <- INCOME_DATA2[i, colIndexNM + j]
     }
     else {
-      INCOME_DATA2[i,startYs+j] <- -4 
+      INCOME_DATA2[i,startYs+j] <- -4
+      INCOME_DATA2[i,startYsNM+j] <- -4 
     }
   }
 }
-#write.csv(INCOME_DATA2, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/incomeadjusted.csv") #saves with no missing values
-write.csv(INCOME_DATA2, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/incomeadjustedwmissing.csv") #saves with missing values
+write.csv(INCOME_DATA2, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/incomeadjusted.csv") #saves with no missing values
+#write.csv(INCOME_DATA2, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/incomeadjustedwmissing.csv") #saves with missing values
 #if doing non-missing, store here:
 #NOMISS_INCOME_DATA <- INCOME_DATA2
 
@@ -229,6 +241,9 @@ for (i in 1:nrow(INCOME_DATA2)){
 
 write.csv(INCOME_DATA2[INCOME_DATA2$COMPLETE_INC ==0,], "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/projectincome.csv")
 
+#get just income data for these missing people
+INCOME_DATA <- read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/INCOME_DATA.csv")
+MISS_DATA <-INCOME_DATA2[INCOME_DATA2$COMPLETE_INC ==0,]
 
 
 #calculate growth rates=======================================================================
