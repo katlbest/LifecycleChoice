@@ -77,8 +77,9 @@ lookupCategory <- function(varType, curValue){ #varType 1 =  biggest range, 3 = 
   }
 }
 
-fillMissing <- function(missingVect, fillVect, lastRoundInd){
+fillMissing <- function(missingVect, fillVect, logicType){
   counter = 0
+  storeVect <- missingVect
   for (j in 1:length(missingVect)){
     if (missingVect[j]==-3){
       if (fillVect[j] > 0){
@@ -93,22 +94,24 @@ fillMissing <- function(missingVect, fillVect, lastRoundInd){
             useOther = 1
           }
         }
-        else if(missingVect[j-1]*.80 <= fillVect[j] | fillVect[j] <= missingVect[j+1]*1.2){ #if its close enough to either adjoining number, fillit
-          useOther = 1
+        else if (logicType == "or"){
+          if (missingVect[j-1]*.80 <= fillVect[j] | fillVect[j] <= missingVect[j+1]*1.2){ 
+            useOther = 1
+          }
+        }
+        else if (logicType == "and"){
+          if (missingVect[j-1]*.80 <= fillVect[j] & fillVect[j] <= missingVect[j+1]*1.2){
+            useOther = 1
+          }
         }
         if (useOther == 1) {
-          missingVect[j] = fillVect[j]
-          counter = counter +1
+          storeVect[j] = fillVect[j]
+          counter = 1
         }
       }
     } 
   }
-  invisible(return(missingVect))
-  print("yes")
-  if(lastRoundInd ==1){
-    print(toString(counter))
-    
-  }
+  return(c(storeVect, counter))
 }
 
 #populate incomes 1996==================================================================
@@ -236,6 +239,7 @@ write.csv(INCOME_DATA2, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Dat
 INCOME_DATA2$COMPLETE_INC <- 0
 misCount = 0
 missCompletelyCount = 0
+fixedCount = 0
 for (i in 1:nrow(INCOME_DATA2)){
   incVect <- c(INCOME_DATA2$y1[i], INCOME_DATA2$y2[i], INCOME_DATA2$y3[i], INCOME_DATA2$y4[i], INCOME_DATA2$y5[i], INCOME_DATA2$y6[i], INCOME_DATA2$y7[i], INCOME_DATA2$y8[i])
   incVectNM <- c(INCOME_DATA2$ynm1[i], INCOME_DATA2$ynm2[i], INCOME_DATA2$ynm3[i], INCOME_DATA2$ynm4[i], INCOME_DATA2$ynm5[i], INCOME_DATA2$ynm6[i], INCOME_DATA2$ynm7[i], INCOME_DATA2$ynm8[i])
@@ -249,12 +253,17 @@ for (i in 1:nrow(INCOME_DATA2)){
     INCOME_DATA2$COMPLETE_INC[i]<- 1 #this person has complete data
   }
   else { #try to fill in missing values with non-missing ones, pass 1
-    incVect <- fillMissing(incVect, incVectNM, 1) #note: a second pass doesn't help if you OR the requirement
+    returnObj <-fillMissing(incVect, incVectNM, "or") #last argument and indicates you must be between two feasible values, or says you must be next to one
+    print(returnObj[1:length(returnObj)-1])
+    incVect <- returnObj[1:length(returnObj)-1] #note: a second pass doesn't help if you OR the requirement
+    fixedCount = fixedCount + returnObj[length(returnObj)]
+    if (min(incVect)>=0){
+      INCOME_DATA2$COMPLETE_INC[i]<- 1 #if incVect now has no zeros, we are complete!
+    }
   }
 }
-  
-  
- #this part doesnt work now 
+print(fixedCount) #with OR you fix 127, with AND you only fix 50; number of people for whom at least one enty is filled in
+ 
   
   else { #must project income
     misCount = misCount +1
