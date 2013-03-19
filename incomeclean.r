@@ -162,11 +162,11 @@ INCOME_DATA2[INCOME_DATA2$Best.Attended == -3,]$START_YEAR <- INCOME_DATA2[INCOM
 INCOME_DATA2[INCOME_DATA2$Best.Attended != -3,]$START_YEAR <- INCOME_DATA2[INCOME_DATA2$Best.Attended != -3,]$COLLEGEID_YEAR2 +1
 
 for (i in 1:nrow(INCOME_DATA2)){
-  curStr = paste('INC_',toString(INCOME_DATA2$START_YEAR[i]),'b',sep = "") #pulls data with no missing values
-  #curStr = paste('INC_',toString(INCOME_DATA2$START_YEAR[i]),sep = "") #pulls data with missing values
+  #curStr = paste('INC_',toString(INCOME_DATA2$START_YEAR[i]),'b',sep = "") #pulls data with no missing values
+  curStr = paste('INC_',toString(INCOME_DATA2$START_YEAR[i]),sep = "") #pulls data with missing values
   colIndex = grep(curStr, colnames(INCOME_DATA2))[1] #use the first occurence
-  #firstIndex = grep("INC_1996", colnames(INCOME_DATA2))[1] #use if doing with missing
-  firstIndex = grep("INC_1996b", colnames(INCOME_DATA2)) #use if doing no missing
+  firstIndex = grep("INC_1996", colnames(INCOME_DATA2))[1] #use if doing with missing
+  #firstIndex = grep("INC_1996b", colnames(INCOME_DATA2)) #use if doing no missing
   startYs = grep("y1", colnames(INCOME_DATA2))
   for (j in 0:7){
     if (colIndex + j <= firstIndex + 13){ #this adjusment needs to be better
@@ -180,8 +180,56 @@ for (i in 1:nrow(INCOME_DATA2)){
     }
   }
 }
-write.csv(INCOME_DATA2, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/incomeadjusted.csv") #saves with no missing values
-#write.csv(INCOME_DATA2, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/incomeadjustedwmissing.csv") #saves with missing values
+#write.csv(INCOME_DATA2, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/incomeadjusted.csv") #saves with no missing values
+write.csv(INCOME_DATA2, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/incomeadjustedwmissing.csv") #saves with missing values
+#if doing non-missing, store here:
+#NOMISS_INCOME_DATA <- INCOME_DATA2
+
+#fill in missing income======================================================================
+#NOTE: MUST USE MISSING DATA HERE!
+
+INCOME_DATA2$COMPLETE_INC <- 0
+misCount = 0
+missCompletelyCount = 0
+for (i in 1:nrow(INCOME_DATA2)){
+  incVect <- c(INCOME_DATA2$y1[i], INCOME_DATA2$y2[i], INCOME_DATA2$y3[i], INCOME_DATA2$y4[i], INCOME_DATA2$y5[i], INCOME_DATA2$y6[i], INCOME_DATA2$y7[i], INCOME_DATA2$y8[i])
+  #drop terminal negative 4's
+  for (j in length(incVect):1){
+    if (incVect[j]==-4){
+      incVect <- incVect[1:length(incVect)-1]
+    } 
+  }
+  if (min(incVect)>=0){
+    INCOME_DATA2$COMPLETE_INC[i]<- 1 #this person has complete data
+  }
+  else { #must project income
+    misCount = misCount +1
+    #check if only terminal values are missing
+    checkRestFlag = 0
+    lengthCounter = 0
+    for (j in length(incVect):1){
+      if (incVect[j]==-3){
+        checkRest <- max(incVect[min(j+1, length(incVect)):length(incVect)])
+        if (checkRest <0){
+          checkRestFlag = 1
+        }
+      } 
+      else {
+        lengthCounter = lengthCounter + 1
+      }
+    }
+    if (checkRestFlag ==1 & lengthCounter >3){
+      INCOME_DATA2$COMPLETE_INC[i]<- 1 
+    }
+    else{
+      missCompletelyCount = missCompletelyCount +1
+    }
+  }
+}
+
+write.csv(INCOME_DATA2[INCOME_DATA2$COMPLETE_INC ==0,], "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/projectincome.csv")
+
+
 
 #calculate growth rates=======================================================================
 INCOME_DATA2$g1 <- 0
