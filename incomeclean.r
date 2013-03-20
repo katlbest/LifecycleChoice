@@ -455,6 +455,7 @@ ENROLL_DATA$enroll6<-0
 ENROLL_DATA$enroll7<-0
 ENROLL_DATA$enroll8<-0
 ENROLL_DATA$enroll9<-0
+ENROLL_DATA$stillInSchool<--3
 
 #populate
 year_vect = c("1997","1998","1999","2000","2001","2002","2003","2004","2005","2006","2007","2008","2009","2010")
@@ -485,3 +486,42 @@ for (i in 1:length(year_vect)){
     }
   }
 }
+
+#fill in missing enroll values
+startEnroll = grep("enroll2", colnames(ENROLL_DATA))
+#endEnroll = startEnroll + 7
+for (j in 1:nrow(ENROLL_DATA)){
+  changing = 0
+  last = 0
+  enrollVect = c(ENROLL_DATA[j,startEnroll], ENROLL_DATA[j,startEnroll+1], ENROLL_DATA[j,startEnroll+2], ENROLL_DATA[j,startEnroll+ 3], ENROLL_DATA[j,startEnroll+4], ENROLL_DATA[j,startEnroll+5], ENROLL_DATA[j,startEnroll+6], ENROLL_DATA[j,startEnroll+7])
+  for (i in 2:length(enrollVect)){
+    if (changing ==0)  {
+      if (enrollVect[i-1]>=0 & enrollVect[i]<0){
+        last = enrollVect[i-1]
+        change_start_ind = i
+        changing = 1
+        #print(paste("starting at ",i, sep = ""))
+      }
+    }
+    else{
+      if (enrollVect[i]== last){
+        for (k in (change_start_ind:i)){
+          enrollVect[k] = last
+        }
+        changing = 0
+      }
+      else if (enrollVect[i] >= 0){
+        changing = 0
+      }
+    }
+  }
+  for (i in 1:length(enrollVect)){
+    ENROLL_DATA[j,startEnroll+i-1]<-enrollVect[i]
+  }
+  i = length(enrollVect)
+  while ENROLL_DATA$stillInSchool[j] <0){
+    ENROLL_DATA$stillInSchool[j] = max(ENROLL_DATA$stillInSchool[j], ENROLL_DATA[j,startEnroll+i-1])
+    i = i+1
+  }
+}
+write.csv(ENROLL_DATA, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/with_enrolldata.csv")
