@@ -519,9 +519,12 @@ for (j in 1:nrow(ENROLL_DATA)){
     ENROLL_DATA[j,startEnroll+i-1]<-enrollVect[i]
   }
   i = length(enrollVect)
-  while ENROLL_DATA$stillInSchool[j] <0){
+  while (ENROLL_DATA$stillInSchool[j] <0 & i < 9){
     ENROLL_DATA$stillInSchool[j] = max(ENROLL_DATA$stillInSchool[j], ENROLL_DATA[j,startEnroll+i-1])
     i = i+1
+  }
+  if (ENROLL_DATA$stillInSchool[j] ==-3){
+    ENROLL_DATA$stillInSchool[j]<- 0
   }
 }
 write.csv(ENROLL_DATA, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/with_enrolldata.csv")
