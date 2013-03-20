@@ -473,9 +473,15 @@ for (i in 1:length(year_vect)){
       counter = yearNum +2
       #set corresponding variable
       pasteStr = paste('enroll',counter, sep = "")
-     #print(pasteStr)
-    #print(enrollVar)
-      ENROLL_DATA[j,pasteStr] <- ENROLL_DATA[j, enrollVar]
+      if (ENROLL_DATA[j, enrollVar] <0){
+        ENROLL_DATA[j,pasteStr] <- ENROLL_DATA[j, enrollVar] #keep missingness information
+      }
+      else if (ENROLL_DATA[j, enrollVar] <8){
+        ENROLL_DATA[j,pasteStr] <- 0 #not enrolled
+      }
+      else {
+        ENROLL_DATA[j,pasteStr] <- 1 #enrolled
+      }
     }
   }
 }
