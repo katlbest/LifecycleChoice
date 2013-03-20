@@ -230,12 +230,9 @@ for (i in 1:nrow(INCOME_DATA2)){
   }
 }
 write.csv(INCOME_DATA2, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/incomeadjusted.csv") #saves with no missing values
-#write.csv(INCOME_DATA2, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/incomeadjustedwmissing.csv") #saves with missing values
-#if doing non-missing, store here:
-#NOMISS_INCOME_DATA <- INCOME_DATA2
 
 #fill in missing income======================================================================
-
+INCOME_DATA2<- read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/incomeadjusted.csv")
 INCOME_DATA2$COMPLETE_INC <- 0
 misCount = 0
 missCompletelyCount = 0
@@ -291,29 +288,44 @@ print(misCount)
 
 write.csv(INCOME_DATA2[INCOME_DATA2$COMPLETE_INC ==0,], "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/projectincome.csv")
 
-#get just income data for these missing people
-INCOME_DATA <- read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/INCOME_DATA.csv")
-MISS_DATA <-INCOME_DATA2[INCOME_DATA2$COMPLETE_INC ==0,]
+#write everyone to file so we can pull in manually updated by vlookup
+write.csv(INCOME_DATA2, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/allindividuals.csv")
+#complete inc is an indicator of whether you should be used for gamma projetion (have at least 4 entries, not necessarly starting at beginning)
 
+#calculate growth rates==============================================================================
+PROJECT_DATA<- read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/allindividuals-incomefilled.csv")
+#repopulated COMPLETE_INC, flag for determining if you have four entries
+PROJECT_DATA$COMPLETE_INC <- 0
+for (i in 1:nrow(PROJECT_DATA)){
+  incVect <- c(PROJECT_DATA$y1[i], PROJECT_DATA$y2[i], PROJECT_DATA$y3[i], PROJECT_DATA$y4[i], PROJECT_DATA$y5[i], PROJECT_DATA$y6[i], PROJECT_DATA$y7[i], PROJECT_DATA$y8[i])
+  lengthCount = 0
+  for (j in length(incVect):1){
+    if(incVect[j]>= 0) {
+      lengthCount = lengthCount +1
+    }
+  }
+  if (lengthCount > 3){
+    PROJECT_DATA$COMPLETE_INC[i]<- 1
+  }
+}
 
-#calculate growth rates=======================================================================
-INCOME_DATA2$g1 <- 0
-INCOME_DATA2$g2 <- 0
-INCOME_DATA2$g3 <- 0
-INCOME_DATA2$g4 <- 0
-INCOME_DATA2$g5 <- 0
-INCOME_DATA2$g6 <- 0
-INCOME_DATA2$g7 <- 0
+PROJECT_DATA$g1 <- 0
+PROJECT_DATA$g2 <- 0
+PROJECT_DATA$g3 <- 0
+PROJECT_DATA$g4 <- 0
+PROJECT_DATA$g5 <- 0
+PROJECT_DATA$g6 <- 0
+PROJECT_DATA$g7 <- 0
 
-for (i in 1:nrow(INCOME_DATA2)){
-  startYs = grep("y1", colnames(INCOME_DATA2))
-  startGs = grep("g1", colnames(INCOME_DATA2))
+for (i in 1:nrow(PROJECT_DATA)){
+  startYs = grep("y1", colnames(PROJECT_DATA))
+  startGs = grep("g1", colnames(PROJECT_DATA))
   for (j in 0:6){
-    if (INCOME_DATA2[i,startYs+j] >0 & INCOME_DATA2[i,startYs+j+1] >0){
-      INCOME_DATA2[i,startGs+j]= INCOME_DATA2[i,startYs+j+1]/INCOME_DATA2[i,startYs+j]
+    if (PROJECT_DATA[i,startYs+j] >0 & PROJECT_DATA[i,startYs+j+1] >0){
+      PROJECT_DATA[i,startGs+j]= PROJECT_DATA[i,startYs+j+1]/PROJECT_DATA[i,startYs+j]
     }
     else {
-      INCOME_DATA2[i,startGs+j]=-3
+      PROJECT_DATA[i,startGs+j]=-3
     }
   }
 }
@@ -327,7 +339,7 @@ pop_counter[is.na(pop_counter)]<-0
 #pop_counter <- rep(rep(0,  length(admit_cats)*length(apply_cats)),7) #counts the number of people in each category
 sum_gamma <- matrix(ncol = 7, nrow = length(admit_cats)*length(apply_cats))
 sum_gamma[is.na(sum_gamma)] <- 0
-#to replace missing values: MERGED_DATA[MERGED_DATA < 0] <- NA
+
 k = 1
 for (i in 1:length(admit_cats)){#populate what will be the "lookup vector"
   for (j in 1:length(apply_cats)){
@@ -336,14 +348,88 @@ for (i in 1:length(admit_cats)){#populate what will be the "lookup vector"
   }
 }
 
-startGs = grep("g1", colnames(INCOME_DATA2))
-for (i in 1:nrow(INCOME_DATA2)){
-  curCat = toString(paste(INCOME_DATA2$Best.Admitted[i],INCOME_DATA2$Best.Attended[i], sep = ""))
+startGs = grep("g1", colnames(PROJECT_DATA))
+for (i in 1:nrow(PROJECT_DATA)){
+  curCat = toString(paste(PROJECT_DATA$Best.Admitted[i],PROJECT_DATA$Best.Attended[i], sep = ""))
   curIndex = match(curCat, cat_vector)
   for (j in 0:6){
-    if (INCOME_DATA2[i,startGs+j] >0){
+    if (PROJECT_DATA[i,startGs+j] >0){
       pop_counter[curIndex,j+1]= pop_counter[curIndex,j+1]+1
-      sum_gamma[curIndex,j+1] =sum_gamma[curIndex,j+1]+INCOME_DATA2[i,startGs+j]
+      sum_gamma[curIndex,j+1] =sum_gamma[curIndex,j+1]+PROJECT_DATA[i,startGs+j]
+    }
+  }
+}
+
+avg_gamma <- matrix(ncol = 7, nrow = length(admit_cats)*length(apply_cats))
+avg_gamma[is.na(avg_gamma)] <- 0
+avg_gamma = sum_gamma/pop_counter
+
+write.csv(avg_gamma, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/avg_gamma.csv")
+write.csv(pop_counter, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/pop_counter.csv")
+
+#populate 5 categories
+admit_cats <- c('1','2', '3', '4', '6', '7')
+apply_cats <- c('-3','1','2', '3', '4', '6', '7')
+cat_vector <- rep(NA, length(admit_cats)*length(apply_cats))
+pop_counter <- matrix(ncol = 7, nrow = length(admit_cats)*length(apply_cats))
+pop_counter[is.na(pop_counter)]<-0
+#pop_counter <- rep(rep(0,  length(admit_cats)*length(apply_cats)),7) #counts the number of people in each category
+sum_gamma <- matrix(ncol = 7, nrow = length(admit_cats)*length(apply_cats))
+sum_gamma[is.na(sum_gamma)] <- 0
+
+k = 1
+for (i in 1:length(admit_cats)){#populate what will be the "lookup vector"
+  for (j in 1:length(apply_cats)){
+    cat_vector[k]= paste(admit_cats[i],apply_cats[j], sep = "")
+    k = k+1
+  }
+}
+
+startGs = grep("g1", colnames(PROJECT_DATA))
+for (i in 1:nrow(PROJECT_DATA)){
+  curCat = toString(paste(PROJECT_DATA$BestAd5[i],PROJECT_DATA$BestAtt5[i], sep = ""))
+  curIndex = match(curCat, cat_vector)
+  for (j in 0:6){
+    if (PROJECT_DATA[i,startGs+j] >0){
+      pop_counter[curIndex,j+1]= pop_counter[curIndex,j+1]+1
+      sum_gamma[curIndex,j+1] =sum_gamma[curIndex,j+1]+PROJECT_DATA[i,startGs+j]
+    }
+  }
+}
+
+avg_gamma <- matrix(ncol = 7, nrow = length(admit_cats)*length(apply_cats))
+avg_gamma[is.na(avg_gamma)] <- 0
+avg_gamma = sum_gamma/pop_counter
+
+write.csv(avg_gamma, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/avg_gamma.csv")
+write.csv(pop_counter, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/pop_counter.csv")
+
+#populate 3 categories
+admit_cats <- c('1','2', '3','7')
+apply_cats <- c('-3','1','2', '3', '7')
+cat_vector <- rep(NA, length(admit_cats)*length(apply_cats))
+pop_counter <- matrix(ncol = 7, nrow = length(admit_cats)*length(apply_cats))
+pop_counter[is.na(pop_counter)]<-0
+#pop_counter <- rep(rep(0,  length(admit_cats)*length(apply_cats)),7) #counts the number of people in each category
+sum_gamma <- matrix(ncol = 7, nrow = length(admit_cats)*length(apply_cats))
+sum_gamma[is.na(sum_gamma)] <- 0
+
+k = 1
+for (i in 1:length(admit_cats)){#populate what will be the "lookup vector"
+  for (j in 1:length(apply_cats)){
+    cat_vector[k]= paste(admit_cats[i],apply_cats[j], sep = "")
+    k = k+1
+  }
+}
+
+startGs = grep("g1", colnames(PROJECT_DATA))
+for (i in 1:nrow(PROJECT_DATA)){
+  curCat = toString(paste(PROJECT_DATA$BestAd3[i],PROJECT_DATA$BestAtt3[i], sep = ""))
+  curIndex = match(curCat, cat_vector)
+  for (j in 0:6){
+    if (PROJECT_DATA[i,startGs+j] >0){
+      pop_counter[curIndex,j+1]= pop_counter[curIndex,j+1]+1
+      sum_gamma[curIndex,j+1] =sum_gamma[curIndex,j+1]+PROJECT_DATA[i,startGs+j]
     }
   }
 }
