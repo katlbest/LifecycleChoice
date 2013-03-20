@@ -440,3 +440,40 @@ avg_gamma = sum_gamma/pop_counter
 
 write.csv(avg_gamma, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/avg_gamma.csv")
 write.csv(pop_counter, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/pop_counter.csv")
+
+#pull schooling versus working info==========================================================
+#goal: get vector of school status and populate for start year
+ENROLL_DATA <- read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/enrollstat/enrollstat.csv")
+ENROLL_DATA <- merge(x = PROJECT_DATA, y = ENROLL_DATA, by = "PUBID_1997", all.x = TRUE)
+
+#holders for enrollment info. note that we do not ask about 1996 (as we do with income, where questions are about last yera)
+ENROLL_DATA$enroll2<-0
+ENROLL_DATA$enroll3<-0
+ENROLL_DATA$enroll4<-0
+ENROLL_DATA$enroll5<-0
+ENROLL_DATA$enroll6<-0
+ENROLL_DATA$enroll7<-0
+ENROLL_DATA$enroll8<-0
+ENROLL_DATA$enroll9<-0
+
+#populate
+year_vect = c("1997","1998","1999","2000","2001","2002","2003","2004","2005","2006","2007","2008","2009","2010")
+for (i in 1:length(year_vect)){
+  intYear = as.integer(year_vect[i])
+  if (intYear < 2005 & intYear != 1997){
+    enrollVar = paste("CV_ENROLLSTAT_EST", year_vect[i], sep = "")
+  }
+  else {
+    enrollVar = paste("CV_ENROLLSTAT", year_vect[i], sep = "")
+  }
+  
+  for (j in 1:nrow(ENROLL_DATA)){
+    yearNum = intYear-ENROLL_DATA$START_YEAR[j]
+    if (yearNum >= 0 & yearNum < 8){#this means you are in a year that is relevant for this person
+      counter = yearNum +2
+      #set corresponding variable
+      pasteStr = paste('enroll',counter, sep = "")
+      ENROLL_DATA[j,pasteStr] <- ENROLL_DATA[j, enrollVar]
+    }
+  }
+}
