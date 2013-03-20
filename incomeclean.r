@@ -456,6 +456,7 @@ ENROLL_DATA$enroll7<-0
 ENROLL_DATA$enroll8<-0
 ENROLL_DATA$enroll9<-0
 ENROLL_DATA$stillInSchool<--3
+ENROLL_DATA$lastSchoolType<--3
 
 #populate
 year_vect = c("1997","1998","1999","2000","2001","2002","2003","2004","2005","2006","2007","2008","2009","2010")
@@ -482,6 +483,9 @@ for (i in 1:length(year_vect)){
       }
       else {
         ENROLL_DATA[j,pasteStr] <- 1 #enrolled
+        if (i == length(year_vect)){
+          ENROLL_DATA[j,"lastSchoolType"] <- ENROLL_DATA[j, enrollVar]
+        }
       }
     }
   }
@@ -527,4 +531,16 @@ for (j in 1:nrow(ENROLL_DATA)){
     ENROLL_DATA$stillInSchool[j]<- 0
   }
 }
+
+#create still in college flag
+ENROLL_DATA$stillInCollege<-0
+for (j in 1:nrow(ENROLL_DATA)){
+  if (ENROLL_DATA$stillInSchool[j] ==1 & ENROLL_DATA$lastSchoolType[j] < 0){
+    ENROLL_DATA$stillInCollege[j] =-3
+  }
+  else if (ENROLL_DATA$stillInSchool[j] ==1 & ENROLL_DATA$lastSchoolType[j] < 11){
+    ENROLL_DATA$stillInCollege[j] =1
+  }
+}
+
 write.csv(ENROLL_DATA, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/with_enrolldata.csv")
