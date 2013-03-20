@@ -461,10 +461,10 @@ year_vect = c("1997","1998","1999","2000","2001","2002","2003","2004","2005","20
 for (i in 1:length(year_vect)){
   intYear = as.integer(year_vect[i])
   if (intYear < 2005 & intYear != 1997){
-    enrollVar = paste("CV_ENROLLSTAT_EST", year_vect[i], sep = "")
+    enrollVar = paste("CV_ENROLLSTAT_EDT_", year_vect[i], sep = "")
   }
   else {
-    enrollVar = paste("CV_ENROLLSTAT", year_vect[i], sep = "")
+    enrollVar = paste("CV_ENROLLSTAT_", year_vect[i], sep = "")
   }
   
   for (j in 1:nrow(ENROLL_DATA)){
@@ -473,6 +473,8 @@ for (i in 1:length(year_vect)){
       counter = yearNum +2
       #set corresponding variable
       pasteStr = paste('enroll',counter, sep = "")
+     #print(pasteStr)
+    #print(enrollVar)
       ENROLL_DATA[j,pasteStr] <- ENROLL_DATA[j, enrollVar]
     }
   }
