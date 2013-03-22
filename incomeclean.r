@@ -548,6 +548,7 @@ write.csv(ENROLL_DATA, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data
 #attmempt ptojection of income dynamics--quadratic
 for (i in 1:nrow(ENROLL_DATA)){
     incVectOut = NULL
+    ageVectOut= NULL
     incVect = c(ENROLL_DATA$y1[i], ENROLL_DATA$y2[i], ENROLL_DATA$y3[i], ENROLL_DATA$y4[i], ENROLL_DATA$y5[i], ENROLL_DATA$y6[i],ENROLL_DATA$y7[i],ENROLL_DATA$y8[i])
     #do cleanup to ensure only runs of 4+ usable variables are included. must adjust for age
     startIndex = 0
@@ -559,6 +560,7 @@ for (i in 1:nrow(ENROLL_DATA)){
         }
         if (endIndex - startIndex >= 4){
           incVectOut = incVect[startIndex:endIndex]
+          ageVectOut = c(startIndex:endIndex)
         }
       }
       if (incVect[j]>=0){
@@ -570,6 +572,7 @@ for (i in 1:nrow(ENROLL_DATA)){
       else {
         if (endIndex - startIndex >= 4){
           incVectOut = incVect[startIndex:endIndex]
+          ageVectOut = c(startIndex:endIndex)
         }
         startIndex = 0
         endIndex = 0
@@ -577,6 +580,9 @@ for (i in 1:nrow(ENROLL_DATA)){
     }
     if (is.null(incVectOut)){
       incVectOut = c(-3)
+      ageVectOut = c(-3)
     }
-  print(incVectOut)
+  #print(incVectOut)
+  #print(ageVectOut)
 }
+
