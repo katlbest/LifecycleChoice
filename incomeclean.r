@@ -547,6 +547,8 @@ write.csv(ENROLL_DATA, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data
 
 #attmempt ptojection of income dynamics--quadratic
 stringVect = rep(NA, nrow(ENROLL_DATA))
+longAgeVect = vector()
+longIncVect = vector()
 for (i in 1:nrow(ENROLL_DATA)){
   incVectOut = NULL
   ageVectOut= NULL
@@ -602,12 +604,86 @@ for (i in 1:nrow(ENROLL_DATA)){
     #transformed model
     incVectFull <- c(rep(-3, startIndex-1), incVectOut, exp(newIncs))
     #non-transformed model
-    incVectFull <- c(rep(-3, startIndex-1), incVectOut, newIncs)
+    #incVectFull <- c(rep(-3, startIndex-1), incVectOut, newIncs)
     
     stringVect[i]= paste(toString(ENROLL_DATA$PUBID_1997[i]), "\t", toString(incVectFull), sep = "")
     stringVect[i] = gsub(", ", "\t", stringVect[i])
+    
+    #get whole sample for nonlinear estimation
+    longIncVect = c(longIncVect,incVectOut)
+    longAgeVect = c(longAgeVect, ageVectOut)
   }
 }
 fileConn<-file("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/quadraticoutput.txt")
+writeLines(stringVect, fileConn)
+close(fileConn)
+
+
+#quadratic projection with nested
+getDelt <- nls(log(longIncVect+1)~a0 + a1 * longAgeVect+(a2+a1*d)* longAgeVect^2 + 2 * d * a2 * longAgeVect^3 + d^2 *a2*longAgeVect^4)
+delta = summary(getDelt)$coefficients[4,1]
+
+stringVect = rep(NA, nrow(ENROLL_DATA))
+for (i in 1:nrow(ENROLL_DATA)){
+  incVectOut = NULL
+  ageVectOut= NULL
+  incVectFull = NULL
+  incVect = c(ENROLL_DATA$y1[i], ENROLL_DATA$y2[i], ENROLL_DATA$y3[i], ENROLL_DATA$y4[i], ENROLL_DATA$y5[i], ENROLL_DATA$y6[i],ENROLL_DATA$y7[i],ENROLL_DATA$y8[i])
+  #do cleanup to ensure only runs of 4+ usable variables are included. must adjust for age
+  startIndex = 0
+  endIndex = 0
+  for (j in 1:length(incVect)){
+    if (j == length(incVect)){
+      if (incVect[j]>=0 & startIndex ==0){
+        endIndex = j
+      }
+      if (endIndex - startIndex >= 4 & startIndex > 0){
+        incVectOut = incVect[startIndex:endIndex]
+        ageVectOut = c(startIndex:endIndex)
+      }
+    }
+    if (incVect[j]>=0){
+      if (startIndex ==0){
+        startIndex = j
+      }
+      endIndex = j
+    }
+    else {
+      if (endIndex - startIndex >= 4 & startIndex > 0){
+        incVectOut = incVect[startIndex:endIndex]
+        ageVectOut = c(startIndex:endIndex)
+      }
+      startIndex = 0
+      endIndex = 0
+    }
+  }
+  if (is.null(incVectOut)){
+    incVectOut = c(-3)
+    ageVectOut = c(-3)
+    stringVect[i]= -3
+  }
+  else{
+    #predict with nested quadratic
+    startIndex = ageVectOut[1]
+    endIndex = ageVectOut[length(ageVectOut)]
+    
+    #transformed model
+    ageVectOut = ageVectOut + delta * ageVectOut^2
+    quadNestMod <- lm(log(incVectOut + 1)~ageVectOut+ I(ageVectOut^2))
+    new <- data.frame(ageVectOut = c((endIndex+1):81))
+    newIncs <- predict(quadMod,new)
+    
+    #transformed model
+    incVectFull <- c(rep(-3, startIndex-1), incVectOut, exp(newIncs))
+     
+    stringVect[i]= paste(toString(ENROLL_DATA$PUBID_1997[i]), "\t", toString(incVectFull), sep = "")
+    stringVect[i] = gsub(", ", "\t", stringVect[i])
+    
+    #get whole sample for nonlinear estimation
+    longIncVect = c(longIncVect,incVectOut)
+    longAgeVect = c(longAgeVect, ageVectOut)
+  }
+}
+fileConn<-file("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/quadraticoutput2.txt")
 writeLines(stringVect, fileConn)
 close(fileConn)
