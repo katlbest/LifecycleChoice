@@ -546,6 +546,7 @@ for (j in 1:nrow(ENROLL_DATA)){
 write.csv(ENROLL_DATA, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/with_enrolldata.csv")
 
 #attmempt ptojection of income dynamics--quadratic
+stringVect = rep(NA, nrow(ENROLL_DATA))
 for (i in 1:nrow(ENROLL_DATA)){
   incVectOut = NULL
   ageVectOut= NULL
@@ -605,7 +606,9 @@ for (i in 1:nrow(ENROLL_DATA)){
     #predict with nested quadratic
     #predict with NS
   }
+  stringVect[i]= paste(toString(ENROLL_DATA$PUBID_1997[i]), "\t", toString(incVectFull), sep = "")
+  stringVect[i] = gsub(", ", "\t", stringVect{i])
 }
 fileConn<-file("output.txt")
-writelines(c(ENROLL_DATA$PUBID_1997[i],incVectFull))
-
+writelines(stringVect)
+close(fileConn)
