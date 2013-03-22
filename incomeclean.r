@@ -582,7 +582,27 @@ for (i in 1:nrow(ENROLL_DATA)){
       incVectOut = c(-3)
       ageVectOut = c(-3)
     }
+  if (incVectOut == -3){
+    print "N/A"
+  }
+  else{
+  #predict with quadratic
+    startIndex = ageVectOut[1]
+    quadMod <- lm(log(incVectOut)~ageVectOut+ I(ageVectOut^2))
+    new <- data.frame(ageVectOut = c(startIndex+1:81))
+    newIncs <- predict(quadMod,new)
+    incVectFull <- c(incVectOut, exp(newIncs))
+    incVectFull <- c(rep(-3, startIndex-1), incVectOut, exp(newIncs))
+    print(incVectFull)
+    #par(mar = rep(2, 4))
+    #plot(incVectFull)
+    #plot(quadMod)
+    #plot(ageVectOut+ I(ageVectOut^2))
+    #abline(quadMod)
+  #predict with nested quadratic
+  #predict with NS
   #print(incVectOut)
   #print(ageVectOut)
+  }
 }
 
