@@ -550,6 +550,7 @@ stringVect = rep(NA, nrow(ENROLL_DATA))
 for (i in 1:nrow(ENROLL_DATA)){
   incVectOut = NULL
   ageVectOut= NULL
+  incVectFull = NULL
   incVect = c(ENROLL_DATA$y1[i], ENROLL_DATA$y2[i], ENROLL_DATA$y3[i], ENROLL_DATA$y4[i], ENROLL_DATA$y5[i], ENROLL_DATA$y6[i],ENROLL_DATA$y7[i],ENROLL_DATA$y8[i])
   #do cleanup to ensure only runs of 4+ usable variables are included. must adjust for age
   startIndex = 0
@@ -580,35 +581,33 @@ for (i in 1:nrow(ENROLL_DATA)){
     }
   }
   if (is.null(incVectOut)){
+    #print(toString(ENROLL_DATA$PUBID_1997[i]))
     incVectOut = c(-3)
     ageVectOut = c(-3)
-  }
-  if (incVectOut[1] == -3){
-    print("N/A")
+    stringVect[i]= -3
   }
   else{
-    print(ageVectOut)
-    print(incVectOut)
     #predict with quadratic
     startIndex = ageVectOut[1]
-    #quadMod <- lm(log(incVectOut)~ageVectOut+ I(ageVectOut^2))
-    quadMod <- lm(incVectOut~ageVectOut+ I(ageVectOut^2))
-    new <- data.frame(ageVectOut = c(startIndex+1:81))
+    endIndex = ageVectOut[length(ageVectOut)]
+    
+    #transformed model
+    quadMod <- lm(log(incVectOut + 1)~ageVectOut+ I(ageVectOut^2))
+    #non-transformedmodel
+    #quadMod <- lm(incVectOut~ageVectOut+ I(ageVectOut^2))
+    
+    new <- data.frame(ageVectOut = c((endIndex+1):81))
     newIncs <- predict(quadMod,new)
-    #incVectFull <- c(rep(-3, startIndex-1), incVectOut, exp(newIncs))
+    
+    #transformed model
+    incVectFull <- c(rep(-3, startIndex-1), incVectOut, exp(newIncs))
+    #non-transformed model
     incVectFull <- c(rep(-3, startIndex-1), incVectOut, newIncs)
-    print(incVectFull)
-    #par(mar = rep(2, 4))
-    #plot(incVectFull)
-    #plot(quadMod)
-    #plot(ageVectOut+ I(ageVectOut^2))
-    #abline(quadMod)
-    #predict with nested quadratic
-    #predict with NS
+    
+    stringVect[i]= paste(toString(ENROLL_DATA$PUBID_1997[i]), "\t", toString(incVectFull), sep = "")
+    stringVect[i] = gsub(", ", "\t", stringVect[i])
   }
-  stringVect[i]= paste(toString(ENROLL_DATA$PUBID_1997[i]), "\t", toString(incVectFull), sep = "")
-  stringVect[i] = gsub(", ", "\t", stringVect{i])
 }
-fileConn<-file("output.txt")
-writelines(stringVect)
+fileConn<-file("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/quadraticoutput.txt")
+writeLines(stringVect, fileConn)
 close(fileConn)
