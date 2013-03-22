@@ -558,7 +558,7 @@ for (i in 1:nrow(ENROLL_DATA)){
       if (incVect[j]>=0 & startIndex ==0){
         endIndex = j
       }
-      if (endIndex - startIndex >= 4){
+      if (endIndex - startIndex >= 4 & startIndex > 0){
         incVectOut = incVect[startIndex:endIndex]
         ageVectOut = c(startIndex:endIndex)
       }
@@ -570,7 +570,7 @@ for (i in 1:nrow(ENROLL_DATA)){
       endIndex = j
     }
     else {
-      if (endIndex - startIndex >= 4){
+      if (endIndex - startIndex >= 4 & startIndex > 0){
         incVectOut = incVect[startIndex:endIndex]
         ageVectOut = c(startIndex:endIndex)
       }
@@ -606,4 +606,6 @@ for (i in 1:nrow(ENROLL_DATA)){
     #predict with NS
   }
 }
+fileConn<-file("output.txt")
+writelines(c(ENROLL_DATA$PUBID_1997[i],incVectFull))
 
