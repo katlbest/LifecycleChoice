@@ -547,62 +547,63 @@ write.csv(ENROLL_DATA, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data
 
 #attmempt ptojection of income dynamics--quadratic
 for (i in 1:nrow(ENROLL_DATA)){
-    incVectOut = NULL
-    ageVectOut= NULL
-    incVect = c(ENROLL_DATA$y1[i], ENROLL_DATA$y2[i], ENROLL_DATA$y3[i], ENROLL_DATA$y4[i], ENROLL_DATA$y5[i], ENROLL_DATA$y6[i],ENROLL_DATA$y7[i],ENROLL_DATA$y8[i])
-    #do cleanup to ensure only runs of 4+ usable variables are included. must adjust for age
-    startIndex = 0
-    endIndex = 0
-    for (j in 1:length(incVect)){
-      if (j == length(incVect)){
-        if (incVect[j]>=0 & startIndex ==0){
-          endIndex = j
-        }
-        if (endIndex - startIndex >= 4){
-          incVectOut = incVect[startIndex:endIndex]
-          ageVectOut = c(startIndex:endIndex)
-        }
-      }
-      if (incVect[j]>=0){
-        if (startIndex ==0){
-          startIndex = j
-        }
+  incVectOut = NULL
+  ageVectOut= NULL
+  incVect = c(ENROLL_DATA$y1[i], ENROLL_DATA$y2[i], ENROLL_DATA$y3[i], ENROLL_DATA$y4[i], ENROLL_DATA$y5[i], ENROLL_DATA$y6[i],ENROLL_DATA$y7[i],ENROLL_DATA$y8[i])
+  #do cleanup to ensure only runs of 4+ usable variables are included. must adjust for age
+  startIndex = 0
+  endIndex = 0
+  for (j in 1:length(incVect)){
+    if (j == length(incVect)){
+      if (incVect[j]>=0 & startIndex ==0){
         endIndex = j
       }
-      else {
-        if (endIndex - startIndex >= 4){
-          incVectOut = incVect[startIndex:endIndex]
-          ageVectOut = c(startIndex:endIndex)
-        }
-        startIndex = 0
-        endIndex = 0
+      if (endIndex - startIndex >= 4){
+        incVectOut = incVect[startIndex:endIndex]
+        ageVectOut = c(startIndex:endIndex)
       }
     }
-    if (is.null(incVectOut)){
-      incVectOut = c(-3)
-      ageVectOut = c(-3)
+    if (incVect[j]>=0){
+      if (startIndex ==0){
+        startIndex = j
+      }
+      endIndex = j
     }
-  if (incVectOut == -3){
-    print "N/A"
+    else {
+      if (endIndex - startIndex >= 4){
+        incVectOut = incVect[startIndex:endIndex]
+        ageVectOut = c(startIndex:endIndex)
+      }
+      startIndex = 0
+      endIndex = 0
+    }
+  }
+  if (is.null(incVectOut)){
+    incVectOut = c(-3)
+    ageVectOut = c(-3)
+  }
+  if (incVectOut[1] == -3){
+    print("N/A")
   }
   else{
-  #predict with quadratic
+    print(ageVectOut)
+    print(incVectOut)
+    #predict with quadratic
     startIndex = ageVectOut[1]
-    quadMod <- lm(log(incVectOut)~ageVectOut+ I(ageVectOut^2))
+    #quadMod <- lm(log(incVectOut)~ageVectOut+ I(ageVectOut^2))
+    quadMod <- lm(incVectOut~ageVectOut+ I(ageVectOut^2))
     new <- data.frame(ageVectOut = c(startIndex+1:81))
     newIncs <- predict(quadMod,new)
-    incVectFull <- c(incVectOut, exp(newIncs))
-    incVectFull <- c(rep(-3, startIndex-1), incVectOut, exp(newIncs))
+    #incVectFull <- c(rep(-3, startIndex-1), incVectOut, exp(newIncs))
+    incVectFull <- c(rep(-3, startIndex-1), incVectOut, newIncs)
     print(incVectFull)
     #par(mar = rep(2, 4))
     #plot(incVectFull)
     #plot(quadMod)
     #plot(ageVectOut+ I(ageVectOut^2))
     #abline(quadMod)
-  #predict with nested quadratic
-  #predict with NS
-  #print(incVectOut)
-  #print(ageVectOut)
+    #predict with nested quadratic
+    #predict with NS
   }
 }
 
