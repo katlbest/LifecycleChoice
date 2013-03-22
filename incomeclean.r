@@ -545,7 +545,7 @@ for (j in 1:nrow(ENROLL_DATA)){
 
 write.csv(ENROLL_DATA, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/with_enrolldata.csv")
 
-#attmempt ptojection of income dynamics--quadratic
+#attmempt projection of income dynamics--quadratic
 stringVect = rep(NA, nrow(ENROLL_DATA))
 longAgeVect = vector()
 longIncVect = vector()
