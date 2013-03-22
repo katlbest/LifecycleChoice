@@ -675,13 +675,9 @@ for (i in 1:nrow(ENROLL_DATA)){
     
     #transformed model
     incVectFull <- c(rep(-3, startIndex-1), incVectOut, exp(newIncs))
-     
     stringVect[i]= paste(toString(ENROLL_DATA$PUBID_1997[i]), "\t", toString(incVectFull), sep = "")
     stringVect[i] = gsub(", ", "\t", stringVect[i])
-    
-    #get whole sample for nonlinear estimation
-    longIncVect = c(longIncVect,incVectOut)
-    longAgeVect = c(longAgeVect, ageVectOut)
+
   }
 }
 fileConn<-file("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/quadraticoutput2.txt")
