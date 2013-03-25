@@ -545,7 +545,8 @@ for (j in 1:nrow(ENROLL_DATA)){
 
 write.csv(ENROLL_DATA, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/with_enrolldata.csv")
 
-#attmempt projection of income dynamics--quadratic
+#attmempt projection of income dynamics--quadratic and NS=====================================
+ENROLL_DATA<-read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/with_enrolldata.csv")
 stringVect = rep(NA, nrow(ENROLL_DATA))
 longAgeVect = vector()
 longIncVect = vector()
@@ -574,7 +575,7 @@ for (i in 1:nrow(ENROLL_DATA)){
       endIndex = j
     }
     else {
-      if (endIndex - startIndex >= 4 & startIndex > 0){
+      if (endIndex - startIndex >= 3 & startIndex > 0){
         incVectOut = incVect[startIndex:endIndex]
         ageVectOut = c(startIndex:endIndex)
       }
@@ -589,22 +590,33 @@ for (i in 1:nrow(ENROLL_DATA)){
     stringVect[i]= -3
   }
   else{
-    #predict with quadratic
+    #predict with quadratic and NS
     startIndex = ageVectOut[1]
     endIndex = ageVectOut[length(ageVectOut)]
     
     #transformed model
-    quadMod <- lm(log(incVectOut + 1)~ageVectOut+ I(ageVectOut^2))
+    #quadMod <- lm(log(incVectOut + 1)~ageVectOut+ I(ageVectOut^2))
     #non-transformedmodel
     #quadMod <- lm(incVectOut~ageVectOut+ I(ageVectOut^2))
+    #transformed and non-transformed
+    #new <- data.frame(ageVectOut = c((endIndex+1):81))
+    #newIncs <- predict(quadMod,new)
     
-    new <- data.frame(ageVectOut = c((endIndex+1):81))
+    #NS model
+    tau = 26.2089
+    input1 = (1-exp(-ageVectOut/tau))/(ageVectOut/tau)
+    input2 = input1 - exp(-ageVectOut/tau)
+    quadMod <- lm(incVectOut~input1+ input2)
+    new <-  c((endIndex+1):81)
+    new1 <-(1-exp(-new/tau))/(new/tau)
+    new2 <- new1 - exp(-new/tau)
+    new <- data.frame(input1 = new1, input2 = new2)
     newIncs <- predict(quadMod,new)
     
     #transformed model
-    incVectFull <- c(rep(-3, startIndex-1), incVectOut, exp(newIncs))
-    #non-transformed model
-    #incVectFull <- c(rep(-3, startIndex-1), incVectOut, newIncs)
+    #incVectFull <- c(rep(-3, startIndex-1), incVectOut, exp(newIncs))
+    #non-transformed model and NS model
+    incVectFull <- c(rep(-3, startIndex-1), incVectOut, newIncs)
     
     stringVect[i]= paste(toString(ENROLL_DATA$PUBID_1997[i]), "\t", toString(incVectFull), sep = "")
     stringVect[i] = gsub(", ", "\t", stringVect[i])
@@ -618,8 +630,7 @@ fileConn<-file("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/
 writeLines(stringVect, fileConn)
 close(fileConn)
 
-
-#quadratic projection with nested
+#attmempt projection of income dynamics--nested quadratic=====================================
 getDelt <- nls(log(longIncVect+1)~a0 + a1 * longAgeVect+(a2+a1*d)* longAgeVect^2 + 2 * d * a2 * longAgeVect^3 + d^2 *a2*longAgeVect^4)
 delta = summary(getDelt)$coefficients[4,1]
 
