@@ -694,3 +694,17 @@ for (i in 1:nrow(ENROLL_DATA)){
 fileConn<-file("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/quadraticoutput2.txt")
 writeLines(stringVect, fileConn)
 close(fileConn)
+
+
+#get shape of census data ======================================================
+CENSUS_DATA <- read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/avgCensus.csv")
+#NS model
+tau = 26.2089
+input1 = (1-exp(-CENSUS_DATA$Age/tau))/(CENSUS_DATA$Age/tau)
+input2 = input1 - exp(-CENSUS_DATA$Age/tau)
+quadMod <- lm(CENSUS_DATA$Income~input1+ input2)
+new <-  c((endIndex+1):81)
+new1 <-(1-exp(-new/tau))/(new/tau)
+new2 <- new1 - exp(-new/tau)
+new <- data.frame(input1 = new1, input2 = new2)
+newIncs <- predict(quadMod,new)
