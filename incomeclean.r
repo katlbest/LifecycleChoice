@@ -554,21 +554,24 @@ for (i in 1:nrow(ENROLL_DATA)){
   incVectOut = NULL
   ageVectOut= NULL
   incVectFull = NULL
+  enrollVectOut = NULL
   incVect = c(ENROLL_DATA$y1[i], ENROLL_DATA$y2[i], ENROLL_DATA$y3[i], ENROLL_DATA$y4[i], ENROLL_DATA$y5[i], ENROLL_DATA$y6[i],ENROLL_DATA$y7[i],ENROLL_DATA$y8[i])
+  enrollVect = c(ENROLL_DATA$enroll2[i], ENROLL_DATA$enroll3[i], ENROLL_DATA$enroll4[i], ENROLL_DATA$enroll5[i], ENROLL_DATA$enroll6[i], ENROLL_DATA$enroll7[i], ENROLL_DATA$enroll8[i], ENROLL_DATA$enroll9[i])
   #do cleanup to ensure only runs of 4+ usable variables are included. must adjust for age
   startIndex = 0
   endIndex = 0
   for (j in 1:length(incVect)){
     if (j == length(incVect)){
-      if (incVect[j]>=0 & startIndex ==0){
+      if (incVect[j]>=0 & startIndex ==0 & enrollVect[j]!= 1){
         endIndex = j
       }
       if (endIndex - startIndex >= 4 & startIndex > 0){
         incVectOut = incVect[startIndex:endIndex]
         ageVectOut = c(startIndex:endIndex)
+        enrollVectOut = enrollVect[startIndex:endIndex]
       }
     }
-    if (incVect[j]>=0){
+    if (incVect[j]>=0 & enrollVect[j]!= 1){
       if (startIndex ==0){
         startIndex = j
       }
@@ -578,6 +581,7 @@ for (i in 1:nrow(ENROLL_DATA)){
       if (endIndex - startIndex >= 3 & startIndex > 0){
         incVectOut = incVect[startIndex:endIndex]
         ageVectOut = c(startIndex:endIndex)
+        enrollVectOut = enrollVect[startIndex:endIndex]
       }
       startIndex = 0
       endIndex = 0
@@ -587,8 +591,10 @@ for (i in 1:nrow(ENROLL_DATA)){
     #print(toString(ENROLL_DATA$PUBID_1997[i]))
     incVectOut = c(-3)
     ageVectOut = c(-3)
+    enrollVectOut = c(-3)
     stringVect[i]= -3
   }
+
   else{
     #predict with quadratic and NS
     startIndex = ageVectOut[1]
@@ -708,3 +714,8 @@ new1 <-(1-exp(-new/tau))/(new/tau)
 new2 <- new1 - exp(-new/tau)
 new <- data.frame(input1 = new1, input2 = new2)
 newIncs <- predict(quadMod,new)
+
+#quadratic
+quadMod <- lm(log(Income)~Age+ I(Age^2), data = CENSUS_DATA)
+quadMod <- lm(Income~Age+ I(Age^2), data = CENSUS_DATA)
+
