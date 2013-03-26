@@ -563,22 +563,24 @@ for (i in 1:nrow(ENROLL_DATA)){
   for (j in 1:length(incVect)){
     if (j == length(incVect)){
       if (incVect[j]>=0 & startIndex ==0 & enrollVect[j]!= 1){
+      #without enrollment modification: if (incVect[j]>=0 & startIndex ==0){
         endIndex = j
       }
-      if (endIndex - startIndex >= 4 & startIndex > 0){
+      if (endIndex - startIndex >= 3 & startIndex > 0){
         incVectOut = incVect[startIndex:endIndex]
         ageVectOut = c(startIndex:endIndex)
         enrollVectOut = enrollVect[startIndex:endIndex]
       }
     }
     if (incVect[j]>=0 & enrollVect[j]!= 1){
+    #without enrollment modification: if (incVect[j]>=0){
       if (startIndex ==0){
         startIndex = j
       }
       endIndex = j
     }
     else {
-      if (endIndex - startIndex >= 3 & startIndex > 0){
+      if (endIndex - startIndex >= 4 & startIndex > 0){
         incVectOut = incVect[startIndex:endIndex]
         ageVectOut = c(startIndex:endIndex)
         enrollVectOut = enrollVect[startIndex:endIndex]
@@ -616,7 +618,8 @@ for (i in 1:nrow(ENROLL_DATA)){
     new <-  c((endIndex+1):81)
     new1 <-(1-exp(-new/tau))/(new/tau)
     new2 <- new1 - exp(-new/tau)
-    new <- data.frame(input1 = new1, input2 = new2)
+    #new <- data.frame(input1 = new1, input2 = new2)
+    new <- data.frame(input2 = new2)
     newIncs <- predict(quadMod,new)
     
     #transformed model
