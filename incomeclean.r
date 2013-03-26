@@ -550,6 +550,7 @@ ENROLL_DATA<-read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/
 stringVect = rep(NA, nrow(ENROLL_DATA))
 longAgeVect = vector()
 longIncVect = vector()
+coeffVect = data.frame(matrix(ncol = 2, nrow = dim(ENROLL_DATA)[1]))
 for (i in 1:nrow(ENROLL_DATA)){
   incVectOut = NULL
   ageVectOut= NULL
@@ -562,8 +563,8 @@ for (i in 1:nrow(ENROLL_DATA)){
   endIndex = 0
   for (j in 1:length(incVect)){
     if (j == length(incVect)){
-      if (incVect[j]>=0 & startIndex ==0 & enrollVect[j]!= 1){
-      #without enrollment modification: if (incVect[j]>=0 & startIndex ==0){
+      #if (incVect[j]>=0 & startIndex ==0 & enrollVect[j]!= 1){ #with enrollment modification
+      if (incVect[j]>=0 & startIndex ==0){ #without enrollment modification
         endIndex = j
       }
       if (endIndex - startIndex >= 3 & startIndex > 0){
@@ -572,8 +573,8 @@ for (i in 1:nrow(ENROLL_DATA)){
         enrollVectOut = enrollVect[startIndex:endIndex]
       }
     }
-    if (incVect[j]>=0 & enrollVect[j]!= 1){
-    #without enrollment modification: if (incVect[j]>=0){
+   # if (incVect[j]>=0 & enrollVect[j]!= 1){ #with enrollment modification: 
+    if (incVect[j]>=0){#without enrollment modification: 
       if (startIndex ==0){
         startIndex = j
       }
@@ -595,6 +596,8 @@ for (i in 1:nrow(ENROLL_DATA)){
     ageVectOut = c(-3)
     enrollVectOut = c(-3)
     stringVect[i]= -3
+    coeffVect[i,1] =-3
+    coeffVect[i,2] =-3
   }
 
   else{
@@ -615,9 +618,12 @@ for (i in 1:nrow(ENROLL_DATA)){
     input1 = (1-exp(-ageVectOut/tau))/(ageVectOut/tau)
     input2 = input1 - exp(-ageVectOut/tau)
     #quadMod <- lm(incVectOut~input1+ input2)
-    quadMod <- lm(incVectOut~input2)
+    #quadMod <- lm(incVectOut~input2)
     output = incVectOut + 3062 * input1
-    new <-  c((endIndex+1):81)
+    quadMod = lm(output~input2)
+    coeffVect[i,1] =quadMod$coefficients[[1]]
+    coeffVect[i,2] =quadMod$coefficients[[2]]
+    new <-  c((endIndex+1):100)
     new1 <-(1-exp(-new/tau))/(new/tau)
     new2 <- new1 - exp(-new/tau)
     #new <- data.frame(input1 = new1, input2 = new2)
@@ -643,6 +649,8 @@ for (i in 1:nrow(ENROLL_DATA)){
 fileConn<-file("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/quadraticoutput.txt")
 writeLines(stringVect, fileConn)
 close(fileConn)
+
+write.csv(coeffVect, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/coeffVect.txt")
 
 #attmempt projection of income dynamics--nested quadratic=====================================
 getDelt <- nls(log(longIncVect+1)~a0 + a1 * longAgeVect+(a2+a1*d)* longAgeVect^2 + 2 * d * a2 * longAgeVect^3 + d^2 *a2*longAgeVect^4)
@@ -729,7 +737,30 @@ quadModHS <- lm(CENSUS_DATA$IncomeHS~input1+ input2)
 b0Vect[2] = quadModHS$coefficients[1]
 b1Vect[2] = quadModHS$coefficients[2]
 b2Vect[2] = quadModHS$coefficients[3]
-
+quadModSC <- lm(CENSUS_DATA$IncomeSC~input1+ input2)
+b0Vect[3] = quadModSC$coefficients[1]
+b1Vect[3] = quadModSC$coefficients[2]
+b2Vect[3] = quadModSC$coefficients[3]
+quadModAS <- lm(CENSUS_DATA$IncomeAS~input1+ input2)
+b0Vect[4] = quadModAS$coefficients[1]
+b1Vect[4] = quadModAS$coefficients[2]
+b2Vect[4] = quadModAS$coefficients[3]
+quadModBS <- lm(CENSUS_DATA$IncomeBS~input1+ input2)
+b0Vect[5] = quadModBS$coefficients[1]
+b1Vect[5] = quadModBS$coefficients[2]
+b2Vect[5] = quadModBS$coefficients[3]
+quadModMA <- lm(CENSUS_DATA$IncomeMA~input1+ input2)
+b0Vect[6] = quadModMA$coefficients[1]
+b1Vect[6] = quadModMA$coefficients[2]
+b2Vect[6] = quadModMA$coefficients[3]
+quadModPR <- lm(CENSUS_DATA$IncomePR~input1+ input2)
+b0Vect[7] = quadModPR$coefficients[1]
+b1Vect[7] = quadModPR$coefficients[2]
+b2Vect[7] = quadModPR$coefficients[3]
+quadModDR <- lm(CENSUS_DATA$IncomeDR~input1+ input2)
+b0Vect[8] = quadModDR$coefficients[1]
+b1Vect[8] = quadModDR$coefficients[2]
+b2Vect[8] = quadModDR$coefficients[3]
 
 new <-  c(19:100)
 new1 <-(1-exp(-new/tau))/(new/tau)
@@ -737,6 +768,12 @@ new2 <- new1 - exp(-new/tau)
 new <- data.frame(input1 = new1, input2 = new2)
 out[1] <- predict(quadModAvg,new)
 out[2] <- predict(quadModHS,new)
+out[3] <- predict(quadModSC,new)
+out[4] <- predict(quadModAS,new)
+out[5] <- predict(quadModBS,new)
+out[6] <- predict(quadModMA,new)
+out[7] <- predict(quadModPR,new)
+out[8] <- predict(quadModDR,new)
 
 write.csv(out,"C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/avgCensusOut.csv")
 
