@@ -614,13 +614,18 @@ for (i in 1:nrow(ENROLL_DATA)){
     tau = 26.2089
     input1 = (1-exp(-ageVectOut/tau))/(ageVectOut/tau)
     input2 = input1 - exp(-ageVectOut/tau)
-    quadMod <- lm(incVectOut~input1+ input2)
+    #quadMod <- lm(incVectOut~input1+ input2)
+    quadMod <- lm(incVectOut~input2)
+    output = incVectOut + 3062 * input1
     new <-  c((endIndex+1):81)
     new1 <-(1-exp(-new/tau))/(new/tau)
     new2 <- new1 - exp(-new/tau)
     #new <- data.frame(input1 = new1, input2 = new2)
     new <- data.frame(input2 = new2)
     newIncs <- predict(quadMod,new)
+    newIncs <- newIncs + 3062 * new1
+    
+    #NS model with fixed beta1
     
     #transformed model
     #incVectFull <- c(rep(-3, startIndex-1), incVectOut, exp(newIncs))
@@ -707,16 +712,33 @@ close(fileConn)
 
 #get shape of census data ======================================================
 CENSUS_DATA <- read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/avgCensus.csv")
+b0Vect = rep(NA,8)
+b1Vect = rep(NA,8)
+b2Vect = rep(NA,8)
+out = data.frame(matrix(ncol = 8, nrow = 82))
+colnames(out)=c("Average", "HS", "SomeCollege", "Associates", "Bachelors", "Masters", "Professional", "Doctoral")
 #NS model
 tau = 26.2089
 input1 = (1-exp(-CENSUS_DATA$Age/tau))/(CENSUS_DATA$Age/tau)
 input2 = input1 - exp(-CENSUS_DATA$Age/tau)
-quadMod <- lm(CENSUS_DATA$Income~input1+ input2)
-new <-  c((endIndex+1):81)
+quadModAvg <- lm(CENSUS_DATA$IncomeAvg~input1+ input2)
+b0Vect[1] = quadModAvg$coefficients[1]
+b1Vect[1] = quadModAvg$coefficients[2]
+b2Vect[1] = quadModAvg$coefficients[3]
+quadModHS <- lm(CENSUS_DATA$IncomeHS~input1+ input2)
+b0Vect[2] = quadModHS$coefficients[1]
+b1Vect[2] = quadModHS$coefficients[2]
+b2Vect[2] = quadModHS$coefficients[3]
+
+
+new <-  c(19:100)
 new1 <-(1-exp(-new/tau))/(new/tau)
 new2 <- new1 - exp(-new/tau)
 new <- data.frame(input1 = new1, input2 = new2)
-newIncs <- predict(quadMod,new)
+out[1] <- predict(quadModAvg,new)
+out[2] <- predict(quadModHS,new)
+
+write.csv(out,"C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/avgCensusOut.csv")
 
 #quadratic
 quadMod <- lm(log(Income)~Age+ I(Age^2), data = CENSUS_DATA)
