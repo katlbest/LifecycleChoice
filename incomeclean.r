@@ -833,7 +833,8 @@ colnames(byCatOut) = cat_vector
 for (i in 1:length(cat_vector)){
   #NS model
   tau = 26.2089
-  curData = outputList[[i]][outputList[[i]]$enroll == 0,]
+  #curData = outputList[[i]][outputList[[i]]$enroll == 0,] #enroll only
+  curData = outputList[[i]] #all data
   numObsVect[i] = dim(curData)[1]
   if (numObsVect[i] > 3){
     input1 = (1-exp(-curData$age/tau))/(curData$age/tau)
@@ -854,6 +855,47 @@ for (i in 1:length(cat_vector)){
    b1Vect[i] = -3
    b2Vect[i] = -3
  }
+}
+
+write.csv(byCatOut,"C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/byCatOut.csv")
+
+
+#NS with fixed beta1
+b0Vect = rep(NA,length(cat_vector))
+b1Vect = rep(NA,length(cat_vector))
+b2Vect = rep(NA,length(cat_vector))
+numObsVect = rep(NA,length(cat_vector))
+R2Vect= rep(NA,length(cat_vector))
+byCatOut = data.frame(matrix(ncol = length(cat_vector), nrow = 82))
+colnames(byCatOut) = cat_vector
+
+for (i in 1:length(cat_vector)){
+  #NS model
+  tau = 26.2089
+  b1 = 10118.85
+  curData = outputList[[i]][outputList[[i]]$enroll == 0,]
+  numObsVect[i] = dim(curData)[1]
+  if (numObsVect[i] > 3){
+    input1 = (1-exp(-curData$age/tau))/(curData$age/tau)
+    input2 = input1 - exp(-curData$age/tau)
+    output = curData$income - b1 * input1
+    quadMod <- lm(output~input1+ input2)
+    b0Vect[i] = quadMod$coefficients[1]
+    b1Vect[i] = quadMod$coefficients[2]
+    b2Vect[i] = quadMod$coefficients[3]
+    R2Vect[i]= summary(quadMod)$r.squared
+    new <-  c(19:100)
+    new1 <-(1-exp(-new/tau))/(new/tau)
+    new2 <- new1 - exp(-new/tau)
+    new <- data.frame(input1 = new1, input2 = new2)
+    byCatOut[,i] <- predict(quadMod,new)
+    byCatOut[,i]<- byCatOut[,i]- b1 * new1
+  }
+  else{
+    b0Vect[i] = -3
+    b1Vect[i] = -3
+    b2Vect[i] = -3
+  }
 }
 
 write.csv(byCatOut,"C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/byCatOut.csv")
