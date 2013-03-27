@@ -551,6 +551,9 @@ stringVect = rep(NA, nrow(ENROLL_DATA))
 longAgeVect = vector()
 longIncVect = vector()
 coeffVect = data.frame(matrix(ncol = 2, nrow = dim(ENROLL_DATA)[1]))
+ageVectList <- list()
+incomeVectList <- list()
+enrollVectList <- list()
 for (i in 1:nrow(ENROLL_DATA)){
   incVectOut = NULL
   ageVectOut= NULL
@@ -571,6 +574,9 @@ for (i in 1:nrow(ENROLL_DATA)){
         incVectOut = incVect[startIndex:endIndex]
         ageVectOut = c(startIndex:endIndex)
         enrollVectOut = enrollVect[startIndex:endIndex]
+        incomeVectList[[i]]<-incVectOut
+        ageVectList[[i]]<-ageVectOut
+        enrollVectList[[i]]<-enrollVectOut
       }
     }
    # if (incVect[j]>=0 & enrollVect[j]!= 1){ #with enrollment modification: 
@@ -585,6 +591,9 @@ for (i in 1:nrow(ENROLL_DATA)){
         incVectOut = incVect[startIndex:endIndex]
         ageVectOut = c(startIndex:endIndex)
         enrollVectOut = enrollVect[startIndex:endIndex]
+        incomeVectList[[i]]<-incVectOut
+        ageVectList[[i]]<-ageVectOut
+        enrollVectList[[i]]<-enrollVectOut
       }
       startIndex = 0
       endIndex = 0
@@ -798,124 +807,53 @@ for (i in 1:length(admit_cats)){#populate what will be the "lookup vector"
 
 outputList <- list()
 
-#create matrices for storing data
+#store data points by category
 for (i in 1:length(cat_vector)){
-  outputList[[i]]<-data.frame(matrix(ncol = 2, nrow = 0))
-  colnames(outputList[[i]])= c("age", "income")
+  outputList[[i]]<-data.frame(matrix(ncol = 3, nrow = 0))
+  colnames(outputList[[i]])= c("age", "income", "enroll")
 }
 names(outputList)<-cat_vector
 
 for (i in 1:nrow(ENROLL_DATA)){
   curCat = toString(paste(ENROLL_DATA$BestAd5[i],ENROLL_DATA$BestAtt5[i], sep = ""))
   curIndex = match(curCat, cat_vector)
-  nextRow = dim(outputList[[curIndex]])[1]+1
-  outputList[[curIndex]][nextRow,] = #NEED TO HAVE THEIR ENTRIES ADDED HERE! (could we just add?)
-    #we should probably just move this up to the previous loop...
+  tempDF <- data.frame(age = ageVectList[[i]], income = incomeVectList[[i]], enroll = enrollVectList[[i]])
+  outputList[[curIndex]] = rbind(outputList[[curIndex]], tempDF)
 }
 
-stringVect = rep(NA, nrow(ENROLL_DATA))
-longAgeVect = vector()
-longIncVect = vector()
-coeffVect = data.frame(matrix(ncol = 2, nrow = dim(ENROLL_DATA)[1]))
-for (i in 1:nrow(ENROLL_DATA)){
-  incVectOut = NULL
-  ageVectOut= NULL
-  incVectFull = NULL
-  enrollVectOut = NULL
-  incVect = c(ENROLL_DATA$y1[i], ENROLL_DATA$y2[i], ENROLL_DATA$y3[i], ENROLL_DATA$y4[i], ENROLL_DATA$y5[i], ENROLL_DATA$y6[i],ENROLL_DATA$y7[i],ENROLL_DATA$y8[i])
-  enrollVect = c(ENROLL_DATA$enroll2[i], ENROLL_DATA$enroll3[i], ENROLL_DATA$enroll4[i], ENROLL_DATA$enroll5[i], ENROLL_DATA$enroll6[i], ENROLL_DATA$enroll7[i], ENROLL_DATA$enroll8[i], ENROLL_DATA$enroll9[i])
-  #do cleanup to ensure only runs of 4+ usable variables are included. must adjust for age
-  startIndex = 0
-  endIndex = 0
-  for (j in 1:length(incVect)){
-    if (j == length(incVect)){
-      #if (incVect[j]>=0 & startIndex ==0 & enrollVect[j]!= 1){ #with enrollment modification
-      if (incVect[j]>=0 & startIndex ==0){ #without enrollment modification
-        endIndex = j
-      }
-      if (endIndex - startIndex >= 3 & startIndex > 0){
-        incVectOut = incVect[startIndex:endIndex]
-        ageVectOut = c(startIndex:endIndex)
-        enrollVectOut = enrollVect[startIndex:endIndex]
-      }
-    }
-    # if (incVect[j]>=0 & enrollVect[j]!= 1){ #with enrollment modification: 
-    if (incVect[j]>=0){#without enrollment modification: 
-      if (startIndex ==0){
-        startIndex = j
-      }
-      endIndex = j
-    }
-    else {
-      if (endIndex - startIndex >= 4 & startIndex > 0){
-        incVectOut = incVect[startIndex:endIndex]
-        ageVectOut = c(startIndex:endIndex)
-        enrollVectOut = enrollVect[startIndex:endIndex]
-      }
-      startIndex = 0
-      endIndex = 0
-    }
-  }
-  if (is.null(incVectOut)){
-    #print(toString(ENROLL_DATA$PUBID_1997[i]))
-    incVectOut = c(-3)
-    ageVectOut = c(-3)
-    enrollVectOut = c(-3)
-    stringVect[i]= -3
-    coeffVect[i,1] =-3
-    coeffVect[i,2] =-3
-  }
-  
-  else{
-    #predict with quadratic and NS
-    startIndex = ageVectOut[1]
-    endIndex = ageVectOut[length(ageVectOut)]
-    
-    #transformed model
-    #quadMod <- lm(log(incVectOut + 1)~ageVectOut+ I(ageVectOut^2))
-    #non-transformedmodel
-    #quadMod <- lm(incVectOut~ageVectOut+ I(ageVectOut^2))
-    #transformed and non-transformed
-    #new <- data.frame(ageVectOut = c((endIndex+1):81))
-    #newIncs <- predict(quadMod,new)
-    
-    #NS model 
-    tau = 26.2089
-    b1 = 10118.85
-    input1 = (1-exp(-ageVectOut/tau))/(ageVectOut/tau)
-    input2 = input1 - exp(-ageVectOut/tau)
-    #quadMod <- lm(incVectOut~input1+ input2)
-    #quadMod <- lm(incVectOut~input2)
-    output = incVectOut - b1 * input1
-    quadMod = lm(output~input2)
-    coeffVect[i,1] =quadMod$coefficients[[1]]
-    coeffVect[i,2] =quadMod$coefficients[[2]]
-    new <-  c((endIndex+1):100)
+#NS with all available datapoint
+b0Vect = rep(NA,length(cat_vector))
+b1Vect = rep(NA,length(cat_vector))
+b2Vect = rep(NA,length(cat_vector))
+numObsVect = rep(NA,length(cat_vector))
+R2Vect= rep(NA,length(cat_vector))
+byCatOut = data.frame(matrix(ncol = length(cat_vector), nrow = 82))
+colnames(byCatOut) = cat_vector
+
+for (i in 1:length(cat_vector)){
+  #NS model
+  tau = 26.2089
+  curData = outputList[[i]][outputList[[i]]$enroll == 0,]
+  numObsVect[i] = dim(curData)[1]
+  if (numObsVect[i] > 3){
+    input1 = (1-exp(-curData$age/tau))/(curData$age/tau)
+    input2 = input1 - exp(-curData$age/tau)
+    quadMod <- lm(curData$income~input1+ input2)
+    b0Vect[i] = quadMod$coefficients[1]
+    b1Vect[i] = quadMod$coefficients[2]
+    b2Vect[i] = quadMod$coefficients[3]
+    R2Vect[i]= summary(quadMod)$r.squared
+    new <-  c(19:100)
     new1 <-(1-exp(-new/tau))/(new/tau)
     new2 <- new1 - exp(-new/tau)
-    #new <- data.frame(input1 = new1, input2 = new2)
-    new <- data.frame(input2 = new2)
-    newIncs <- predict(quadMod,new)
-    newIncs <- newIncs - b1 * new1
-    
-    #NS model with fixed beta1
-    
-    #transformed model
-    #incVectFull <- c(rep(-3, startIndex-1), incVectOut, exp(newIncs))
-    #non-transformed model and NS model
-    incVectFull <- c(rep(-3, startIndex-1), incVectOut, newIncs)
-    
-    stringVect[i]= paste(toString(ENROLL_DATA$PUBID_1997[i]), "\t", toString(incVectFull), sep = "")
-    stringVect[i] = gsub(", ", "\t", stringVect[i])
-    
-    #get whole sample for nonlinear estimation
-    longIncVect = c(longIncVect,incVectOut)
-    longAgeVect = c(longAgeVect, ageVectOut)
+    new <- data.frame(input1 = new1, input2 = new2)
+    byCatOut[,i] <- predict(quadMod,new)
   }
+ else{
+   b0Vect[i] = -3
+   b1Vect[i] = -3
+   b2Vect[i] = -3
+ }
 }
-fileConn<-file("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/quadraticoutput.txt")
-writeLines(stringVect, fileConn)
-close(fileConn)
 
-write.csv(coeffVect, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/coeffVect.txt")
-
+write.csv(byCatOut,"C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/byCatOut.csv")
