@@ -633,7 +633,7 @@ for (i in 1:nrow(ENROLL_DATA)){
     quadMod = lm(output~input2)
     coeffVect[i,1] =quadMod$coefficients[[1]]
     coeffVect[i,2] =quadMod$coefficients[[2]]
-    new <-  c((endIndex+1):100)
+    new <-  c((endIndex+1):81)
     new1 <-(1-exp(-new/tau))/(new/tau)
     new2 <- new1 - exp(-new/tau)
     #new <- data.frame(input1 = new1, input2 = new2)
@@ -792,7 +792,7 @@ quadMod <- lm(Income~Age+ I(Age^2), data = CENSUS_DATA)
 
 #attmempt NS projection of income dynamics for each education group=====================================
 ENROLL_DATA<-read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/with_enrolldata.csv")
-
+ENROLL_DATA$category <- NA
 admit_cats <- c('1','2', '3', '4', '6', '7')
 apply_cats <- c('-3','1','2', '3', '4', '6', '7')
 cat_vector <- rep(NA, length(admit_cats)*length(apply_cats))
@@ -816,6 +816,7 @@ names(outputList)<-cat_vector
 
 for (i in 1:nrow(ENROLL_DATA)){
   curCat = toString(paste(ENROLL_DATA$BestAd5[i],ENROLL_DATA$BestAtt5[i], sep = ""))
+  ENROLL_DATA$category[i]<-curCat
   curIndex = match(curCat, cat_vector)
   tempDF <- data.frame(age = ageVectList[[i]], income = incomeVectList[[i]], enroll = enrollVectList[[i]])
   outputList[[curIndex]] = rbind(outputList[[curIndex]], tempDF)
