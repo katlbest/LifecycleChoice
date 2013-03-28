@@ -639,7 +639,7 @@ for (i in 1:nrow(ENROLL_DATA)){
     #new <- data.frame(input1 = new1, input2 = new2)
     new <- data.frame(input2 = new2)
     newIncs <- predict(quadMod,new)
-    newIncs <- newIncs - b1 * new1
+    newIncs <- newIncs + b1 * new1
     
     #NS model with fixed beta1
     
@@ -773,9 +773,10 @@ b1Vect[8] = quadModDR$coefficients[2]
 b2Vect[8] = quadModDR$coefficients[3]
 
 longInc = c(CENSUS_DATA$IncomeHS, CENSUS_DATA$IncomeSC, CENSUS_DATA$IncomeAS, CENSUS_DATA$IncomeBS)
-longAge = c(CENSUS_DATA$AgeHS, CENSUS_DATA$AgeSC, CENSUS_DATA$AgeAS, CENSUS_DATA$AgeBS)
+longAge = c(CENSUS_DATA$Age, CENSUS_DATA$Age, CENSUS_DATA$Age, CENSUS_DATA$Age)
 input1 = (1-exp(-longAge/tau))/(longAge/tau)
 input2 = input1 - exp(-longAge/tau)
+quadModDR <- lm(longInc~input1+ input2)
 
 new <-  c(19:100)
 new1 <-(1-exp(-new/tau))/(new/tau)
