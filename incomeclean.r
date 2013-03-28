@@ -736,7 +736,7 @@ b2Vect = rep(NA,8)
 out = data.frame(matrix(ncol = 8, nrow = 82))
 colnames(out)=c("Average", "HS", "SomeCollege", "Associates", "Bachelors", "Masters", "Professional", "Doctoral")
 #NS model
-tau = 26.2089
+tau =27.8818
 input1 = (1-exp(-CENSUS_DATA$Age/tau))/(CENSUS_DATA$Age/tau)
 input2 = input1 - exp(-CENSUS_DATA$Age/tau)
 quadModAvg <- lm(CENSUS_DATA$IncomeAvg~input1+ input2)
@@ -771,6 +771,11 @@ quadModDR <- lm(CENSUS_DATA$IncomeDR~input1+ input2)
 b0Vect[8] = quadModDR$coefficients[1]
 b1Vect[8] = quadModDR$coefficients[2]
 b2Vect[8] = quadModDR$coefficients[3]
+
+longInc = c(CENSUS_DATA$IncomeHS, CENSUS_DATA$IncomeSC, CENSUS_DATA$IncomeAS, CENSUS_DATA$IncomeBS)
+longAge = c(CENSUS_DATA$AgeHS, CENSUS_DATA$AgeSC, CENSUS_DATA$AgeAS, CENSUS_DATA$AgeBS)
+input1 = (1-exp(-longAge/tau))/(longAge/tau)
+input2 = input1 - exp(-longAge/tau)
 
 new <-  c(19:100)
 new1 <-(1-exp(-new/tau))/(new/tau)
