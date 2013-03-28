@@ -661,6 +661,7 @@ writeLines(stringVect, fileConn)
 close(fileConn)
 
 write.csv(coeffVect, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/coeffVect.txt")
+write.csv(ENROLL_DATA, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/enroll_data_withvectors.txt")
 
 #attmempt projection of income dynamics--nested quadratic=====================================
 getDelt <- nls(log(longIncVect+1)~a0 + a1 * longAgeVect+(a2+a1*d)* longAgeVect^2 + 2 * d * a2 * longAgeVect^3 + d^2 *a2*longAgeVect^4)
