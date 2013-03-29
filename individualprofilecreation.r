@@ -14,6 +14,7 @@ for (i in 1:nrow(ENROLL_DATA)){
   enrollVect = c(ENROLL_DATA$enroll2[i], ENROLL_DATA$enroll3[i], ENROLL_DATA$enroll4[i], ENROLL_DATA$enroll5[i], ENROLL_DATA$enroll6[i], ENROLL_DATA$enroll7[i], ENROLL_DATA$enroll8[i], ENROLL_DATA$enroll9[i])
   startIndex = 0
   endIndex = 0
+  
   #fill in intermediate zeros/missings
       changing = 0
       last = 0
@@ -87,11 +88,18 @@ for (i in 1:nrow(ENROLL_DATA)){
 
 #ENROLL_DATA<-ENROLL_DATA[ENROLL_DATA$Best.Attended == -3,]
 
+#must add 18 to each age number so that tau is correct
+for (i in 1:length(ageVectList)){
+  if (ageVectList[[i]][1]>0){
+    ageVectList[[i]] = ageVectList[[i]] + 18
+  }
+}
+
 #project without fixing any variables==================================================================================
 tau = 27.8818
 coeffVect = data.frame(matrix(ncol = 5, nrow = dim(ENROLL_DATA)[1]))
 colnames(coeffVect)=c("b0","b1" ,"b2", "R2", "NumObservations")
-output = data.frame(matrix(ncol = length(ENROLL_DATA), nrow = 100))
+output = data.frame(matrix(ncol = length(ENROLL_DATA), nrow = 82))
 for (i in 1:nrow(ENROLL_DATA)){
   if (length(incomeVectList[[i]])>2){
     curData = data.frame(age = ageVectList[[i]], income = incomeVectList[[i]], enroll = enrollVectList[[i]])
@@ -111,10 +119,10 @@ for (i in 1:nrow(ENROLL_DATA)){
     new2 <- new1 - exp(-new/tau)
     new <- data.frame(input1 = new1, input2 = new2)
     newIncs <-predict(quadMod,new)
-    output[,i] <- c(rep(-3, firstDataYear-1), curData$income, newIncs)
+    output[,i] <- c(rep(-3, firstDataYear-10), curData$income, newIncs)
   }
   else{
-    output[,i] <- rep(-3, 100)
+    output[,i] <- rep(-3, 82)
   }
 }  
 colnames(output)=ENROLL_DATA$PUBID_1997
@@ -126,7 +134,7 @@ tau = 27.8818
 b1 = 29332 #same result if you do them all together
 coeffVect = data.frame(matrix(ncol = 5, nrow = dim(ENROLL_DATA)[1]))
 colnames(coeffVect)=c("b0","b1","b2", "R2", "NumObservations")
-output = data.frame(matrix(ncol = length(ENROLL_DATA), nrow = 100))
+output = data.frame(matrix(ncol = length(ENROLL_DATA), nrow = 82))
 for (i in 1:nrow(ENROLL_DATA)){
   if (length(incomeVectList[[i]])>2){
     curData = data.frame(age = ageVectList[[i]], income = incomeVectList[[i]], enroll = enrollVectList[[i]])
@@ -148,10 +156,10 @@ for (i in 1:nrow(ENROLL_DATA)){
     new <- data.frame(input2 = new2)
     newIncs <-predict(quadMod,new)
     newIncs <- newIncs + b1 * new1
-    output[,i] <- c(rep(-3, firstDataYear-1), curData$income, newIncs)
+    output[,i] <- c(rep(-3, firstDataYear-19), curData$income, newIncs)
   }
   else{
-    output[,i] <- rep(-3, 100)
+    output[,i] <- rep(-3, 82)
   }
 }  
 colnames(output)=ENROLL_DATA$PUBID_1997
@@ -164,7 +172,7 @@ m = -2.8149
 b = 36241
 coeffVect = data.frame(matrix(ncol = 5, nrow = dim(ENROLL_DATA)[1]))
 colnames(coeffVect)=c("b0","b1" ,"b2", "R2", "NumObservations")
-output = data.frame(matrix(ncol = length(ENROLL_DATA), nrow = 100))
+output = data.frame(matrix(ncol = length(ENROLL_DATA), nrow =82))
 for (i in 1:nrow(ENROLL_DATA)){
   if (length(incomeVectList[[i]])>2){
     curData = data.frame(age = ageVectList[[i]], income = incomeVectList[[i]], enroll = enrollVectList[[i]])
@@ -186,10 +194,10 @@ for (i in 1:nrow(ENROLL_DATA)){
     new2 <- new1 - exp(-new/tau)
     new <- data.frame(input1 = new1, input2 = new2)
     newIncs <-predict(quadMod,new)
-    output[,i] <- c(rep(-3, firstDataYear-1), curData$income, newIncs)
+    output[,i] <- c(rep(-3, firstDataYear-19), curData$income, newIncs)
   }
   else{
-    output[,i] <- rep(-3, 100)
+    output[,i] <- rep(-3,82)
   }
 }  
 colnames(output)=ENROLL_DATA$PUBID_1997
@@ -203,7 +211,7 @@ m = -2.8149
 b = 36241
 coeffVect = data.frame(matrix(ncol = 6, nrow = dim(ENROLL_DATA)[1]))
 colnames(coeffVect)=c("Gamma","b0","b1" ,"b2", "R2", "NumObservations")
-output = data.frame(matrix(ncol = length(ENROLL_DATA), nrow = 81))
+output = data.frame(matrix(ncol = length(ENROLL_DATA), nrow = 82))
 for (i in 1:nrow(ENROLL_DATA)){
   if (length(incomeVectList[[i]])>2){
     curData = data.frame(age = ageVectList[[i]], income = incomeVectList[[i]], enroll = enrollVectList[[i]])
@@ -222,16 +230,16 @@ for (i in 1:nrow(ENROLL_DATA)){
     coeffVect[i,6]= numObs
     firstDataYear = ageVectList[[i]][1]
     lastDataYear = ageVectList[[i]][length(ageVectList[[i]])]
-    new <-  c((lastDataYear+1):81)
+    new <-  c((lastDataYear+1):100)
     new1 <-(1-exp(-new/tau))/(new/tau)
     new2 <- new1 - exp(-new/tau)
     new <- data.frame(input1 = new1, input2 = new2)
     newIncs <-predict(quadMod,new)
     newIncs <- newIncs + b1 * new1
-    output[,i] <- c(rep(-3, firstDataYear-1), curData$income, newIncs)
+    output[,i] <- c(rep(-3, firstDataYear-19), curData$income, newIncs)
   }
   else{
-    output[,i] <- rep(-3, 81)
+    output[,i] <- rep(-3, 82)
   }
 }  
 colnames(output)=ENROLL_DATA$PUBID_1997
