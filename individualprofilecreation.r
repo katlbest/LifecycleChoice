@@ -14,6 +14,32 @@ for (i in 1:nrow(ENROLL_DATA)){
   enrollVect = c(ENROLL_DATA$enroll2[i], ENROLL_DATA$enroll3[i], ENROLL_DATA$enroll4[i], ENROLL_DATA$enroll5[i], ENROLL_DATA$enroll6[i], ENROLL_DATA$enroll7[i], ENROLL_DATA$enroll8[i], ENROLL_DATA$enroll9[i])
   startIndex = 0
   endIndex = 0
+  #fill in intermediate zeros/missings
+      changing = 0
+      last = 0
+      for (j in 2:length(incVect)){
+        if (changing ==0)  {
+          if (incVect[j-1]>0 & incVect[j]<=0){
+            last = incVect[j-1]
+            change_start_ind = j
+            change_start_value = incVect[j-1]
+            changing = 1
+            #print(paste("starting at ",i, sep = ""))
+          }
+        }
+        else{
+          if (incVect[j]> 0){
+            for (k in (change_start_ind:j)){
+              incVect[k] = max(mean(last, change_start_value), last)
+            }
+            changing = 0
+          }
+          else if (enrollVect[j] > 0){
+            changing = 0
+          }
+        }
+     }
+  #find longest run of usable data
   for (j in 1:length(incVect)){
     if (j == length(incVect)){
       #if (incVect[j]>=0 & startIndex ==0 & enrollVect[j]!= 1){ #with enrollment modification
@@ -175,8 +201,8 @@ tau = 27.8818
 b1 = 29332 #same result if you do them all together
 m = -2.8149
 b = 36241
-coeffVect = data.frame(matrix(ncol = 5, nrow = dim(ENROLL_DATA)[1]))
-colnames(coeffVect)=c("b0","b1" ,"b2", "R2", "NumObservations")
+coeffVect = data.frame(matrix(ncol = 6, nrow = dim(ENROLL_DATA)[1]))
+colnames(coeffVect)=c("Gamma","b0","b1" ,"b2", "R2", "NumObservations")
 output = data.frame(matrix(ncol = length(ENROLL_DATA), nrow = 81))
 for (i in 1:nrow(ENROLL_DATA)){
   if (length(incomeVectList[[i]])>2){
@@ -188,11 +214,12 @@ for (i in 1:nrow(ENROLL_DATA)){
     quadMod <- lm(adjoutput~0+input2)
     gamma = quadMod$coefficients[1]
     b0= (gamma-b)/m
-    coeffVect[i,1] = b0
-    coeffVect[i,2] = b1
-    coeffVect[i,3]= (m-1)*b0+b
-    coeffVect[i,4]= summary(quadMod)$r.squared
-    coeffVect[i,5]= numObs
+    coeffVect[i,1] = gamma
+    coeffVect[i,2] = b0
+    coeffVect[i,3] = b1
+    coeffVect[i,4]= (m-1)*b0+b
+    coeffVect[i,5]= summary(quadMod)$r.squared
+    coeffVect[i,6]= numObs
     firstDataYear = ageVectList[[i]][1]
     lastDataYear = ageVectList[[i]][length(ageVectList[[i]])]
     new <-  c((lastDataYear+1):81)
@@ -204,7 +231,7 @@ for (i in 1:nrow(ENROLL_DATA)){
     output[,i] <- c(rep(-3, firstDataYear-1), curData$income, newIncs)
   }
   else{
-    output[,i] <- rep(-3, 100)
+    output[,i] <- rep(-3, 81)
   }
 }  
 colnames(output)=ENROLL_DATA$PUBID_1997
