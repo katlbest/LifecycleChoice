@@ -1,5 +1,3 @@
-library(plyr)
-
 ENROLL_DATA<-read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/enroll_data_withvectors.csv")
 
 #set up vector lists of input data==============================================================================
@@ -17,6 +15,7 @@ for (i in 1:nrow(ENROLL_DATA)){
   endIndex = 0
   for (j in 1:length(incVect)){
     if (j == length(incVect)){
+      #if (incVect[j]>=0 & startIndex ==0 & enrollVect[j]!= 1){ #with enrollment modification
       if (incVect[j]>=0 & startIndex ==0){ #without enrollment modification
         endIndex = j
       }
@@ -29,6 +28,7 @@ for (i in 1:nrow(ENROLL_DATA)){
         enrollVectList[[i]]<-enrollVectOut
       }
     }
+    #if (incVect[j]>=0 & enrollVect[j]!= 1){ #with enrollment modification: 
     if (incVect[j]>=0){#without enrollment modification: 
       if (startIndex ==0){
         startIndex = j
@@ -52,8 +52,13 @@ for (i in 1:nrow(ENROLL_DATA)){
     incVectOut = c(-3)
     ageVectOut = c(-3)
     enrollVectOut = c(-3)
+    incomeVectList[[i]]<-incVectOut
+    ageVectList[[i]]<-ageVectOut
+    enrollVectList[[i]]<-enrollVectOut
   }
 }
+
+ENROLL_DATA<-ENROLL_DATA[ENROLL_DATA$Best.Attended == -3,]
 
 #project without fixing any variables==================================================================================
 tau = 27.8818
