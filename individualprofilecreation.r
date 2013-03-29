@@ -95,6 +95,36 @@ for (i in 1:length(ageVectList)){
   }
 }
 
+#set to missing if only zeros available
+for (i in 1:length(incomeVectList)){
+  #set to missing if only zeros available
+  if (sum(incomeVectList[[i]])<= 0){
+    incomeVectList[[i]]<-c(-3)
+    ageVectList[[i]]<-c(-3)
+    enrollVectList[[i]]<-c(-3)
+  }
+}
+
+#if income is lower than previous, set to previous
+for (i in 1:length(incomeVectList)){
+  if (incomeVectList[[i]][1]>=0){
+    firstBigIndex = 0
+    for (j in 2:length(incomeVectList[[i]])){
+      if (incomeVectList[[i]][j]<incomeVectList[[i]][j-1]){
+        incomeVectList[[i]][j]=incomeVectList[[i]][j-1]
+      }
+      if (firstBigIndex == 0){
+        if (incomeVectList[[i]][j-1] >= 10000){
+          firstBigIndex = j-1
+        }
+      }
+    }
+  incomeVectList[[i]]= incomeVectList[[i]][firstBigIndex:length(incomeVectList[[i]])]
+  ageVectList[[i]]= ageVectList[[i]][firstBigIndex:length(ageVectList[[i]])]
+  enrollVectList[[i]]= enrollVectList[[i]][firstBigIndex:length(enrollVectList[[i]])]
+  }
+}
+
 #project without fixing any variables==================================================================================
 tau = 27.8818
 coeffVect = data.frame(matrix(ncol = 5, nrow = dim(ENROLL_DATA)[1]))
@@ -119,7 +149,7 @@ for (i in 1:nrow(ENROLL_DATA)){
     new2 <- new1 - exp(-new/tau)
     new <- data.frame(input1 = new1, input2 = new2)
     newIncs <-predict(quadMod,new)
-    output[,i] <- c(rep(-3, firstDataYear-10), curData$income, newIncs)
+    output[,i] <- c(rep(-3, firstDataYear-19), curData$income, newIncs)
   }
   else{
     output[,i] <- rep(-3, 82)
