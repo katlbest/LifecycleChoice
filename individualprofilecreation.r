@@ -10,7 +10,7 @@ for (i in 1:nrow(ENROLL_DATA)){
   ageVectOut= NULL
   incVectFull = NULL
   enrollVectOut = NULL
-  incVect = c(ENROLL_DATA$y1[i], ENROLL_DATA$y2[i], ENROLL_DATA$y3[i], ENROLL_DATA$y4[i], ENROLL_DATA$y5[i], ENROLL_DATA$y6[i],ENROLL_DATA$y7[i],ENROLL_DATA$y8[i])
+  incVect = c(ENROLL_DATA$ynm1[i], ENROLL_DATA$ynm2[i], ENROLL_DATA$ynm3[i], ENROLL_DATA$ynm4[i], ENROLL_DATA$ynm5[i], ENROLL_DATA$ynm6[i],ENROLL_DATA$ynm7[i],ENROLL_DATA$ynm8[i])
   enrollVect = c(ENROLL_DATA$enroll2[i], ENROLL_DATA$enroll3[i], ENROLL_DATA$enroll4[i], ENROLL_DATA$enroll5[i], ENROLL_DATA$enroll6[i], ENROLL_DATA$enroll7[i], ENROLL_DATA$enroll8[i], ENROLL_DATA$enroll9[i])
   startIndex = 0
   endIndex = 0
@@ -20,7 +20,7 @@ for (i in 1:nrow(ENROLL_DATA)){
       if (incVect[j]>0 & startIndex ==0){ #without enrollment modification
         endIndex = j
       }
-      if (endIndex - startIndex >= 3 & startIndex > 0){
+      if (endIndex - startIndex >= 2 & startIndex > 0){
         incVectOut = incVect[startIndex:endIndex]
         ageVectOut = c(startIndex:endIndex)
         enrollVectOut = enrollVect[startIndex:endIndex]
@@ -37,7 +37,7 @@ for (i in 1:nrow(ENROLL_DATA)){
       endIndex = j
     }
     else {
-      if (endIndex - startIndex >= 3 & startIndex > 0){
+      if (endIndex - startIndex >= 2 & startIndex > 0){
         incVectOut = incVect[startIndex:endIndex]
         ageVectOut = c(startIndex:endIndex)
         enrollVectOut = enrollVect[startIndex:endIndex]
