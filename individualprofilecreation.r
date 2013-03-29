@@ -177,7 +177,7 @@ m = -2.8149
 b = 36241
 coeffVect = data.frame(matrix(ncol = 5, nrow = dim(ENROLL_DATA)[1]))
 colnames(coeffVect)=c("b0","b1" ,"b2", "R2", "NumObservations")
-output = data.frame(matrix(ncol = length(ENROLL_DATA), nrow = 100))
+output = data.frame(matrix(ncol = length(ENROLL_DATA), nrow = 81))
 for (i in 1:nrow(ENROLL_DATA)){
   if (length(incomeVectList[[i]])>2){
     curData = data.frame(age = ageVectList[[i]], income = incomeVectList[[i]], enroll = enrollVectList[[i]])
@@ -195,7 +195,7 @@ for (i in 1:nrow(ENROLL_DATA)){
     coeffVect[i,5]= numObs
     firstDataYear = ageVectList[[i]][1]
     lastDataYear = ageVectList[[i]][length(ageVectList[[i]])]
-    new <-  c((lastDataYear+1):100)
+    new <-  c((lastDataYear+1):81)
     new1 <-(1-exp(-new/tau))/(new/tau)
     new2 <- new1 - exp(-new/tau)
     new <- data.frame(input1 = new1, input2 = new2)
