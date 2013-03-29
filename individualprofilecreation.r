@@ -29,7 +29,7 @@ for (i in 1:nrow(ENROLL_DATA)){
         }
         else{
           if (incVect[j]> 0){
-            for (k in (change_start_ind:j)){
+            for (k in (change_start_ind:j-1)){
               incVect[k] = max(mean(last, change_start_value), last)
             }
             changing = 0
@@ -85,7 +85,7 @@ for (i in 1:nrow(ENROLL_DATA)){
   }
 }
 
-ENROLL_DATA<-ENROLL_DATA[ENROLL_DATA$Best.Attended == -3,]
+#ENROLL_DATA<-ENROLL_DATA[ENROLL_DATA$Best.Attended == -3,]
 
 #project without fixing any variables==================================================================================
 tau = 27.8818
