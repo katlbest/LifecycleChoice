@@ -797,6 +797,82 @@ write.csv(out,"C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/a
 quadMod <- lm(log(Income)~Age+ I(Age^2), data = CENSUS_DATA)
 quadMod <- lm(Income~Age+ I(Age^2), data = CENSUS_DATA)
 
+#get shape of census data with fixed b0/b2 relationship ======================================================
+CENSUS_DATA <- read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/avgCensus.csv")
+b0Vect = rep(NA,8)
+b1Vect = rep(NA,8)
+b2Vect = rep(NA,8)
+gammaVect = rep(NA,8)
+out = data.frame(matrix(ncol = 8, nrow = 82))
+colnames(out)=c("Average", "HS", "SomeCollege", "Associates", "Bachelors", "Masters", "Professional", "Doctoral")
+#NS model
+tau =27.8818
+m = -2.8149
+b = 36241
+input1 = (1-exp(-CENSUS_DATA$Age/tau))/(CENSUS_DATA$Age/tau)
+input2 = input1 - exp(-CENSUS_DATA$Age/tau)
+quadModAvg <- lm(CENSUS_DATA$IncomeAvg~0+input1+ input2)
+gammaVect[1] =  quadModAvg$coefficients[1]
+b0Vect[1] = (gamma-b)/m
+b1Vect[1] = quadModAvg$coefficients[2]
+b2Vect[1] =  (m-1)*b0+b
+quadModHS <- lm(CENSUS_DATA$IncomeHS~0+input1+ input2)
+gammaVect[2] =  quadModAvg$coefficients[1]
+b0Vect[2] = (gamma-b)/m
+b1Vect[2] = quadModAvg$coefficients[2]
+b2Vect[2] =  (m-1)*b0+b
+quadModSC <- lm(CENSUS_DATA$IncomeSC~0+input1+ input2)
+gammaVect[3] =  quadModAvg$coefficients[1]
+b0Vect[3] = (gamma-b)/m
+b1Vect[3] = quadModAvg$coefficients[2]
+b2Vect[3] =  (m-1)*b0+b
+quadModAS <- lm(CENSUS_DATA$IncomeAS~0+input1+ input2)
+gammaVect[4] =  quadModAvg$coefficients[1]
+b0Vect[4] = (gamma-b)/m
+b1Vect[4] = quadModAvg$coefficients[2]
+b2Vect[4] =  (m-1)*b0+b
+quadModBS <- lm(CENSUS_DATA$IncomeBS~0+input1+ input2)
+gammaVect[5] =  quadModAvg$coefficients[1]
+b0Vect[5] = (gamma-b)/m
+b1Vect[5] = quadModAvg$coefficients[2]
+b2Vect[5] =  (m-1)*b0+b
+quadModMA <- lm(CENSUS_DATA$IncomeMA~0+input1+ input2)
+gammaVect[6] =  quadModAvg$coefficients[1]
+b0Vect[6] = (gamma-b)/m
+b1Vect[6] = quadModAvg$coefficients[2]
+b2Vect[6] =  (m-1)*b0+b
+quadModPR <- lm(CENSUS_DATA$IncomePR~0+input1+ input2)
+gammaVect[7] =  quadModAvg$coefficients[1]
+b0Vect[7] = (gamma-b)/m
+b1Vect[7] = quadModAvg$coefficients[2]
+b2Vect[7] =  (m-1)*b0+b
+quadModDR <- lm(CENSUS_DATA$IncomeDR~0+input1+ input2)
+gammaVect[8] =  quadModAvg$coefficients[1]
+b0Vect[8] = (gamma-b)/m
+b1Vect[8] = quadModAvg$coefficients[2]
+b2Vect[8] =  (m-1)*b0+b
+
+longInc = c(CENSUS_DATA$IncomeHS, CENSUS_DATA$IncomeSC, CENSUS_DATA$IncomeAS, CENSUS_DATA$IncomeBS)
+longAge = c(CENSUS_DATA$Age, CENSUS_DATA$Age, CENSUS_DATA$Age, CENSUS_DATA$Age)
+input1 = (1-exp(-longAge/tau))/(longAge/tau)
+input2 = input1 - exp(-longAge/tau)
+quadModDR <- lm(longInc~input1+ input2)
+
+new <-  c(19:100)
+new1 <-(1-exp(-new/tau))/(new/tau)
+new2 <- new1 - exp(-new/tau)
+new <- data.frame(input1 = new1, input2 = new2)
+out[1] <- predict(quadModAvg,new)
+out[2] <- predict(quadModHS,new)
+out[3] <- predict(quadModSC,new)
+out[4] <- predict(quadModAS,new)
+out[5] <- predict(quadModBS,new)
+out[6] <- predict(quadModMA,new)
+out[7] <- predict(quadModPR,new)
+out[8] <- predict(quadModDR,new)
+
+write.csv(out,"C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/avgCensusOut.csv")
+
 #attmempt NS projection of income dynamics for each education group=====================================
 ENROLL_DATA<-read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/with_enrolldata.csv")
 ENROLL_DATA$category <- NA
