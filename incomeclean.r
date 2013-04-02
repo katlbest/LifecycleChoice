@@ -733,6 +733,7 @@ CENSUS_DATA <- read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Dat
 b0Vect = rep(NA,8)
 b1Vect = rep(NA,8)
 b2Vect = rep(NA,8)
+R2Vect = rep(NA,8)
 out = data.frame(matrix(ncol = 8, nrow = 82))
 colnames(out)=c("Average", "HS", "SomeCollege", "Associates", "Bachelors", "Masters", "Professional", "Doctoral")
 #NS model
@@ -743,34 +744,42 @@ quadModAvg <- lm(CENSUS_DATA$IncomeAvg~input1+ input2)
 b0Vect[1] = quadModAvg$coefficients[1]
 b1Vect[1] = quadModAvg$coefficients[2]
 b2Vect[1] = quadModAvg$coefficients[3]
+R2Vect[1]= summary(quadModAvg)$r.squared
 quadModHS <- lm(CENSUS_DATA$IncomeHS~input1+ input2)
 b0Vect[2] = quadModHS$coefficients[1]
 b1Vect[2] = quadModHS$coefficients[2]
 b2Vect[2] = quadModHS$coefficients[3]
+R2Vect[2]= summary(quadModHS)$r.squared
 quadModSC <- lm(CENSUS_DATA$IncomeSC~input1+ input2)
 b0Vect[3] = quadModSC$coefficients[1]
 b1Vect[3] = quadModSC$coefficients[2]
 b2Vect[3] = quadModSC$coefficients[3]
+R2Vect[3]= summary(quadModSC)$r.squared
 quadModAS <- lm(CENSUS_DATA$IncomeAS~input1+ input2)
 b0Vect[4] = quadModAS$coefficients[1]
 b1Vect[4] = quadModAS$coefficients[2]
 b2Vect[4] = quadModAS$coefficients[3]
+R2Vect[4]= summary(quadModAS)$r.squared
 quadModBS <- lm(CENSUS_DATA$IncomeBS~input1+ input2)
 b0Vect[5] = quadModBS$coefficients[1]
 b1Vect[5] = quadModBS$coefficients[2]
 b2Vect[5] = quadModBS$coefficients[3]
+R2Vect[5]= summary(quadModBS)$r.squared
 quadModMA <- lm(CENSUS_DATA$IncomeMA~input1+ input2)
 b0Vect[6] = quadModMA$coefficients[1]
 b1Vect[6] = quadModMA$coefficients[2]
 b2Vect[6] = quadModMA$coefficients[3]
+R2Vect[6]= summary(quadModMA)$r.squared
 quadModPR <- lm(CENSUS_DATA$IncomePR~input1+ input2)
 b0Vect[7] = quadModPR$coefficients[1]
 b1Vect[7] = quadModPR$coefficients[2]
 b2Vect[7] = quadModPR$coefficients[3]
+R2Vect[7]= summary(quadModPR)$r.squared
 quadModDR <- lm(CENSUS_DATA$IncomeDR~input1+ input2)
 b0Vect[8] = quadModDR$coefficients[1]
 b1Vect[8] = quadModDR$coefficients[2]
 b2Vect[8] = quadModDR$coefficients[3]
+R2Vect[8]= summary(quadModDR)$r.squared
 
 longInc = c(CENSUS_DATA$IncomeHS, CENSUS_DATA$IncomeSC, CENSUS_DATA$IncomeAS, CENSUS_DATA$IncomeBS)
 longAge = c(CENSUS_DATA$Age, CENSUS_DATA$Age, CENSUS_DATA$Age, CENSUS_DATA$Age)
@@ -802,76 +811,363 @@ CENSUS_DATA <- read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Dat
 b0Vect = rep(NA,8)
 b1Vect = rep(NA,8)
 b2Vect = rep(NA,8)
-gammaVect = rep(NA,8)
-out = data.frame(matrix(ncol = 8, nrow = 82))
+R2Vect = rep(NA,8)
+out = data.frame(matrix(ncol = 10, nrow = 82))
 colnames(out)=c("Average", "HS", "SomeCollege", "Associates", "Bachelors", "Masters", "Professional", "Doctoral")
 #NS model
 tau =27.8818
-m = -2.8149
+m = -3.8149
 b = 36241
 input1 = (1-exp(-CENSUS_DATA$Age/tau))/(CENSUS_DATA$Age/tau)
-input2 = input1 - exp(-CENSUS_DATA$Age/tau)
-quadModAvg <- lm(CENSUS_DATA$IncomeAvg~0+input1+ input2)
-gammaVect[1] =  quadModAvg$coefficients[1]
-b0Vect[1] = (gammaVect[1]-b)/m
-b1Vect[1] = quadModAvg$coefficients[2]
-b2Vect[1] =  (m-1)*b0Vect[1]+b
-quadModHS <- lm(CENSUS_DATA$IncomeHS~0+input1+ input2)
-gammaVect[2] =  quadModHS$coefficients[1]
-b0Vect[2] = (gammaVect[2]-b)/m
-b1Vect[2] = quadModHS$coefficients[2]
-b2Vect[2] =  (m-1)*b0Vect[2]+b
-quadModSC <- lm(CENSUS_DATA$IncomeSC~0+input1+ input2)
-gammaVect[3] =  quadModSC$coefficients[1]
-b0Vect[3] = (gammaVect[3]-b)/m
-b1Vect[3] = quadModSC$coefficients[2]
-b2Vect[3] =  (m-1)*b0Vect[3]+b
-quadModAS <- lm(CENSUS_DATA$IncomeAS~0+input1+ input2)
-gammaVect[4] =  quadModAS$coefficients[1]
-b0Vect[4] = (gammaVect[4]-b)/m
-b1Vect[4] = quadModAS$coefficients[2]
-b2Vect[4] =  (m-1)*b0Vect[4]+b
-quadModBS <- lm(CENSUS_DATA$IncomeBS~0+input1+ input2)
-gammaVect[5] =  quadModBS$coefficients[1]
-b0Vect[5] = (gammaVect[5]-b)/m
-b1Vect[5] = quadModBS$coefficients[2]
-b2Vect[5] =  (m-1)*b0Vect[5]+b
-quadModMA <- lm(CENSUS_DATA$IncomeMA~0+input1+ input2)
-gammaVect[6] =  quadModMA$coefficients[1]
-b0Vect[6] = (gammaVect[6]-b)/m
-b1Vect[6] = quadModMA$coefficients[2]
-b2Vect[6] =  (m-1)*b0Vect[6]+b
-quadModPR <- lm(CENSUS_DATA$IncomePR~0+input1+ input2)
-gammaVect[7] =  quadModPR$coefficients[1]
-b0Vect[7] = (gammaVect[7]-b)/m
-b1Vect[7] = quadModPR$coefficients[2]
-b2Vect[7] =  (m-1)*b0Vect[7]+b
-quadModDR <- lm(CENSUS_DATA$IncomeDR~0+input1+ input2)
-gammaVect[8] =  quadModDR$coefficients[1]
-b0Vect[8] = (gammaVect[8]-b)/m
-b1Vect[8] = quadModDR$coefficients[2]
-b2Vect[8] =  (m-1)*b0Vect[8]+b
+B = input1 - exp(-CENSUS_DATA$Age/tau)
+input2 = (1+m*B)
 
-longInc = c(CENSUS_DATA$IncomeHS, CENSUS_DATA$IncomeSC, CENSUS_DATA$IncomeAS, CENSUS_DATA$IncomeBS)
-longAge = c(CENSUS_DATA$Age, CENSUS_DATA$Age, CENSUS_DATA$Age, CENSUS_DATA$Age)
-input1 = (1-exp(-longAge/tau))/(longAge/tau)
-input2 = input1 - exp(-longAge/tau)
-quadModDR <- lm(longInc~input1+ input2)
+output = CENSUS_DATA$IncomeAvg -(b * B)
+quadModAvg <- lm(output~0+input1+ input2)
+b0Vect[1] = quadModAvg$coefficients[2]
+b1Vect[1] = quadModAvg$coefficients[1]
+b2Vect[1] = quadModAvg$coefficients[2] * m + b
+R2Vect[1]= summary(quadModAvg)$r.squared
+
+output = CENSUS_DATA$IncomeHS -(b * B)
+quadModHS <-lm(output~0+input1+ input2)
+b0Vect[2] = quadModHS$coefficients[2]
+b1Vect[2] = quadModHS$coefficients[1]
+b2Vect[2] = quadModHS$coefficients[2] * m + b
+R2Vect[2]= summary(quadModHS)$r.squared
+
+output = CENSUS_DATA$IncomeSC -(b * B)
+quadModSC <- lm(output~0+input1+ input2)
+b0Vect[3] = quadModSC$coefficients[2]
+b1Vect[3] = quadModSC$coefficients[1]
+b2Vect[3] = quadModSC$coefficients[2] * m + b
+R2Vect[3]= summary(quadModSC)$r.squared
+
+output = CENSUS_DATA$IncomeAS -(b * B)
+quadModAS <-lm(output~0+input1+ input2)
+b0Vect[4] = quadModAS$coefficients[2]
+b1Vect[4] = quadModAS$coefficients[1]
+b2Vect[4] = quadModAS$coefficients[2] * m + b
+R2Vect[4]= summary(quadModAS)$r.squared
+
+output = CENSUS_DATA$IncomeBS -(b * B)
+quadModBS <- lm(output~0+input1+ input2)
+b0Vect[5] = quadModBS$coefficients[2]
+b1Vect[5] = quadModBS$coefficients[1]
+b2Vect[5] = quadModBS$coefficients[2] * m + b
+R2Vect[5]= summary(quadModBS)$r.squared
+
+output = CENSUS_DATA$IncomeMA -(b * B)
+quadModMA <-lm(output~0+input1+ input2)
+b0Vect[6] = quadModMA$coefficients[2]
+b1Vect[6] = quadModMA$coefficients[1]
+b2Vect[6] = quadModMA$coefficients[2] * m + b
+R2Vect[6]= summary(quadModMA)$r.squared
+
+output = CENSUS_DATA$IncomePR -(b * B)
+quadModPR <- lm(output~0+input1+ input2)
+b0Vect[7] = quadModPR$coefficients[2]
+b1Vect[7] = quadModPR$coefficients[1]
+b2Vect[7] = quadModPR$coefficients[2] * m + b
+R2Vect[7]= summary(quadModPR)$r.squared
+
+output = CENSUS_DATA$IncomeDR -(b * B)
+quadModDR <-lm(output~0+input1+ input2)
+b0Vect[8] = quadModDR$coefficients[2]
+b1Vect[8] = quadModDR$coefficients[1]
+b2Vect[8] = quadModDR$coefficients[2] * m + b
+R2Vect[8]= summary(quadModDR)$r.squared
+
+new <-  c(19:100)
+new1 <-(1-exp(-new/tau))/(new/tau)
+newB <- new1 - exp(-new/tau)
+new2 <- (1+m*newB)
+new <- data.frame(input1 = new1, input2 = new2)
+out[1] <- predict(quadModAvg,new)+b*newB
+out[2] <- predict(quadModHS,new)+b*newB
+out[3] <- predict(quadModSC,new)+b*newB
+out[4] <- predict(quadModAS,new)+b*newB
+out[5] <- predict(quadModBS,new)+b*newB
+out[6] <- predict(quadModMA,new)+b*newB
+out[7] <- predict(quadModPR,new)+b*newB
+out[8] <- predict(quadModDR,new)+b*newB
+out[9] <- new1
+out[10]<-new2
+
+write.csv(out,"C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/avgCensusOut.csv")
+
+#get shape of census data with fixed b0/b2 relationship and fixed b1======================================================
+CENSUS_DATA <- read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/avgCensus.csv")
+b0Vect = rep(NA,8)
+b1Vect = rep(NA,8)
+b2Vect = rep(NA,8)
+R2Vect = rep(NA,8)
+out = data.frame(matrix(ncol = 10, nrow = 82))
+colnames(out)=c("Average", "HS", "SomeCollege", "Associates", "Bachelors", "Masters", "Professional", "Doctoral")
+#NS model
+tau =27.8818
+m = -3.8149
+b = 36241
+b1 = 48781.31 #note this is what you get when you set the b0/b1 relationship
+input1 = (1-exp(-CENSUS_DATA$Age/tau))/(CENSUS_DATA$Age/tau)
+B = input1 - exp(-CENSUS_DATA$Age/tau)
+input2 = (1+m*B)
+
+output = CENSUS_DATA$IncomeAvg -(b * B)- (b1*input1)
+quadModAvg <- lm(output~0+input2)
+b0Vect[1] = quadModAvg$coefficients[1]
+b1Vect[1] = b1
+b2Vect[1] = quadModAvg$coefficients[1] * m + b
+R2Vect[1]= summary(quadModAvg)$r.squared
+
+output = CENSUS_DATA$IncomeHS -(b * B) - (b1*input1)
+quadModHS <-lm(output~0+input2)
+b0Vect[2] = quadModHS$coefficients[1]
+b1Vect[2] = b1
+b2Vect[2] = quadModHS$coefficients[1] * m + b
+R2Vect[2]= summary(quadModHS)$r.squared
+
+output = CENSUS_DATA$IncomeSC -(b * B)- (b1*input1)
+quadModSC <- lm(output~0+input2)
+b0Vect[3] = quadModSC$coefficients[1]
+b1Vect[3] = b1
+b2Vect[3] = quadModSC$coefficients[1] * m + b
+R2Vect[3]= summary(quadModSC)$r.squared
+
+output = CENSUS_DATA$IncomeAS -(b * B)- (b1*input1)
+quadModAS <-lm(output~0+input2)
+b0Vect[4] = quadModAS$coefficients[1]
+b1Vect[4] = b1
+b2Vect[4] = quadModAS$coefficients[1] * m + b
+R2Vect[4]= summary(quadModAS)$r.squared
+
+output = CENSUS_DATA$IncomeBS -(b * B)- (b1*input1)
+quadModBS <- lm(output~0+input2)
+b0Vect[5] = quadModBS$coefficients[1]
+b1Vect[5] = b1
+b2Vect[5] = quadModBS$coefficients[1] * m + b
+R2Vect[5]= summary(quadModBS)$r.squared
+
+output = CENSUS_DATA$IncomeMA -(b * B)- (b1*input1)
+quadModMA <-lm(output~0+input2)
+b0Vect[6] = quadModMA$coefficients[1]
+b1Vect[6] = b1
+b2Vect[6] = quadModMA$coefficients[1] * m + b
+R2Vect[6]= summary(quadModMA)$r.squared
+
+output = CENSUS_DATA$IncomePR -(b * B)- (b1*input1)
+quadModPR <- lm(output~0+input2)
+b0Vect[7] = quadModPR$coefficients[1]
+b1Vect[7] = b1
+b2Vect[7] = quadModPR$coefficients[1] * m + b
+R2Vect[7]= summary(quadModPR)$r.squared
+
+output = CENSUS_DATA$IncomeDR -(b * B)- (b1*input1)
+quadModDR <-lm(output~0+input2)
+b0Vect[8] = quadModDR$coefficients[1]
+b1Vect[8] = b1
+b2Vect[8] = quadModDR$coefficients[1] * m + b
+R2Vect[8]= summary(quadModDR)$r.squared
+
+new <-  c(19:100)
+new1 <-(1-exp(-new/tau))/(new/tau)
+newB <- new1 - exp(-new/tau)
+new2 <- (1+m*newB)
+new <- data.frame(input2 = new2)
+out[1] <- predict(quadModAvg,new)+b*newB + b1 * new1
+out[2] <- predict(quadModHS,new)+b*newB+ b1 * new1
+out[3] <- predict(quadModSC,new)+b*newB+ b1 * new1
+out[4] <- predict(quadModAS,new)+b*newB+ b1 * new1
+out[5] <- predict(quadModBS,new)+b*newB+ b1 * new1
+out[6] <- predict(quadModMA,new)+b*newB+ b1 * new1
+out[7] <- predict(quadModPR,new)+b*newB+ b1 * new1
+out[8] <- predict(quadModDR,new)+b*newB+ b1 * new1
+out[9] <- new1
+out[10]<-new2
+
+write.csv(out,"C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/avgCensusOut1.csv")
+
+#get shape of census data with fixed b1==================================================
+CENSUS_DATA <- read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/avgCensus.csv")
+b0Vect = rep(NA,8)
+b1Vect = rep(NA,8)
+b2Vect = rep(NA,8)
+R2Vect = rep(NA,8)
+out = data.frame(matrix(ncol = 10, nrow = 82))
+colnames(out)=c("Average", "HS", "SomeCollege", "Associates", "Bachelors", "Masters", "Professional", "Doctoral")
+#NS model
+tau =27.8818
+m = -3.8149
+b = 36241
+b1 = 29332
+input1 = (1-exp(-CENSUS_DATA$Age/tau))/(CENSUS_DATA$Age/tau)
+input2 = input1 - exp(-CENSUS_DATA$Age/tau)
+
+output = CENSUS_DATA$IncomeAvg - (b1*input1)
+quadModAvg <- lm(output~input2)
+b0Vect[1] = quadModAvg$coefficients[1]
+b1Vect[1] = b1
+b2Vect[1] = quadModAvg$coefficients[2]
+R2Vect[1]= summary(quadModAvg)$r.squared
+
+output = CENSUS_DATA$IncomeHS  - (b1*input1)
+quadModHS <-lm(output~input2)
+b0Vect[2] = quadModHS$coefficients[1]
+b1Vect[2] = b1
+b2Vect[2] = quadModHS$coefficients[2]
+R2Vect[2]= summary(quadModHS)$r.squared
+
+output = CENSUS_DATA$IncomeSC - (b1*input1)
+quadModSC <- lm(output~input2)
+b0Vect[3] = quadModSC$coefficients[1]
+b1Vect[3] = b1
+b2Vect[3] = quadModSC$coefficients[2]
+R2Vect[3]= summary(quadModSC)$r.squared
+
+output = CENSUS_DATA$IncomeAS- (b1*input1)
+quadModAS <-lm(output~input2)
+b0Vect[4] = quadModAS$coefficients[1]
+b1Vect[4] = b1
+b2Vect[4] = quadModAS$coefficients[2]
+R2Vect[4]= summary(quadModAS)$r.squared
+
+output = CENSUS_DATA$IncomeBS- (b1*input1)
+quadModBS <- lm(output~input2)
+b0Vect[5] = quadModBS$coefficients[1]
+b1Vect[5] = b1
+b2Vect[5] = quadModBS$coefficients[2]
+R2Vect[5]= summary(quadModBS)$r.squared
+
+output = CENSUS_DATA$IncomeMA - (b1*input1)
+quadModMA <-lm(output~input2)
+b0Vect[6] = quadModMA$coefficients[1]
+b1Vect[6] = b1
+b2Vect[6] = quadModMA$coefficients[2]
+R2Vect[6]= summary(quadModMA)$r.squared
+
+output = CENSUS_DATA$IncomePR - (b1*input1)
+quadModPR <- lm(output~input2)
+b0Vect[7] = quadModPR$coefficients[1]
+b1Vect[7] = b1
+b2Vect[7] = quadModPR$coefficients[2]
+R2Vect[7]= summary(quadModPR)$r.squared
+
+output = CENSUS_DATA$IncomeDR- (b1*input1)
+quadModDR <-lm(output~input2)
+b0Vect[8] = quadModDR$coefficients[1]
+b1Vect[8] = b1
+b2Vect[8] = quadModDR$coefficients[2]
+R2Vect[8]= summary(quadModDR)$r.squared
 
 new <-  c(19:100)
 new1 <-(1-exp(-new/tau))/(new/tau)
 new2 <- new1 - exp(-new/tau)
+new <- data.frame(input2 = new2)
+out[1] <- predict(quadModAvg,new) + b1 * new1
+out[2] <- predict(quadModHS,new)+ b1 * new1
+out[3] <- predict(quadModSC,new)+ b1 * new1
+out[4] <- predict(quadModAS,new)+ b1 * new1
+out[5] <- predict(quadModBS,new)+ b1 * new1
+out[6] <- predict(quadModMA,new)+ b1 * new1
+out[7] <- predict(quadModPR,new)+ b1 * new1
+out[8] <- predict(quadModDR,new)+ b1 * new1
+out[9] <- new1
+out[10]<-new2
+
+write.csv(out,"C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/avgCensusOut2.csv")
+
+#get shape of census data with fixed b0/b2 and b0/b1 relationship ======================================================
+CENSUS_DATA <- read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/avgCensus.csv")
+b0Vect = rep(NA,8)
+b1Vect = rep(NA,8)
+b2Vect = rep(NA,8)
+R2Vect = rep(NA,8)
+out = data.frame(matrix(ncol = 10, nrow = 82))
+colnames(out)=c("Average", "HS", "SomeCollege", "Associates", "Bachelors", "Masters", "Professional", "Doctoral")
+#NS model
+tau =27.8818
+m = -3.8149
+b = 36241
+n =  -0.2445
+a = 2234.3
+input1 = (1-exp(-CENSUS_DATA$Age/tau))/(CENSUS_DATA$Age/tau)
+input2 = input1 - exp(-CENSUS_DATA$Age/tau)
+input2 = (1+m*input2+n*input1)
+
+output = CENSUS_DATA$IncomeAvg -(b * input2)- (a * input1)
+quadModAvg <- lm(output~0+input1+ input2)
+b0Vect[1] = quadModAvg$coefficients[2]
+b1Vect[1] = quadModAvg$coefficients[1]
+b2Vect[1] = quadModAvg$coefficients[2] * m + b
+R2Vect[1]= summary(quadModAvg)$r.squared
+
+output = CENSUS_DATA$IncomeHS -(b * input2)
+quadModHS <-lm(output~0+input1+ input2)
+b0Vect[2] = quadModHS$coefficients[2]
+b1Vect[2] = quadModHS$coefficients[1]
+b2Vect[2] = quadModHS$coefficients[2] * m + b
+R2Vect[2]= summary(quadModHS)$r.squared
+
+output = CENSUS_DATA$IncomeSC -(b * input2)
+quadModSC <- lm(output~0+input1+ input2)
+b0Vect[3] = quadModSC$coefficients[2]
+b1Vect[3] = quadModSC$coefficients[1]
+b2Vect[3] = quadModSC$coefficients[2] * m + b
+R2Vect[3]= summary(quadModSC)$r.squared
+
+output = CENSUS_DATA$IncomeAS -(b * input2)
+quadModAS <-lm(output~0+input1+ input2)
+b0Vect[4] = quadModAS$coefficients[2]
+b1Vect[4] = quadModAS$coefficients[1]
+b2Vect[4] = quadModAS$coefficients[2] * m + b
+R2Vect[4]= summary(quadModAS)$r.squared
+
+output = CENSUS_DATA$IncomeBS -(b * input2)
+quadModBS <- lm(output~0+input1+ input2)
+b0Vect[5] = quadModBS$coefficients[2]
+b1Vect[5] = quadModBS$coefficients[1]
+b2Vect[5] = quadModBS$coefficients[2] * m + b
+R2Vect[5]= summary(quadModBS)$r.squared
+
+output = CENSUS_DATA$IncomeMA -(b * input2)
+quadModMA <-lm(output~0+input1+ input2)
+b0Vect[6] = quadModMA$coefficients[2]
+b1Vect[6] = quadModMA$coefficients[1]
+b2Vect[6] = quadModMA$coefficients[2] * m + b
+R2Vect[6]= summary(quadModMA)$r.squared
+
+output = CENSUS_DATA$IncomePR -(b * input2)
+quadModPR <- lm(output~0+input1+ input2)
+b0Vect[7] = quadModPR$coefficients[2]
+b1Vect[7] = quadModPR$coefficients[1]
+b2Vect[7] = quadModPR$coefficients[2] * m + b
+R2Vect[7]= summary(quadModPR)$r.squared
+
+output = CENSUS_DATA$IncomeDR -(b * input2)
+quadModDR <-lm(output~0+input1+ input2)
+b0Vect[8] = quadModDR$coefficients[2]
+b1Vect[8] = quadModDR$coefficients[1]
+b2Vect[8] = quadModDR$coefficients[2] * m + b
+R2Vect[8]= summary(quadModDR)$r.squared
+
+new <-  c(19:100)
+new1 <-(1-exp(-new/tau))/(new/tau)
+new2 <- new1 - exp(-new/tau)
+new2 <- (1+m*new2)
 new <- data.frame(input1 = new1, input2 = new2)
-out[1] <- predict(quadModAvg,new)
-out[2] <- predict(quadModHS,new)
-out[3] <- predict(quadModSC,new)
-out[4] <- predict(quadModAS,new)
-out[5] <- predict(quadModBS,new)
-out[6] <- predict(quadModMA,new)
-out[7] <- predict(quadModPR,new)
-out[8] <- predict(quadModDR,new)
+out[1] <- predict(quadModAvg,new)+b*input2
+out[2] <- predict(quadModHS,new)+b*input2
+out[3] <- predict(quadModSC,new)+b*input2
+out[4] <- predict(quadModAS,new)+b*input2
+out[5] <- predict(quadModBS,new)+b*input2
+out[6] <- predict(quadModMA,new)+b*input2
+out[7] <- predict(quadModPR,new)+b*input2
+out[8] <- predict(quadModDR,new)+b*input2
+out[9] <- new1
+out[10]<-new2
 
 write.csv(out,"C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/avgCensusOut.csv")
+
 
 #attmempt NS projection of income dynamics for each education group=====================================
 ENROLL_DATA<-read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/with_enrolldata.csv")
