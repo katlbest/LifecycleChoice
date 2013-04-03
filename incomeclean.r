@@ -25,6 +25,20 @@ INCOME_DATA$INC_2006 <- 0
 INCOME_DATA$INC_2007 <- 0
 INCOME_DATA$INC_2008 <- 0
 INCOME_DATA$INC_2009 <- 0
+INCOME_DATA$INC_1996b <- 0
+INCOME_DATA$INC_1997b <- 0
+INCOME_DATA$INC_1998b <- 0
+INCOME_DATA$INC_1999b <- 0
+INCOME_DATA$INC_2000b <- 0
+INCOME_DATA$INC_2001b <- 0
+INCOME_DATA$INC_2002b <- 0
+INCOME_DATA$INC_2003b <- 0
+INCOME_DATA$INC_2004b <- 0
+INCOME_DATA$INC_2005b <- 0
+INCOME_DATA$INC_2006b <- 0
+INCOME_DATA$INC_2007b <- 0
+INCOME_DATA$INC_2008b <- 0
+INCOME_DATA$INC_2009b <- 0
 
 #functions=====================================================================
 getTotal <- function(data, indicator, mainvar, secondvar, clarify, lookupType) { #data frame, indicator var name, main var name, secondary var name, clarify var name or none
@@ -57,7 +71,6 @@ getTotal <- function(data, indicator, mainvar, secondvar, clarify, lookupType) {
   }
   invisible(return(totalVect))
 }
-
 
 lookupCategory <- function(varType, curValue){ #varType 1 =  biggest range, 3 = smallers
   if (varType ==1){
@@ -181,8 +194,12 @@ for (i in 1:length(year_vect)){
 #write to file ========================================================================
 write.csv(INCOME_DATA, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/INCOME_DATA2.csv")
 
+#add in attendance category data =============================================================
+CATEGORY_DATA <- read.csv("C://Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/categories.csv")
+INCOME_DATA2 <- merge(x = CATEGORY_DATA, y = INCOME_DATA2, by = "PUBID_1997", all.x = TRUE)
+
 #adjust timing of income data =======================================================================
-INCOME_DATA2 <- read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/INCOME_DATA2input.csv")
+#INCOME_DATA2 <- read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/INCOME_DATA2input.csv")
 INCOME_DATA2$START_YEAR <- 0
 INCOME_DATA2$y1 <- 0
 INCOME_DATA2$y2 <- 0
@@ -543,7 +560,7 @@ for (j in 1:nrow(ENROLL_DATA)){
   }
 }
 
-write.csv(ENROLL_DATA, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/with_enrolldata.csv")
+write.csv(ENROLL_DATA, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/indivdata_allsources_hasmissing.csv")
 
 #attmempt projection of income dynamics--quadratic and NS=====================================
 ENROLL_DATA<-read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/with_enrolldata.csv")
