@@ -664,7 +664,7 @@ for (j in 1:nrow(ENROLL_DATA)){
   }
 }
 
-write.csv(ENROLL_DATA, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/indivdata_allsources_hasmissing.csv")
+write.csv(ENROLL_DATA, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/indivdata_allsources.csv")
 
 #CENSUS===========================================================================================
 
