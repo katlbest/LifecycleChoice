@@ -210,19 +210,19 @@ ageVectListNm<-NmReturn[[2]]
 enrollVectListNm<-NmReturn[[3]]
 
 MReturn <-removeZeros(incomeVectListM, ageVectListM, enrollVectListM)
-incomeVectListM[[i]]<-MReturn[[1]]
-ageVectListM[[i]]<-MReturn[[2]]
-enrollVectListM[[i]]<-MReturn[[3]]
+incomeVectListM<-MReturn[[1]]
+ageVectListM<-MReturn[[2]]
+enrollVectListM<-MReturn[[3]]
 
 LabNmReturn <-removeZeros(incomeVectListLabNm, ageVectListLabNm, enrollVectListLabNm)
-incomeVectListLabNm[[i]]<-LabNmReturn[[1]]
-ageVectListLabNm[[i]]<-LabNmReturn[[2]]
-enrollVectListLabNm[[i]]<-LabNmReturn[[3]]
+incomeVectListLabNm<-LabNmReturn[[1]]
+ageVectListLabNm<-LabNmReturn[[2]]
+enrollVectListLabNm<-LabNmReturn[[3]]
 
 LabMReturn <-removeZeros(incomeVectListLabM, ageVectListLabM, enrollVectListLabM)
-incomeVectListLabM[[i]]<-LabMReturn[[1]]
-ageVectListLabM[[i]]<-LabMReturn[[2]]
-enrollVectListLabM[[i]]<-LabMReturn[[3]]
+incomeVectListLabM<-LabMReturn[[1]]
+ageVectListLabM<-LabMReturn[[2]]
+enrollVectListLabM<-LabMReturn[[3]]
 
 #Project======================================================================================
 #project with fixed relationship between b2 and b0
