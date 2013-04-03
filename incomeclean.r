@@ -666,6 +666,11 @@ for (j in 1:nrow(ENROLL_DATA)){
 
 write.csv(ENROLL_DATA, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/indivdata_allsources.csv")
 
+
+#MERGE WITH OTHER DAtA =========================================================================
+LABOR_ONLY = read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/indivdata_allsources.csv")
+COMPLETE_DATA <- merge(x = ENROLL_DATA, y = LABOR_ONLY, by = "PUBID_1997", all.x = TRUE)
+write.csv(COMPLETE_DATA, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/allindivdata.csv")
 #CENSUS===========================================================================================
 
 #get shape of census data ======================================================
