@@ -1,63 +1,49 @@
-#ENROLL_DATA<-read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/enroll_data_withvectors.csv")
-ENROLL_DATA<-read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/with_enrolldata.csv")
+ENROLL_DATA<-read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/allindivdata.csv")
 
-#set up vector lists of input data==============================================================================
-ageVectList <- list()
-incomeVectList <- list()
-enrollVectList <- list()
-for (i in 1:nrow(ENROLL_DATA)){
-  incVectOut = NULL
-  ageVectOut= NULL
-  incVectFull = NULL
-  enrollVectOut = NULL
-  incVect = c(ENROLL_DATA$ynm1[i], ENROLL_DATA$ynm2[i], ENROLL_DATA$ynm3[i], ENROLL_DATA$ynm4[i], ENROLL_DATA$ynm5[i], ENROLL_DATA$ynm6[i],ENROLL_DATA$ynm7[i],ENROLL_DATA$ynm8[i])
-  enrollVect = c(ENROLL_DATA$enroll2[i], ENROLL_DATA$enroll3[i], ENROLL_DATA$enroll4[i], ENROLL_DATA$enroll5[i], ENROLL_DATA$enroll6[i], ENROLL_DATA$enroll7[i], ENROLL_DATA$enroll8[i], ENROLL_DATA$enroll9[i])
+#functions===============================================================================================
+fillMissing <- function(IncomeVector, EnrollmentVector, personindex){
   startIndex = 0
   endIndex = 0
-  
   #fill in intermediate zeros/missings
-      changing = 0
-      last = 0
-      for (j in 2:length(incVect)){
-        if (changing ==0)  {
-          if (incVect[j-1]>0 & incVect[j]<=0){
-            last = incVect[j-1]
-            change_start_ind = j
-            change_start_value = incVect[j-1]
-            changing = 1
-            #print(paste("starting at ",i, sep = ""))
-          }
+  changing = 0
+  last = 0
+  for (j in 2:length(IncomeVector)){
+    if (changing ==0)  {
+      if (IncomeVector[j-1]>0 & IncomeVector[j]<=0){
+        last = IncomeVector[j-1]
+        change_start_ind = j
+        change_start_value = IncomeVector[j-1]
+        changing = 1
+      }
+    }
+    else{
+      if (IncomeVector[j]> 0){
+        for (k in (change_start_ind:j-1)){
+          IncomeVector[k] = max(mean(last, change_start_value), last)
         }
-        else{
-          if (incVect[j]> 0){
-            for (k in (change_start_ind:j-1)){
-              incVect[k] = max(mean(last, change_start_value), last)
-            }
-            changing = 0
-          }
-          else if (enrollVect[j] > 0){
-            changing = 0
-          }
-        }
-     }
+        changing = 0
+      }
+      else if (IncomeVector[j] > 0){
+        changing = 0
+      }
+    }
+  }
   #find longest run of usable data
-  for (j in 1:length(incVect)){
-    if (j == length(incVect)){
+  for (j in 1:length(IncomeVector)){
+    if (j == length(IncomeVector)){
       #if (incVect[j]>=0 & startIndex ==0 & enrollVect[j]!= 1){ #with enrollment modification
-      if (incVect[j]>0 & startIndex ==0){ #without enrollment modification
+      if (IncomeVector[j]>0 & startIndex ==0){ #without enrollment modification
         endIndex = j
       }
       if (endIndex - startIndex >= 2 & startIndex > 0){
-        incVectOut = incVect[startIndex:endIndex]
+        incVectOut = IncomeVector[startIndex:endIndex]
         ageVectOut = c(startIndex:endIndex)
-        enrollVectOut = enrollVect[startIndex:endIndex]
-        incomeVectList[[i]]<-incVectOut
-        ageVectList[[i]]<-ageVectOut
-        enrollVectList[[i]]<-enrollVectOut
+        enrollVectOut = EnrollmentVector[startIndex:endIndex]
+        returnList = list(incVectOut, ageVectOut, enrollVectOut)
       }
     }
     #if (incVect[j]>=0 & enrollVect[j]!= 1){ #with enrollment modification: 
-    if (incVect[j]>0){#without enrollment modification: 
+    if (IncomeVector[j]>0){#without enrollment modification: 
       if (startIndex ==0){
         startIndex = j
       }
@@ -65,12 +51,10 @@ for (i in 1:nrow(ENROLL_DATA)){
     }
     else {
       if (endIndex - startIndex >= 2 & startIndex > 0){
-        incVectOut = incVect[startIndex:endIndex]
+        incVectOut = IncomeVector[startIndex:endIndex]
         ageVectOut = c(startIndex:endIndex)
-        enrollVectOut = enrollVect[startIndex:endIndex]
-        incomeVectList[[i]]<-incVectOut
-        ageVectList[[i]]<-ageVectOut
-        enrollVectList[[i]]<-enrollVectOut
+        enrollVectOut = EnrollmentVector[startIndex:endIndex]
+        returnList = list(incVectOut, ageVectOut, enrollVectOut)
       }
       startIndex = 0
       endIndex = 0
@@ -80,13 +64,57 @@ for (i in 1:nrow(ENROLL_DATA)){
     incVectOut = c(-3)
     ageVectOut = c(-3)
     enrollVectOut = c(-3)
-    incomeVectList[[i]]<-incVectOut
-    ageVectList[[i]]<-ageVectOut
-    enrollVectList[[i]]<-enrollVectOut
+    returnList = list(incVectOut, ageVectOut, enrollVectOut)
   }
+  return(returnList)
+  #print(returnList)
 }
 
-#ENROLL_DATA<-ENROLL_DATA[ENROLL_DATA$Best.Attended == -3,]
+#set up vector lists of input data==============================================================================
+ageVectListNm <- list()
+incomeVectListNm <- list()
+enrollVectListNm <- list()
+ageVectListM<- list()
+incomeVectListM <- list()
+enrollVectListM <- list()
+ageVectListLabNm <- list()
+incomeVectListLabNm <- list()
+enrollVectListLabNm <- list()
+ageVectListLabM <- list()
+incomeVectListLabM <- list()
+enrollVectListLabM <- list()
+
+for (i in 1:nrow(ENROLL_DATA)){
+  incVectOut = NULL
+  ageVectOut= NULL
+  enrollVectOut = NULL
+
+  incVectNm = c(ENROLL_DATA$ynm1[i], ENROLL_DATA$ynm2[i], ENROLL_DATA$ynm3[i], ENROLL_DATA$ynm4[i], ENROLL_DATA$ynm5[i], ENROLL_DATA$ynm6[i],ENROLL_DATA$ynm7[i],ENROLL_DATA$ynm8[i])
+  incVectM = c(ENROLL_DATA$y1[i], ENROLL_DATA$y2[i], ENROLL_DATA$y3[i], ENROLL_DATA$y4[i], ENROLL_DATA$y5[i], ENROLL_DATA$y6[i],ENROLL_DATA$y7[i],ENROLL_DATA$y8[i])
+  incVectLabNm = c(ENROLL_DATA$znm1[i], ENROLL_DATA$znm2[i], ENROLL_DATA$znm3[i], ENROLL_DATA$znm4[i], ENROLL_DATA$znm5[i], ENROLL_DATA$znm6[i],ENROLL_DATA$znm7[i],ENROLL_DATA$znm8[i])
+  incVectLabM = c(ENROLL_DATA$z1[i], ENROLL_DATA$z2[i], ENROLL_DATA$z3[i], ENROLL_DATA$z4[i], ENROLL_DATA$z5[i], ENROLL_DATA$z6[i],ENROLL_DATA$z7[i],ENROLL_DATA$z8[i])
+  enrollVect = c(ENROLL_DATA$enroll2[i], ENROLL_DATA$enroll3[i], ENROLL_DATA$enroll4[i], ENROLL_DATA$enroll5[i], ENROLL_DATA$enroll6[i], ENROLL_DATA$enroll7[i], ENROLL_DATA$enroll8[i], ENROLL_DATA$enroll9[i])
+  
+  NmReturn <- fillMissing(incVectNm, enrollVect, i)
+  incomeVectListNm[[i]]<-NmReturn[[1]]
+  ageVectListNm[[i]]<-NmReturn[[2]]
+  enrollVectListNm[[i]]<-NmReturn[[3]]
+  
+  MReturn <-fillMissing(incVectM, enrollVect, i)
+  incomeVectListM[[i]]<-MReturn[[1]]
+  ageVectListM[[i]]<-MReturn[[2]]
+  enrollVectListM[[i]]<-MReturn[[3]]
+  
+  LabNmReturn <-fillMissing(incVectLabNm, enrollVect, i)
+  incomeVectListLabNm[[i]]<-LabNmReturn[[1]]
+  ageVectListLabNm[[i]]<-LabNmReturn[[2]]
+  enrollVectListLabNm[[i]]<-LabNmReturn[[3]]
+  
+  LabMReturn <-fillMissing(incVectLabM, enrollVect, i)
+  incomeVectListLabM[[i]]<-LabMReturn[[1]]
+  ageVectListLabM[[i]]<-LabMReturn[[2]]
+  enrollVectListLabM[[i]]<-LabMReturn[[3]]
+}
 
 #must add 18 to each age number so that tau is correct
 for (i in 1:length(ageVectList)){
