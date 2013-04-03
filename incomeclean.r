@@ -132,7 +132,7 @@ fillMissing <- function(missingVect, fillVect, logicType){
 salary_96 = getTotal(INCOME_DATA, "P5_010_1997", "P5_016_1997", "P5_017_1997", "P5_011_1997", 1)
 farm_96 = getTotal(INCOME_DATA, "P5_018_1997", "P5_019_1997", "P5_020_1997", "None", 1)
 other_96 = getTotal(INCOME_DATA, "P5_055_1997", "P5_056_1997", "P5_057_1997", "None", 2)+getTotal(INCOME_DATA, "P5_067_1997", "P5_068_1997", "P5_069_1997", "None", 3)+ getTotal(INCOME_DATA, "P5_048_1997", "P5_049_1997", "P5_050_1997", "None", 2)+ getTotal(INCOME_DATA, "P5_052_1997", "P5_053_1997", "P5_054_1997", "None", 2)
-INCOME_DATA$INC_1996 <- salary_96+ farm_96 + other_96
+INCOME_DATA$INC_1996b <- salary_96+ farm_96 + other_96
 
 #populate incomes 1997-2010==================================================================
 #syntax: data frame, indicator, main variable, secondary (refuser) variable, clarification question indicator or "None"
@@ -177,14 +177,14 @@ for (i in 1:length(year_vect)){
     other_cur = other_cur + other_cur2
   }
   
-  outString = paste("INC_", toString(as.integer(year_vect[i])-1), sep = "") #store in last year's income variable
+  outString = paste("INC_", toString(as.integer(year_vect[i])-1), "b", sep = "") #store in last year's income variable
   INCOME_DATA[,outString]<- salary_cur + farm_cur + other_cur
   #print(paste("salary",year_vect[i], salary_cur, sep = ","))
   #print(paste("farm",year_vect[i], farm_cur, sep = ","))
   #print(paste("other",year_vect[i], other_cur, sep = ","))
   
   if (as.integer(year_vect[i])> 1998){
-    outString2 = paste("INC_", toString(as.integer(year_vect[i])-2), sep = "") #store in last year's income variable
+    outString2 = paste("INC_", toString(as.integer(year_vect[i])-2), "b", sep = "") #store in last year's income variable
     for (k in 1: nrow(INCOME_DATA)){
       INCOME_DATA[k,outString2]<- max(0,INCOME_DATA[k,outString2]) + salary_twoyear[k]
     }
