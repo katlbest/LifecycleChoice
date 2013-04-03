@@ -71,7 +71,13 @@ fillMissing <- function(IncomeVector, EnrollmentVector, personindex){
 }
 
 removeZeros <- function(IncomeVectorList, AgeVectorList, EnrollmentVectorList){
+  outInc = list()
+  outAge = list()
+  outEnroll = list()
   for (i in 1:length(IncomeVectorList)){
+    outInc[[i]] = IncomeVectorList[[i]]
+    outAge[[i]] = AgeVectorList[[i]]
+    outEnroll[[i]] = EnrollmentVectorList[[i]]
     if (IncomeVectorList[[i]][1]>=0){
       firstBigIndex = 0
       for (j in 2:length(IncomeVectorList[[i]])){
@@ -84,12 +90,13 @@ removeZeros <- function(IncomeVectorList, AgeVectorList, EnrollmentVectorList){
           }
         }
       }
-      outInc= IncomeVectorList[[i]][firstBigIndex:length(IncomeVectorList[[i]])]
-      outAge= AgeVectorList[[i]][firstBigIndex:length(AgeVectorList[[i]])]
-      outEnroll= EnrollmentVectorList[[i]][firstBigIndex:length(EnrollmentVectorList[[i]])]
-      returnList <- list(outInc, outAge, outEnroll)
+      outInc[[i]]= IncomeVectorList[[i]][firstBigIndex:length(IncomeVectorList[[i]])]
+      outAge[[i]]= AgeVectorList[[i]][firstBigIndex:length(AgeVectorList[[i]])]
+      outEnroll[[i]]= EnrollmentVectorList[[i]][firstBigIndex:length(EnrollmentVectorList[[i]])]
     }
   }
+  outList = list(outInc, outAge, outEnroll)
+  return(outList)
 }
 #set up vector lists of input data==============================================================================
 ageVectListNm <- list()
@@ -198,9 +205,9 @@ enrollVectListLabM <- list()
 #NOTE: this leaves you with vectors without zeros
 
 NmReturn <- removeZeros(incomeVectListNm, ageVectListNm, enrollVectListNm)
-incomeVectListNm[[i]]<-NmReturn[[1]]
-ageVectListNm[[i]]<-NmReturn[[2]]
-enrollVectListNm[[i]]<-NmReturn[[3]]
+incomeVectListNm<-NmReturn[[1]]
+ageVectListNm<-NmReturn[[2]]
+enrollVectListNm<-NmReturn[[3]]
 
 MReturn <-removeZeros(incomeVectListM, ageVectListM, enrollVectListM)
 incomeVectListM[[i]]<-MReturn[[1]]
