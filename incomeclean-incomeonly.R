@@ -11,20 +11,34 @@ INCOME_DATA <- read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Dat
 #INCOME_DATA<- INCOME_DATA[1,]
 
 #setup variables================================================================
-INCOME_DATA$INC_1996 <- 0
-INCOME_DATA$INC_1997 <- 0
-INCOME_DATA$INC_1998 <- 0
-INCOME_DATA$INC_1999 <- 0
-INCOME_DATA$INC_2000 <- 0
-INCOME_DATA$INC_2001 <- 0
-INCOME_DATA$INC_2002 <- 0
-INCOME_DATA$INC_2003 <- 0
-INCOME_DATA$INC_2004 <- 0
-INCOME_DATA$INC_2005 <- 0
-INCOME_DATA$INC_2006 <- 0
-INCOME_DATA$INC_2007 <- 0
-INCOME_DATA$INC_2008 <- 0
-INCOME_DATA$INC_2009 <- 0
+INCOME_DATA$LAB_1996 <- 0
+INCOME_DATA$LAB_1997 <- 0
+INCOME_DATA$LAB_1998 <- 0
+INCOME_DATA$LAB_1999 <- 0
+INCOME_DATA$LAB_2000 <- 0
+INCOME_DATA$LAB_2001 <- 0
+INCOME_DATA$LAB_2002 <- 0
+INCOME_DATA$LAB_2003 <- 0
+INCOME_DATA$LAB_2004 <- 0
+INCOME_DATA$LAB_2005 <- 0
+INCOME_DATA$LAB_2006 <- 0
+INCOME_DATA$LAB_2007 <- 0
+INCOME_DATA$LAB_2008 <- 0
+INCOME_DATA$LAB_2009 <- 0
+INCOME_DATA$LAB_1996b <- 0
+INCOME_DATA$LAB_1997b <- 0
+INCOME_DATA$LAB_1998b <- 0
+INCOME_DATA$LAB_1999b <- 0
+INCOME_DATA$LAB_2000b <- 0
+INCOME_DATA$LAB_2001b <- 0
+INCOME_DATA$LAB_2002b <- 0
+INCOME_DATA$LAB_2003b <- 0
+INCOME_DATA$LAB_2004b <- 0
+INCOME_DATA$LAB_2005b <- 0
+INCOME_DATA$LAB_2006b <- 0
+INCOME_DATA$LAB_2007b <- 0
+INCOME_DATA$LAB_2008b <- 0
+INCOME_DATA$LAB_2009b <- 0
 
 #functions=====================================================================
 getTotal <- function(data, indicator, mainvar, secondvar, clarify, lookupType) { #data frame, indicator var name, main var name, secondary var name, clarify var name or none
@@ -58,6 +72,36 @@ getTotal <- function(data, indicator, mainvar, secondvar, clarify, lookupType) {
   invisible(return(totalVect))
 }
 
+getTotal2 <- function(data, indicator, mainvar, secondvar, clarify, lookupType) { #data frame, indicator var name, main var name, secondary var name, clarify var name or none
+  totalVect <- rep(0, nrow(data))
+  for (j in 1:nrow(data)){
+    #if indicator is positive
+    if (clarify == "None"){#this means we dont have a clarifying question
+      realIndicator = data[j, indicator]
+    } else {
+      realIndicator = max(data[j, indicator],data[j, clarify])
+    }
+    if (realIndicator == 1){#some income received
+      if (data[j, mainvar] > 0){
+        totalVect[j]= data[j, mainvar]
+      }
+      else if(data[j, secondvar] > 0){
+        totalVect[j]= lookupCategory(lookupType, data[j, secondvar])
+      }
+      else if (lookupType ==1){ #we don't use this check
+        totalVect[j]= -100000000 #very negativenumber so it doesn't become positive
+        #print("yes")
+      }
+    }
+    #if (realIndicator==-1 | realIndicator == -2 | realIndicator == -5){ #when this is used, we check that no one refused or don't know for income variable indicator
+    # if (lookupType ==1){ 
+    #  totalVect[j]= -100000000 #very negativenumber so it doesn't become positive
+    # print(paste("Missing data in", toString(j),year_vect[i],sep = ",")) #this doesn't happen, no unjustified skip values
+    #}
+    #}
+  }
+  invisible(return(totalVect))
+}
 
 lookupCategory <- function(varType, curValue){ #varType 1 =  biggest range, 3 = smallers
   if (varType ==1){
@@ -114,14 +158,14 @@ fillMissing <- function(missingVect, fillVect, logicType){
   return(c(storeVect, counter))
 }
 
-#populate incomes 1996==================================================================
+#POPULATE INCOMES WITH IGNORING MISSINGS==========================================================
+#populate incomes 1996
+
 #syntax: data frame, indicator, main variable, secondary (refuser) variable, clarification question indicator or "None"
 salary_96 = getTotal(INCOME_DATA, "P5_010_1997", "P5_016_1997", "P5_017_1997", "P5_011_1997", 1)
-#farm_96 = getTotal(INCOME_DATA, "P5_018_1997", "P5_019_1997", "P5_020_1997", "None", 1)
-#other_96 = getTotal(INCOME_DATA, "P5_055_1997", "P5_056_1997", "P5_057_1997", "None", 2)+getTotal(INCOME_DATA, "P5_067_1997", "P5_068_1997", "P5_069_1997", "None", 3)+ getTotal(INCOME_DATA, "P5_048_1997", "P5_049_1997", "P5_050_1997", "None", 2)+ getTotal(INCOME_DATA, "P5_052_1997", "P5_053_1997", "P5_054_1997", "None", 2)
-#INCOME_DATA$INC_1996 <- salary_96+ farm_96 + other_96
+INCOME_DATA$LAB_1996b <- salary_96
 
-#populate incomes 1997-2010==================================================================
+#populate incomes 1997-2010
 #syntax: data frame, indicator, main variable, secondary (refuser) variable, clarification question indicator or "None"
 year_vect = c("1997","1998","1999","2000","2001","2002","2003","2004","2005","2006","2007","2008","2009","2010")
 for (i in 1:length(year_vect)){
@@ -145,14 +189,59 @@ for (i in 1:length(year_vect)){
   }
   
   
-  outString = paste("INC_", toString(as.integer(year_vect[i])-1), sep = "") #store in last year's income variable
+  outString = paste("LAB_", toString(as.integer(year_vect[i])-1),"b", sep = "") #store in last year's income variable
   INCOME_DATA[,outString]<- salary_cur
   #print(paste("salary",year_vect[i], salary_cur, sep = ","))
   #print(paste("farm",year_vect[i], farm_cur, sep = ","))
   #print(paste("other",year_vect[i], other_cur, sep = ","))
   
   if (as.integer(year_vect[i])> 1998){
-    outString2 = paste("INC_", toString(as.integer(year_vect[i])-2), sep = "") #store in last year's income variable
+    outString2 = paste("LAB_", toString(as.integer(year_vect[i])-2),"b", sep = "") #store in last year's income variable
+    for (k in 1: nrow(INCOME_DATA)){
+      INCOME_DATA[k,outString2]<- max(0,INCOME_DATA[k,outString2]) + salary_twoyear[k]
+    }
+  }
+}
+
+#POPULATE INCOMES WITH KEEPING MISSINGS==========================================================
+#populate incomes 1996
+
+#syntax: data frame, indicator, main variable, secondary (refuser) variable, clarification question indicator or "None"
+salary_96 = getTotal2(INCOME_DATA, "P5_010_1997", "P5_016_1997", "P5_017_1997", "P5_011_1997", 1)
+INCOME_DATA$LAB_1996 <- salary_96
+
+#populate incomes 1997-2010
+#syntax: data frame, indicator, main variable, secondary (refuser) variable, clarification question indicator or "None"
+year_vect = c("1997","1998","1999","2000","2001","2002","2003","2004","2005","2006","2007","2008","2009","2010")
+for (i in 1:length(year_vect)){
+  #salary
+  salIndicator=paste("YINC_1400_", year_vect[i], sep = "") #this only exists until 2002
+  salMain=paste("YINC_1700_", year_vect[i], sep = "")
+  salSecond=paste("YINC_1800_", year_vect[i], sep = "")
+  salClarify=paste("YINC_1500_", year_vect[i], sep = "") 
+  if (as.integer(year_vect[i])< 2003){
+    salary_cur = getTotal2(INCOME_DATA, salIndicator, salMain, salSecond, salClarify, 1)
+  } else {
+    salary_cur = getTotal2(INCOME_DATA, salIndicator, salMain, salSecond, "None", 1)
+  }
+  
+  #salary from two years ago
+  if (as.integer(year_vect[i])> 1998){
+    salTwoYearInd=paste("YINC_1400A_", year_vect[i], sep = "")
+    salTwoYearMain = paste("YINC_1700A_", year_vect[i], sep = "") 
+    salTwoYearSecond = paste("YINC_1800A_", year_vect[i], sep = "")
+    salary_twoyear = getTotal2(INCOME_DATA, salTwoYearInd, salTwoYearMain, salTwoYearSecond, "None", 1)
+  }
+  
+  
+  outString = paste("LAB_", toString(as.integer(year_vect[i])-1), sep = "") #store in last year's income variable
+  INCOME_DATA[,outString]<- salary_cur
+  #print(paste("salary",year_vect[i], salary_cur, sep = ","))
+  #print(paste("farm",year_vect[i], farm_cur, sep = ","))
+  #print(paste("other",year_vect[i], other_cur, sep = ","))
+  
+  if (as.integer(year_vect[i])> 1998){
+    outString2 = paste("LAB_", toString(as.integer(year_vect[i])-2), sep = "") #store in last year's income variable
     for (k in 1: nrow(INCOME_DATA)){
       INCOME_DATA[k,outString2]<- max(0,INCOME_DATA[k,outString2]) + salary_twoyear[k]
     }
@@ -162,25 +251,29 @@ for (i in 1:length(year_vect)){
 #write to file ========================================================================
 write.csv(INCOME_DATA, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/INCOME_DATA2.csv")
 
+#add in attendance category data =============================================================
+CATEGORY_DATA <- read.csv("C://Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/categories.csv")
+INCOME_DATA2 <- merge(x = CATEGORY_DATA, y = INCOME_DATA, by = "PUBID_1997", all.x = TRUE)
+
 #adjust timing of income data =======================================================================
-INCOME_DATA2 <- read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/INCOME_DATA2input.csv")
+#INCOME_DATA2 <- read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/INCOME_DATA2input.csv")
 INCOME_DATA2$START_YEAR <- 0
-INCOME_DATA2$y1 <- 0
-INCOME_DATA2$y2 <- 0
-INCOME_DATA2$y3 <- 0
-INCOME_DATA2$y4 <- 0
-INCOME_DATA2$y5 <- 0
-INCOME_DATA2$y6 <- 0
-INCOME_DATA2$y7 <- 0
-INCOME_DATA2$y8 <- 0
-INCOME_DATA2$ynm1 <- 0
-INCOME_DATA2$ynm2 <- 0
-INCOME_DATA2$ynm3 <- 0
-INCOME_DATA2$ynm4 <- 0
-INCOME_DATA2$ynm5 <- 0
-INCOME_DATA2$ynm6 <- 0
-INCOME_DATA2$ynm7 <- 0
-INCOME_DATA2$ynm8 <- 0
+INCOME_DATA2$z1 <- 0
+INCOME_DATA2$z2 <- 0
+INCOME_DATA2$z3 <- 0
+INCOME_DATA2$z4 <- 0
+INCOME_DATA2$z5 <- 0
+INCOME_DATA2$z6 <- 0
+INCOME_DATA2$z7 <- 0
+INCOME_DATA2$z8 <- 0
+INCOME_DATA2$znm1 <- 0
+INCOME_DATA2$znm2 <- 0
+INCOME_DATA2$znm3 <- 0
+INCOME_DATA2$znm4 <- 0
+INCOME_DATA2$znm5 <- 0
+INCOME_DATA2$znm6 <- 0
+INCOME_DATA2$znm7 <- 0
+INCOME_DATA2$znm8 <- 0
 
 #if not an attender, first year of earning is choice year plus 1
 INCOME_DATA2[INCOME_DATA2$Best.Attended == -3,]$START_YEAR <- INCOME_DATA2[INCOME_DATA2$Best.Attended == -3,]$CHOICE_YEAR +1 
@@ -188,14 +281,14 @@ INCOME_DATA2[INCOME_DATA2$Best.Attended == -3,]$START_YEAR <- INCOME_DATA2[INCOM
 INCOME_DATA2[INCOME_DATA2$Best.Attended != -3,]$START_YEAR <- INCOME_DATA2[INCOME_DATA2$Best.Attended != -3,]$COLLEGEID_YEAR2 +1
 
 for (i in 1:nrow(INCOME_DATA2)){
-  curStrNM = paste('INC_',toString(INCOME_DATA2$START_YEAR[i]),'b',sep = "") #pulls data with no missing values
-  curStr = paste('INC_',toString(INCOME_DATA2$START_YEAR[i]),sep = "") #pulls data with missing values
+  curStrNM = paste('LAB_',toString(INCOME_DATA2$START_YEAR[i]),'b',sep = "") #pulls data with no missing values
+  curStr = paste('LAB_',toString(INCOME_DATA2$START_YEAR[i]),sep = "") #pulls data with missing values
   colIndex = grep(curStr, colnames(INCOME_DATA2))[1] #use the first occurence
   colIndexNM = grep(curStrNM, colnames(INCOME_DATA2))[1] #use the first occurence
-  firstIndex = grep("INC_1996", colnames(INCOME_DATA2))[1] #use if doing with missing
-  firstIndexNM = grep("INC_1996b", colnames(INCOME_DATA2)) #use if doing no missing
-  startYs = grep("y1", colnames(INCOME_DATA2))
-  startYsNM = grep("ynm1", colnames(INCOME_DATA2))
+  firstIndex = grep("LAB_1996", colnames(INCOME_DATA2))[1] #use if doing with missing
+  firstIndexNM = grep("LAB_1996b", colnames(INCOME_DATA2)) #use if doing no missing
+  startYs = grep("z1", colnames(INCOME_DATA2))
+  startYsNM = grep("znm1", colnames(INCOME_DATA2))
   for (j in 0:7){
     if (colIndex + j <= firstIndex + 13){ #this adjusment needs to be better
       #print(colIndex)
@@ -213,14 +306,14 @@ for (i in 1:nrow(INCOME_DATA2)){
 write.csv(INCOME_DATA2, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/incomeadjusted.csv") #saves with no missing values
 
 #fill in missing income======================================================================
-INCOME_DATA2<- read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/incomeadjusted.csv")
+#INCOME_DATA2<- read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/incomeadjusted.csv")
 INCOME_DATA2$COMPLETE_INC <- 0
 misCount = 0
 missCompletelyCount = 0
 fixedCount = 0
 for (i in 1:nrow(INCOME_DATA2)){
-  incVect <- c(INCOME_DATA2$y1[i], INCOME_DATA2$y2[i], INCOME_DATA2$y3[i], INCOME_DATA2$y4[i], INCOME_DATA2$y5[i], INCOME_DATA2$y6[i], INCOME_DATA2$y7[i], INCOME_DATA2$y8[i])
-  incVectNM <- c(INCOME_DATA2$ynm1[i], INCOME_DATA2$ynm2[i], INCOME_DATA2$ynm3[i], INCOME_DATA2$ynm4[i], INCOME_DATA2$ynm5[i], INCOME_DATA2$ynm6[i], INCOME_DATA2$ynm7[i], INCOME_DATA2$ynm8[i])
+  incVect <- c(INCOME_DATA2$z1[i], INCOME_DATA2$z2[i], INCOME_DATA2$z3[i], INCOME_DATA2$z4[i], INCOME_DATA2$z5[i], INCOME_DATA2$z6[i], INCOME_DATA2$z7[i], INCOME_DATA2$z8[i])
+  incVectNM <- c(INCOME_DATA2$znm1[i], INCOME_DATA2$znm2[i], INCOME_DATA2$znm3[i], INCOME_DATA2$znm4[i], INCOME_DATA2$znm5[i], INCOME_DATA2$znm6[i], INCOME_DATA2$znm7[i], INCOME_DATA2$znm8[i])
   #drop terminal negative 4's
   for (j in length(incVect):1){
     if (incVect[j]==-4){
@@ -232,7 +325,7 @@ for (i in 1:nrow(INCOME_DATA2)){
   }
   else { #try to fill in missing values with non-missing ones, pass 1
     returnObj <-fillMissing(incVect, incVectNM, "or") #last argument and indicates you must be between two feasible values, or says you must be next to one
-    print(returnObj[1:length(returnObj)-1])
+    #print(returnObj[1:length(returnObj)-1])
     incVect <- returnObj[1:length(returnObj)-1] #note: a second pass doesn't help if you OR the requirement
     fixedCount = fixedCount + returnObj[length(returnObj)]
   }
@@ -263,11 +356,11 @@ for (i in 1:nrow(INCOME_DATA2)){
     }
   }
 }
-print(fixedCount) #with OR you fix 127, with AND you only fix 50; number of people for whom at least one enty is filled in
-print(missCompletelyCount)
-print(misCount)
+#print(fixedCount) #with OR you fix 127, with AND you only fix 50; number of people for whom at least one enty is filled in
+#print(missCompletelyCount)
+#print(misCount)
 
-write.csv(INCOME_DATA2[INCOME_DATA2$COMPLETE_INC ==0,], "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/projectincome.csv")
+#write.csv(INCOME_DATA2[INCOME_DATA2$COMPLETE_INC ==0,], "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/projectincome.csv")
 
 #write everyone to file so we can pull in manually updated by vlookup
 write.csv(INCOME_DATA2, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/allindividuals.csv")
@@ -275,7 +368,9 @@ write.csv(INCOME_DATA2, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Dat
 
 
 
-#calculate growth rates==============================================================================
+#OLD=======================================================================================
+
+#calculate growth rates===
 PROJECT_DATA<-INCOME_DATA2
 #repopulated COMPLETE_INC, flag for determining if you have four entries
 PROJECT_DATA$COMPLETE_INC <- 0
@@ -313,7 +408,7 @@ for (i in 1:nrow(PROJECT_DATA)){
   }
 }
 
-#populate categories=======================================================================
+#populate categories===
 admit_cats <- c('1','2', '3', '4', '5', '6', '7')
 apply_cats <- c('-3','1','2', '3', '4', '5', '6', '7')
 cat_vector <- rep(NA, length(admit_cats)*length(apply_cats))
@@ -424,7 +519,7 @@ avg_gamma = sum_gamma/pop_counter
 write.csv(avg_gamma, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/avg_gamma.csv")
 write.csv(pop_counter, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/pop_counter.csv")
 
-#pull schooling versus working info==========================================================
+#pull schooling versus working info
 #goal: get vector of school status and populate for start year
 ENROLL_DATA <- read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/enrollstat/enrollstat.csv")
 ENROLL_DATA <- merge(x = PROJECT_DATA, y = ENROLL_DATA, by = "PUBID_1997", all.x = TRUE)
@@ -526,4 +621,4 @@ for (j in 1:nrow(ENROLL_DATA)){
   }
 }
 
-write.csv(ENROLL_DATA, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/with_enrolldata.csv")
+write.csv(ENROLL_DATA, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/indivdata_incomeonly_nomissing.csv")
