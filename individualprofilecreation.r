@@ -228,13 +228,13 @@ enrollVectListLabM[[i]]<-LabMReturn[[3]]
 #project with fixed relationship between b2 and b0
 #set up
   #Nm
-    ageVectList <- ageVectListNm
-    incomeVectList <- incomeVectListNm
-    enrollVectList <- enrollVectListNm
+  #  ageVectList <- ageVectListNm
+  #  incomeVectList <- incomeVectListNm
+   # enrollVectList <- enrollVectListNm
   #M
-    #ageVectList <- ageVectListM
-    #incomeVectList <- incomeVectListM
-    #enrollVectList <- enrollVectListM
+    ageVectList <- ageVectListM
+    incomeVectList <- incomeVectListM
+    enrollVectList <- enrollVectListM
   #LabNm
     #ageVectList <- ageVectListLabNm
     #incomeVectList <- incomeVectListLabNm
