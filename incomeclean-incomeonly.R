@@ -248,6 +248,13 @@ for (i in 1:length(year_vect)){
   }
 }
 
+#replace all negative numbers with negative three
+year_vect = c("1996","1997","1998","1999","2000","2001","2002","2003","2004","2005","2006","2007","2008","2009")
+for (i in 1:length(year_vect)){
+  outString = paste("LAB_", toString(as.integer(year_vect[i])), sep = "")
+  INCOME_DATA[,outString][INCOME_DATA[,outString]<0] = -3
+}
+
 #write to file ========================================================================
 write.csv(INCOME_DATA, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/INCOME_DATA2.csv")
 
@@ -364,7 +371,8 @@ for (i in 1:nrow(INCOME_DATA2)){
 
 #write everyone to file so we can pull in manually updated by vlookup
 write.csv(INCOME_DATA2, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/allindividuals.csv")
-#complete inc is an indicator of whether you should be used for gamma projetion (have at least 4 entries, not necessarly starting at beginning)
+write.csv(INCOME_DATA2[c("PUBID_1997", "z1","z2","z3","z4","z5","z6","z7","z8","znm1","znm2","znm3","znm4","znm5","znm6","znm7","znm8")], "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/indivdata_allsources.csv")
+
 
 
 
