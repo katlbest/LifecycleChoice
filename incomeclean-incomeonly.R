@@ -371,7 +371,7 @@ for (i in 1:nrow(INCOME_DATA2)){
 
 #write everyone to file so we can pull in manually updated by vlookup
 write.csv(INCOME_DATA2, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/allindividuals.csv")
-write.csv(INCOME_DATA2[c("PUBID_1997", "z1","z2","z3","z4","z5","z6","z7","z8","znm1","znm2","znm3","znm4","znm5","znm6","znm7","znm8")], "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/indivdata_allsources.csv")
+write.csv(INCOME_DATA2[c("PUBID_1997", "z1","z2","z3","z4","z5","z6","z7","z8","znm1","znm2","znm3","znm4","znm5","znm6","znm7","znm8")], "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/indivdata_laboronly.csv")
 
 
 

@@ -228,21 +228,21 @@ enrollVectListLabM<-LabMReturn[[3]]
 #project with fixed relationship between b2 and b0
 #set up
   #Nm
-  #  ageVectList <- ageVectListNm
-  #  incomeVectList <- incomeVectListNm
-   # enrollVectList <- enrollVectListNm
+    #ageVectList <- ageVectListNm
+    #incomeVectList <- incomeVectListNm
+    #enrollVectList <- enrollVectListNm
   #M
-    ageVectList <- ageVectListM
-    incomeVectList <- incomeVectListM
-    enrollVectList <- enrollVectListM
+    #ageVectList <- ageVectListM
+    #incomeVectList <- incomeVectListM
+    #enrollVectList <- enrollVectListM
   #LabNm
     #ageVectList <- ageVectListLabNm
     #incomeVectList <- incomeVectListLabNm
     #enrollVectList <- enrollVectListLabNm
   #LabM
-    #ageVectList <- ageVectListLabM
-    #incomeVectList <- incomeVectLisLabM
-    #enrollVectList <- enrollVectListLabM
+    ageVectList <- ageVectListLabM
+    incomeVectList <- incomeVectListLabM
+    enrollVectList <- enrollVectListLabM
 
 #inputs
 tau =27.8818
@@ -286,6 +286,144 @@ for (i in 1:nrow(ENROLL_DATA)){
 colnames(outMatrix)=ENROLL_DATA$PUBID_1997
 write.csv(outMatrix, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/individualoutput.csv")
 write.csv(coeffVect, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/individualcoefficients.csv")
+
+#store all four coefficient lists
+#coeffVectNmRaw<- coeffVect
+write.csv(coeffVectNmRaw, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/coeffVectNmRaw.csv")
+#coeffVectMRaw<- coeffVect
+write.csv(coeffVectMRaw, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/coeffVectMRaw.csv")
+#coeffVectLabNmRaw<- coeffVect
+write.csv(coeffVectLabNmRaw, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/coeffVectLabNmRaw.csv")
+#coeffVectLabMRaw<- coeffVect
+write.csv(coeffVectLabMRaw, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/coeffVectLabMRaw.csv")
+
+#coeffVectNmFilled<- coeffVect
+write.csv(coeffVectNmFilled, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/coeffVectNmFilled.csv")
+#coeffVectMFilled<- coeffVect
+write.csv(coeffVectMFilled, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/coeffVectMFilled.csv")
+#coeffVectLabNmFilled<- coeffVect
+write.csv(coeffVectLabNmFilled, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/coeffVectLabNmFilled.csv")
+#coeffVectLabMFilled<- coeffVect
+write.csv(coeffVectLabMFilled, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/coeffVectLabMFilled.csv")
+
+
+#store all eight outmatrixes and place in list
+#outMatrixNmRaw <- outMatrix
+write.csv(outMatrixNmRaw, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/outNmRaw.csv")
+#outMatrixMRaw <- outMatrix
+write.csv(outMatrixMRaw, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/outMRaw.csv")
+#outMatrixLabNmRaw <- outMatrix
+write.csv(outMatrixLabNmRaw, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/outLabNmRaw.csv")
+#outMatrixLabMRaw <- outMatrix
+write.csv(outMatrixLabMRaw, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/outLabMRaw.csv")
+
+#outMatrixNmFilled <- outMatrix
+write.csv(outMatrixNmFilled, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/outNmFilled.csv")
+#outMatrixMFilled <- outMatrix
+write.csv(outMatrixMFilled, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/outMFilled.csv")
+#outMatrixLabNmFilled <- outMatrix
+write.csv(outMatrixLabNmFilled, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/outLabNmFilled.csv")
+#outMatrixLabMFilled <- outMatrix
+write.csv(outMatrixLabMFilled, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/outLabMFilled.csv")
+
+outMatrixList = list(outMatrixMRaw, outMatrixNmRaw,outMatrixLabMRaw,outMatrixLabNmRaw,outMatrixMFilled,outMatrixNmFilled,outMatrixLabMFilled,outMatrixLabNmFilled)
+
+#save this workspace for later loading
+#save.image(file="inddata.RData")
+#load("inddata.RData")
+
+#create best estimate for each person====================================================
+incomeEstimate<- list()
+incomeb0 <- list()
+b0Min = -500000 #upper limit of about 140K top salary
+b0Max = -100 #lower limit of about 12K top salary
+  
+for (i in 1:length(incomeVectList)){
+  b0Vect <- c(coeffVectMRaw[i,1], coeffVectNmRaw[i,1],coeffVectLabMRaw[i,1],coeffVectLabNmRaw[i,1],coeffVectMFilled[i,1],coeffVectNmFilled[i,1],coeffVectLabMFilled[i,1],coeffVectLabNmFilled[i,1])
+  useIndex = 0
+  for (j in 1:length(b0Vect)){
+    if (useIndex == 0 & !(is.na(b0Vect[j]))){
+      if ((b0Vect[j]>=b0Min) & (b0Vect[j] <= b0Max)){
+        useIndex = j
+      }
+    }
+  }
+  if (useIndex >0){
+    incomeEstimate[[i]] <- outMatrixList[[useIndex]][[i]]
+    incomeb0[[i]]<- b0Vect[useIndex]
+  }
+  else{
+    incomeEstimate[[i]] <- rep(-3, 82)
+    incomeb0[[i]]<--3
+  }
+}
+
+write.csv(incomeEstimate, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/incomeEsts.csv")
+write.csv(incomeb0, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/incomeb0.csv")
+
+#add b0 to data points
+ENROLL_DATA$b0 <- unlist(incomeb0)
+write.csv(ENROLL_DATA, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/datawithb0.csv")
+
+#extract data on differences in betas===========================================
+#categories (currently using 5)
+ENROLL_DATA$cat <-NA
+admit_cats <- c('1','2', '3', '4', '6', '7')
+apply_cats <- c('-3','1','2', '3', '4', '6', '7')
+cat_vector <- rep(NA, length(admit_cats)*length(apply_cats))
+pop_counter <- rep(0, length(cat_vector))
+avg_beta0 <- rep(0, length(cat_vector))
+var_beta0 <- rep(0, length(cat_vector))
+beta0byCat <- list()
+length(beta0byCat) <- length(cat_vector)
+
+k=1
+for (i in 1:length(admit_cats)){#populate what will be the "lookup vector"
+  for (j in 1:length(apply_cats)){
+    cat_vector[k]= paste(admit_cats[i],apply_cats[j], sep = "")
+    k = k+1
+  }
+}
+
+for (i in 1:nrow(ENROLL_DATA)){
+  curCat = toString(paste(ENROLL_DATA$BestAd5[i],ENROLL_DATA$BestAtt5[i], sep = ""))
+  ENROLL_DATA$cat[i]=curCat
+  curIndex = match(curCat, cat_vector)
+  if (ENROLL_DATA$b0[i]!=-3){
+    #add it to corresponding list
+    beta0byCat[[curIndex]][[length(beta0byCat[[curIndex]])+1]]<-ENROLL_DATA$b0[i]
+  }
+}
+
+for (i in 1:length(beta0byCat)){
+  curbetalist = beta0byCat[[i]]
+  pop_counter[i]<- length(curbetalist)
+  if (pop_counter[i]> 0){
+    avg_beta0[i] <- sum(curbetalist)
+    var_beta0[i] <- var(curbetalist)
+  }  
+}
+
+outdat <- data.frame(name = cat_vector, number = pop_counter, average = avg_beta0, variance = var_beta0)
+write.csv(ENROLL_DATA, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/datawithb0.csv")
+write.csv(outdat, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/b0output.csv")
+
+#regress b0 on category================================================
+b0ProjectData <- data.frame(b0 = ENROLL_DATA$b0, cat = ENROLL_DATA$cat, admit = ENROLL_DATA$BestAd5, attend = ENROLL_DATA$BestAtt5)
+#clean data--remove 7's so that we have ordinal numbers
+#-3 means no school attendance, which is worse than some shcool attendance, so also ordinal
+b0ProjectData <- b0ProjectData[b0ProjectData$admit != 7 & b0ProjectData$attend != 7,]
+
+#factor model
+b0ProjectModel <- lm(b0~factor(cat)-1, data=b0ProjectData)
+b0ProjectModel <- lm(b0~admit+attend, data=b0ProjectData)
+b0ProjectModel <- lm(b0~factor(attend), data=b0ProjectData)
+b0ProjectModel <- lm(b0~factor(admit), data=b0ProjectData)
+
+
+
+
+
 
 #OLD=======================================================================================
 #project without fixing any variables
