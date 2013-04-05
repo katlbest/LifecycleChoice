@@ -327,6 +327,7 @@ write.csv(outMatrixLabNmFilled, "C:/Users/Katharina/Documents/Umich/Lifecycle Ch
 write.csv(outMatrixLabMFilled, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/outLabMFilled.csv")
 
 outMatrixList = list(outMatrixMRaw, outMatrixNmRaw,outMatrixLabMRaw,outMatrixLabNmRaw,outMatrixMFilled,outMatrixNmFilled,outMatrixLabMFilled,outMatrixLabNmFilled)
+#outMatrixList = list(outMatrixMFilled,outMatrixNmFilled,outMatrixLabMFilled,outMatrixLabNmFilled,outMatrixMRaw, outMatrixNmRaw,outMatrixLabMRaw,outMatrixLabNmRaw)
 
 #save this workspace for later loading
 #save.image(file="inddata.RData")
@@ -340,6 +341,7 @@ b0Max = -100 #lower limit of about 12K top salary
   
 for (i in 1:length(incomeVectList)){
   b0Vect <- c(coeffVectMRaw[i,1], coeffVectNmRaw[i,1],coeffVectLabMRaw[i,1],coeffVectLabNmRaw[i,1],coeffVectMFilled[i,1],coeffVectNmFilled[i,1],coeffVectLabMFilled[i,1],coeffVectLabNmFilled[i,1])
+  #b0Vect <- c(coeffVectMFilled[i,1],coeffVectNmFilled[i,1],coeffVectLabMFilled[i,1],coeffVectLabNmFilled[i,1],coeffVectMRaw[i,1], coeffVectNmRaw[i,1],coeffVectLabMRaw[i,1],coeffVectLabNmRaw[i,1])
   useIndex = 0
   for (j in 1:length(b0Vect)){
     if (useIndex == 0 & !(is.na(b0Vect[j]))){
@@ -420,10 +422,57 @@ b0ProjectModel <- lm(b0~admit+attend, data=b0ProjectData)
 b0ProjectModel <- lm(b0~factor(attend), data=b0ProjectData)
 b0ProjectModel <- lm(b0~factor(admit), data=b0ProjectData)
 
+#save this workspace for later loading
+#save.image(file="inddata2.RData")
+#load("inddata2.RData")
+
+#read in other relevant predictor information
+INCOME_PREDS<- read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/incomepredictors.csv")
+ENROLL_DATA2<- merge(x = ENROLL_DATA, y = INCOME_PREDS, by = "PUBID_1997", all.x = TRUE)
+COLLEGE_NUM<- read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/collegenumber.csv")
+ENROLL_DATA2<- merge(x = ENROLL_DATA2, y = COLLEGE_NUM, by = "PUBID_1997", all.x = TRUE)
+LOC_DATA <- read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/desensitizedloc.csv")
+ENROLL_DATA2<- merge(x = ENROLL_DATA2, y = LOC_DATA, by = "PUBID_1997", all.x = TRUE)
+ENROLL_DATA<-ENROLL_DATA2
+
+#populate major
+  #use latest major at "real school"
+ENROLL_DATA$MAJOR <- -3
+for (i in 1:nrow(ENROLL_DATA)){
+  colNumString = paste("YSCH_21300", ENROLL_DATA$COLLEGEID_ROSTERNUM2[i], "_", sep ="")
+  varVector = c()
+  curYear = ENROLL_DATA$COLLEGEID_YEAR2[i]
+  yearString = paste("_", ENROLL_DATA$COLLEGEID_YEAR2[i], sep ="")
+  termVect = c("01","02", "03", "04","05", "06", "07","08","09","10","11","12", "13")
+  for (j in 1:length(termVect)){
+    curstr = paste(colNumString, termVect[j], yearString, sep = "")
+    if (curstr %in% colnames(ENROLL_DATA)){
+      varVector[length(varVector)+1] = curstr
+    }
+  }
+  #now have vector of variables to check, use most recent
+  if (length(varVector)>0){
+    for (j in length(varVector):1){
+      curStr = paste("ENROLL_DATA$", varVector[j], sep = "")
+      curMajor = eval(parse(text =curStr))[i]
+      if (ENROLL_DATA$MAJOR[i] == -3 & curMajor >= 0){
+        ENROLL_DATA$MAJOR[i]= curMajor
+      }
+    }
+  }
+  else {
+    ENROLL_DATA$MAJOR[i]= -3
+  }
+}
 
 
 
+#populate area of residence
+#geo variables are pretty straight forward
 
+#populate GPA
+#use the one GPA variable ()
+#YSCH-7300 (dont worry about recode, etc)
 
 #OLD=======================================================================================
 #project without fixing any variables
