@@ -465,14 +465,16 @@ for (i in 1:nrow(ENROLL_DATA)){
   }
 }
 
-
-
 #populate area of residence
-#geo variables are pretty straight forward
+#geo variables are pretty straight forward, GEO03--ues desensitized
 
 #populate GPA
-#use the one GPA variable ()
-#YSCH-7300 (dont worry about recode, etc)
+#use the one GPA variable (), #YSCH-7300 (dont worry about recode, etc)
+
+#try to get industry in addition to major??
+#YEMP_55505_COD or YEMP_INDCODE-2002, but lots of employers, etc.
+
+#populate data on schooling completion (CVC_HIGHEST_DEGREE_EVER_XRND)
 
 #OLD=======================================================================================
 #project without fixing any variables
