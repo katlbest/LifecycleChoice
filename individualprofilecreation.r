@@ -415,12 +415,13 @@ b0ProjectData <- data.frame(b0 = ENROLL_DATA$b0, cat = ENROLL_DATA$cat, admit = 
 #clean data--remove 7's so that we have ordinal numbers
 #-3 means no school attendance, which is worse than some shcool attendance, so also ordinal
 b0ProjectData <- b0ProjectData[b0ProjectData$admit != 7 & b0ProjectData$attend != 7,]
-
+b0ProjectData[b0ProjectData == -3] <- NA #replace with NAs
 #factor model
-b0ProjectModel <- lm(b0~factor(cat)-1, data=b0ProjectData)
-b0ProjectModel <- lm(b0~admit+attend, data=b0ProjectData)
-b0ProjectModel <- lm(b0~factor(attend), data=b0ProjectData)
-b0ProjectModel <- lm(b0~factor(admit), data=b0ProjectData)
+b0ProjectModel <- lm(b0~factor(cat)-1, data=na.exclude(b0ProjectData))
+b0ProjectModel <- lm(b0~cat, data=na.exclude(b0ProjectData))
+b0ProjectModel <- lm(b0~admit+attend, data=na.exclude(b0ProjectData))
+b0ProjectModel <- lm(b0~factor(attend), data=na.exclude(b0ProjectData))
+b0ProjectModel <- lm(b0~factor(admit), data=na.exclude(b0ProjectData))
 
 #save this workspace for later loading
 #save.image(file="inddata2.RData")
@@ -466,15 +467,59 @@ for (i in 1:nrow(ENROLL_DATA)){
 }
 
 #populate area of residence
-#geo variables are pretty straight forward, GEO03--ues desensitized
+#geo variables are pretty straight forward, GEO03--use desensitized
+#get mode, and if all are different use the latest avaialble
+ENROLL_DATA$GEO = -3
+for (i in 1:nrow(ENROLL_DATA)){
+  geoVector = c()
+  if (ENROLL_DATA$GEO03_2010[i]>=0){
+    geoVector[length(geoVector)+1]= ENROLL_DATA$GEO03_2010[i]
+  }
+  if (ENROLL_DATA$GEO03_2009[i]>=0){
+    geoVector[length(geoVector)+1]= ENROLL_DATA$GEO03_2009[i]
+  }
+  if (ENROLL_DATA$GEO03_2008[i]>=0){
+    geoVector[length(geoVector)+1]= ENROLL_DATA$GEO03_2008[i]
+  }
+  if (ENROLL_DATA$GEO03_2009[i]>=0){
+    geoVector[length(geoVector)+1]= ENROLL_DATA$GEO03_2009[i]
+  }
+  if (length(geoVector)>0){
+    uniques <- unique(geoVector)
+    ENROLL_DATA$GEO[i]<- uniques[which.max(tabulate(match(geoVector, uniques)))]
+  }
+}
 
 #populate GPA
 #use the one GPA variable (), #YSCH-7300 (dont worry about recode, etc)
+#value of 1 is badm 8 is good, above 8 should be discarded
+yearVect  = c("2007", "2006","2005","2004","2003","2002","2001","2000","1999","1998","1997")
+ENROLL_DATA$GRADES = -3
+for (i in 1:nrow(ENROLL_DATA)){
+  for (j in 1:length(yearVect)){
+    curStr = paste("ENROLL_DATA$YSCH_7300_", yearVect[j], sep = "")
+    curValue  = eval(parse(text =curStr))[i]
+    if (ENROLL_DATA$GRADES[i] == -3 & curValue >= 0 & curValue <9){
+      ENROLL_DATA$GRADES[i] = curValue
+    }
+  }
+}
 
 #try to get industry in addition to major??
 #YEMP_55505_COD or YEMP_INDCODE-2002, but lots of employers, etc.
 
 #populate data on schooling completion (CVC_HIGHEST_DEGREE_EVER_XRND)
+ENROLL_DATA$COLLEGECOMPLETED = -3
+for (i in 1:nrow(ENROLL_DATA)){
+  if (ENROLL_DATA$stillInCollege[i]==0){
+    if (ENROLL_DATA$CVC_HIGHEST_DEGREE_EVER_XRND[i]>3){ #4 is bachelors
+      ENROLL_DATA$COLLEGECOMPLETED[i] = 1
+    }
+    else{
+      ENROLL_DATA$COLLEGECOMPLETED[i] = 0
+    }
+  }
+}
 
 #OLD=======================================================================================
 #project without fixing any variables
