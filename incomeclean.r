@@ -671,6 +671,12 @@ write.csv(ENROLL_DATA, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data
 LABOR_ONLY = read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/indivdata_laboronly.csv")
 COMPLETE_DATA <- merge(x = ENROLL_DATA, y = LABOR_ONLY, by = "PUBID_1997", all.x = TRUE)
 write.csv(COMPLETE_DATA, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/allindivdata.csv")
+
+
+
+
+
+
 #CENSUS===========================================================================================
 
 #get shape of census data ======================================================
@@ -1246,8 +1252,8 @@ for (i in 1:nrow(ENROLL_DATA)){
   endIndex = 0
   for (j in 1:length(incVect)){
     if (j == length(incVect)){
-      #if (incVect[j]>=0 & startIndex ==0 & enrollVect[j]!= 1){ #with enrollment modification
-      if (incVect[j]>=0 & startIndex ==0){ #without enrollment modification
+      if (incVect[j]>=0 & startIndex ==0 & enrollVect[j]!= 1){ #with enrollment modification
+      #if (incVect[j]>=0 & startIndex ==0){ #without enrollment modification
         endIndex = j
       }
       if (endIndex - startIndex >= 3 & startIndex > 0){
@@ -1259,8 +1265,8 @@ for (i in 1:nrow(ENROLL_DATA)){
         enrollVectList[[i]]<-enrollVectOut
       }
     }
-    # if (incVect[j]>=0 & enrollVect[j]!= 1){ #with enrollment modification: 
-    if (incVect[j]>=0){#without enrollment modification: 
+     if (incVect[j]>=0 & enrollVect[j]!= 1){ #with enrollment modification: 
+    #if (incVect[j]>=0){#without enrollment modification: 
       if (startIndex ==0){
         startIndex = j
       }

@@ -333,6 +333,10 @@ outMatrixList = list(outMatrixMRaw, outMatrixNmRaw,outMatrixLabMRaw,outMatrixLab
 #save.image(file="inddata.RData")
 #load("inddata.RData")
 
+#save this workspace for later loading
+#save.image(file="inddata-noenroll.RData")
+#load("inddata.RData")
+
 #create best estimate for each person====================================================
 incomeEstimate<- list()
 incomeb0 <- list()
@@ -365,7 +369,7 @@ write.csv(incomeb0, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/In
 
 #add b0 to data points
 ENROLL_DATA$b0 <- unlist(incomeb0)
-write.csv(ENROLL_DATA, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/datawithb0.csv")
+write.csv(ENROLL_DATA, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/datawithb0-noenroll.csv")
 
 #extract data on differences in betas===========================================
 #categories (currently using 5)
@@ -410,212 +414,6 @@ outdat <- data.frame(name = cat_vector, number = pop_counter, average = avg_beta
 write.csv(ENROLL_DATA, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/datawithb0.csv")
 write.csv(outdat, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/b0output.csv")
 
-#regress b0 on category================================================
-b0ProjectData <- data.frame(b0 = ENROLL_DATA$b0, cat = ENROLL_DATA$cat, admit = ENROLL_DATA$BestAd5, attend = ENROLL_DATA$BestAtt5)
-#clean data--remove 7's so that we have ordinal numbers
-#-3 means no school attendance, which is worse than some shcool attendance, so also ordinal
-b0ProjectData <- b0ProjectData[b0ProjectData$admit != 7 & b0ProjectData$attend != 7,]
-b0ProjectData[b0ProjectData == -3] <- NA #replace with NAs
-#factor model
-b0ProjectModel <- lm(b0~factor(cat), data=na.exclude(b0ProjectData))
-b0ProjectModel <- lm(b0~cat, data=na.exclude(b0ProjectData))
-b0ProjectModel <- lm(b0~admit+attend, data=na.exclude(b0ProjectData))
-b0ProjectModel <- lm(b0~factor(attend), data=na.exclude(b0ProjectData))
-b0ProjectModel <- lm(b0~factor(admit), data=na.exclude(b0ProjectData))
-
-#save this workspace for later loading
-#save.image(file="inddata2.RData")
-#load("inddata2.RData")
-
-#read in other relevant predictor information
-INCOME_PREDS<- read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/incomepredictors.csv")
-ENROLL_DATA2<- merge(x = ENROLL_DATA, y = INCOME_PREDS, by = "PUBID_1997", all.x = TRUE)
-COLLEGE_NUM<- read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/collegenumber.csv")
-ENROLL_DATA2<- merge(x = ENROLL_DATA2, y = COLLEGE_NUM, by = "PUBID_1997", all.x = TRUE)
-LOC_DATA <- read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/desensitizedloc.csv")
-ENROLL_DATA2<- merge(x = ENROLL_DATA2, y = LOC_DATA, by = "PUBID_1997", all.x = TRUE)
-ENROLL_DATA<-ENROLL_DATA2
-
-#populate major
-  #use latest major at "real school"
-ENROLL_DATA$MAJOR <- -3
-for (i in 1:nrow(ENROLL_DATA)){
-  colNumString = paste("YSCH_21300", ENROLL_DATA$COLLEGEID_ROSTERNUM2[i], "_", sep ="")
-  varVector = c()
-  curYear = ENROLL_DATA$COLLEGEID_YEAR2[i]
-  yearString = paste("_", ENROLL_DATA$COLLEGEID_YEAR2[i], sep ="")
-  termVect = c("01","02", "03", "04","05", "06", "07","08","09","10","11","12", "13")
-  for (j in 1:length(termVect)){
-    curstr = paste(colNumString, termVect[j], yearString, sep = "")
-    if (curstr %in% colnames(ENROLL_DATA)){
-      varVector[length(varVector)+1] = curstr
-    }
-  }
-  #now have vector of variables to check, use most recent
-  if (length(varVector)>0){
-    for (j in length(varVector):1){
-      curStr = paste("ENROLL_DATA$", varVector[j], sep = "")
-      curMajor = eval(parse(text =curStr))[i]
-      if (ENROLL_DATA$MAJOR[i] == -3 & curMajor >= 0){
-        ENROLL_DATA$MAJOR[i]= curMajor
-      }
-    }
-  }
-  else {
-    ENROLL_DATA$MAJOR[i]= -3
-  }
-}
-
-#prediction with major
-b0MajorData <- data.frame(b0 = ENROLL_DATA$b0, major = ENROLL_DATA$MAJOR)
-b0MajorData[b0MajorData == -3] <- NA #replace with NAs
-#99 means other, 0 means no field
-b0MajorData <- b0MajorData[b0MajorData$major != 99 & b0MajorData$major != 0,]
-#factor model
-b0MajorModel <- lm(b0~factor(major), data=na.exclude(b0MajorData))
-hardSci <- c(6, 21, 25)
-softSci <- c(3, 10, 11, 31, 32)
-bus <- c(7, 8, 9, 13)
-health <- c(22, 23, 27, 29, 30, 28)
-b0MajorData$major2
-#reduce categories
-for (i in 1:nrow(b0MajorData)){
-  if (b0MajorData$major[i] %in% hardSci){
-    b0MajorData$major2[i]= 1
-  }
-  else if (b0MajorData$major[i] %in% softSci){
-    b0MajorData$major2[i]= 2
-  }
- else if (b0MajorData$major[i] %in% bus){
-   b0MajorData$major2[i]= 3
- }
-  else if (b0MajorData$major[i] %in% health){
-    b0MajorData$major2[i]= 4
-  }
- else if (is.na(b0MajorData$major[i])){
-   b0MajorData$major2[i]= -3
- }
-  else{
-    b0MajorData$major2[i]= 5
-  }
-}
-b0MajorModel2 <- lm(b0~factor(major2), data=na.exclude(b0MajorData))
-
-#populate area of residence
-#geo variables are pretty straight forward, GEO03--use desensitized
-#get mode, and if all are different use the latest avaialble
-ENROLL_DATA$GEO = -3
-for (i in 1:nrow(ENROLL_DATA)){
-  geoVector = c()
-  if (ENROLL_DATA$GEO03_2010[i]>=0){
-    geoVector[length(geoVector)+1]= ENROLL_DATA$GEO03_2010[i]
-  }
-  if (ENROLL_DATA$GEO03_2009[i]>=0){
-    geoVector[length(geoVector)+1]= ENROLL_DATA$GEO03_2009[i]
-  }
-  if (ENROLL_DATA$GEO03_2008[i]>=0){
-    geoVector[length(geoVector)+1]= ENROLL_DATA$GEO03_2008[i]
-  }
-  if (ENROLL_DATA$GEO03_2009[i]>=0){
-    geoVector[length(geoVector)+1]= ENROLL_DATA$GEO03_2009[i]
-  }
-  if (length(geoVector)>0){
-    uniques <- unique(geoVector)
-    ENROLL_DATA$GEO[i]<- uniques[which.max(tabulate(match(geoVector, uniques)))]
-  }
-}
-
-b0GeoData <- data.frame(b0 = ENROLL_DATA$b0, geo = ENROLL_DATA$GEO)
-b0GeoData[b0GeoData == -3] <- NA #replace with NAs
-b0GeoModel <- lm(b0~factor(geo), data=na.exclude(b0GeoData))
-
-#populate GPA
-#use the one GPA variable (), #YSCH-7300 (dont worry about recode, etc)
-#value of 1 is badm 8 is good, above 8 should be discarded
-yearVect  = c("2007", "2006","2005","2004","2003","2002","2001","2000","1999","1998","1997")
-ENROLL_DATA$GRADES = -3
-for (i in 1:nrow(ENROLL_DATA)){
-  for (j in 1:length(yearVect)){
-    curStr = paste("ENROLL_DATA$YSCH_7300_", yearVect[j], sep = "")
-    curValue  = eval(parse(text =curStr))[i]
-    if (ENROLL_DATA$GRADES[i] == -3 & curValue >= 0 & curValue <9){
-      ENROLL_DATA$GRADES[i] = curValue
-    }
-  }
-}
-
-b0GPAData <- data.frame(b0 = ENROLL_DATA$b0, gpa = ENROLL_DATA$GRADES)
-b0GPAData[b0GPAData == -3] <- NA #replace with NAs
-b0GPAModel <- lm(b0~factor(gpa), data=na.exclude(b0GPAData))
-b0GPAModel <- lm(b0~gpa, data=na.exclude(b0GPAData))
-
-#try to get industry in addition to major??
-#YEMP_55505_COD or YEMP_INDCODE-2002, but lots of employers, etc.
-
-#populate data on schooling completion (CVC_HIGHEST_DEGREE_EVER_XRND)
-ENROLL_DATA$COLLEGECOMPLETED = -3
-for (i in 1:nrow(ENROLL_DATA)){
-  if (ENROLL_DATA$stillInCollege[i]==0){
-    if (ENROLL_DATA$CVC_HIGHEST_DEGREE_EVER_XRND[i]>3){ #4 is bachelors
-      ENROLL_DATA$COLLEGECOMPLETED[i] = 1
-    }
-    else{
-      ENROLL_DATA$COLLEGECOMPLETED[i] = 0
-    }
-  }
-}
-
-b0GradData <- data.frame(b0 = ENROLL_DATA$b0, grad = ENROLL_DATA$COLLEGECOMPLETED)
-b0GradData[b0GradData == -3] <- NA #replace with NAs
-b0GradModel <- lm(b0~factor(grad), data=na.exclude(b0GradData))
-
-#project with all ifno============================================================
-b0ProjectData <- data.frame(b0 = ENROLL_DATA$b0, cat = ENROLL_DATA$cat, admit = ENROLL_DATA$BestAd5, attend = ENROLL_DATA$BestAtt5, major = ENROLL_DATA$MAJOR, gpa = ENROLL_DATA$GRADES)
-b0ProjectData[b0ProjectData == -3] <- NA #replace with NAs
-
-#get major categories
-hardSci <- c(6, 21, 25)
-softSci <- c(3, 10, 11, 31, 32)
-bus <- c(7, 8, 9, 13)
-health <- c(22, 23, 27, 29, 30, 28)
-b0ProjectData$major2
-b0MajorData <- b0MajorData[b0MajorData$major != 99 & b0MajorData$major != 0,]
-
-#reduce categories
-for (i in 1:nrow(b0ProjectData)){
-  if (b0ProjectData$major[i] %in% hardSci){
-    b0ProjectData$major2[i]= 1
-  }
-  else if (b0ProjectData$major[i] %in% softSci){
-    b0ProjectData$major2[i]= 2
-  }
-  else if (b0ProjectData$major[i] %in% bus){
-    b0ProjectData$major2[i]= 3
-  }
-  else if (b0ProjectData$major[i] %in% health){
-    b0ProjectData$major2[i]= 4
-  }
-  else if (is.na(b0ProjectData$major[i])){
-    b0ProjectData$major2[i]= -3
-  }
-  else{
-    b0ProjectData$major2[i]= 5
-  }
-}
-#clean data--remove 7's so that we have ordinal numbers
-b0ProjectData <- b0ProjectData[b0ProjectData$admit != 7 & b0ProjectData$attend != 7,]
-#factor model
-AllFactor <- lm(b0~factor(cat)+ factor(gpa) + factor(major2), data=na.exclude(b0ProjectData))
-AllFactor <- lm(b0~factor(cat)+ factor(major2), data=na.exclude(b0ProjectData))
-AllFactor <- lm(b0~factor(admit)+ factor(major2), data=na.exclude(b0ProjectData))
-AllFactor <- lm(b0~factor(admit), data=na.exclude(b0ProjectData))
-AllFactor <- lm(b0~factor(attend), data=na.exclude(b0ProjectData))
-
-
-#save this workspace for later loading
-#save.image(file="noenrollmentrest.RData")
-#load("inddata2.RData")
-write.csv(ENROLL_DATA,"C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/noenrollmentrest.csv") 
 
 #OLD=======================================================================================
 #project without fixing any variables
