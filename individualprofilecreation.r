@@ -417,7 +417,7 @@ b0ProjectData <- data.frame(b0 = ENROLL_DATA$b0, cat = ENROLL_DATA$cat, admit = 
 b0ProjectData <- b0ProjectData[b0ProjectData$admit != 7 & b0ProjectData$attend != 7,]
 b0ProjectData[b0ProjectData == -3] <- NA #replace with NAs
 #factor model
-b0ProjectModel <- lm(b0~factor(cat)-1, data=na.exclude(b0ProjectData))
+b0ProjectModel <- lm(b0~factor(cat), data=na.exclude(b0ProjectData))
 b0ProjectModel <- lm(b0~cat, data=na.exclude(b0ProjectData))
 b0ProjectModel <- lm(b0~admit+attend, data=na.exclude(b0ProjectData))
 b0ProjectModel <- lm(b0~factor(attend), data=na.exclude(b0ProjectData))
@@ -466,6 +466,41 @@ for (i in 1:nrow(ENROLL_DATA)){
   }
 }
 
+#prediction with major
+b0MajorData <- data.frame(b0 = ENROLL_DATA$b0, major = ENROLL_DATA$MAJOR)
+b0MajorData[b0MajorData == -3] <- NA #replace with NAs
+#99 means other, 0 means no field
+b0MajorData <- b0MajorData[b0MajorData$major != 99 & b0MajorData$major != 0,]
+#factor model
+b0MajorModel <- lm(b0~factor(major), data=na.exclude(b0MajorData))
+hardSci <- c(6, 21, 25)
+softSci <- c(3, 10, 11, 31, 32)
+bus <- c(7, 8, 9, 13)
+health <- c(22, 23, 27, 29, 30, 28)
+b0MajorData$major2
+#reduce categories
+for (i in 1:nrow(b0MajorData)){
+  if (b0MajorData$major[i] %in% hardSci){
+    b0MajorData$major2[i]= 1
+  }
+  else if (b0MajorData$major[i] %in% softSci){
+    b0MajorData$major2[i]= 2
+  }
+ else if (b0MajorData$major[i] %in% bus){
+   b0MajorData$major2[i]= 3
+ }
+  else if (b0MajorData$major[i] %in% health){
+    b0MajorData$major2[i]= 4
+  }
+ else if (is.na(b0MajorData$major[i])){
+   b0MajorData$major2[i]= -3
+ }
+  else{
+    b0MajorData$major2[i]= 5
+  }
+}
+b0MajorModel2 <- lm(b0~factor(major2), data=na.exclude(b0MajorData))
+
 #populate area of residence
 #geo variables are pretty straight forward, GEO03--use desensitized
 #get mode, and if all are different use the latest avaialble
@@ -490,6 +525,10 @@ for (i in 1:nrow(ENROLL_DATA)){
   }
 }
 
+b0GeoData <- data.frame(b0 = ENROLL_DATA$b0, geo = ENROLL_DATA$GEO)
+b0GeoData[b0GeoData == -3] <- NA #replace with NAs
+b0GeoModel <- lm(b0~factor(geo), data=na.exclude(b0GeoData))
+
 #populate GPA
 #use the one GPA variable (), #YSCH-7300 (dont worry about recode, etc)
 #value of 1 is badm 8 is good, above 8 should be discarded
@@ -504,6 +543,11 @@ for (i in 1:nrow(ENROLL_DATA)){
     }
   }
 }
+
+b0GPAData <- data.frame(b0 = ENROLL_DATA$b0, gpa = ENROLL_DATA$GRADES)
+b0GPAData[b0GPAData == -3] <- NA #replace with NAs
+b0GPAModel <- lm(b0~factor(gpa), data=na.exclude(b0GPAData))
+b0GPAModel <- lm(b0~gpa, data=na.exclude(b0GPAData))
 
 #try to get industry in addition to major??
 #YEMP_55505_COD or YEMP_INDCODE-2002, but lots of employers, etc.
@@ -520,6 +564,58 @@ for (i in 1:nrow(ENROLL_DATA)){
     }
   }
 }
+
+b0GradData <- data.frame(b0 = ENROLL_DATA$b0, grad = ENROLL_DATA$COLLEGECOMPLETED)
+b0GradData[b0GradData == -3] <- NA #replace with NAs
+b0GradModel <- lm(b0~factor(grad), data=na.exclude(b0GradData))
+
+#project with all ifno============================================================
+b0ProjectData <- data.frame(b0 = ENROLL_DATA$b0, cat = ENROLL_DATA$cat, admit = ENROLL_DATA$BestAd5, attend = ENROLL_DATA$BestAtt5, major = ENROLL_DATA$MAJOR, gpa = ENROLL_DATA$GRADES)
+b0ProjectData[b0ProjectData == -3] <- NA #replace with NAs
+
+#get major categories
+hardSci <- c(6, 21, 25)
+softSci <- c(3, 10, 11, 31, 32)
+bus <- c(7, 8, 9, 13)
+health <- c(22, 23, 27, 29, 30, 28)
+b0ProjectData$major2
+b0MajorData <- b0MajorData[b0MajorData$major != 99 & b0MajorData$major != 0,]
+
+#reduce categories
+for (i in 1:nrow(b0ProjectData)){
+  if (b0ProjectData$major[i] %in% hardSci){
+    b0ProjectData$major2[i]= 1
+  }
+  else if (b0ProjectData$major[i] %in% softSci){
+    b0ProjectData$major2[i]= 2
+  }
+  else if (b0ProjectData$major[i] %in% bus){
+    b0ProjectData$major2[i]= 3
+  }
+  else if (b0ProjectData$major[i] %in% health){
+    b0ProjectData$major2[i]= 4
+  }
+  else if (is.na(b0ProjectData$major[i])){
+    b0ProjectData$major2[i]= -3
+  }
+  else{
+    b0ProjectData$major2[i]= 5
+  }
+}
+#clean data--remove 7's so that we have ordinal numbers
+b0ProjectData <- b0ProjectData[b0ProjectData$admit != 7 & b0ProjectData$attend != 7,]
+#factor model
+AllFactor <- lm(b0~factor(cat)+ factor(gpa) + factor(major2), data=na.exclude(b0ProjectData))
+AllFactor <- lm(b0~factor(cat)+ factor(major2), data=na.exclude(b0ProjectData))
+AllFactor <- lm(b0~factor(admit)+ factor(major2), data=na.exclude(b0ProjectData))
+AllFactor <- lm(b0~factor(admit), data=na.exclude(b0ProjectData))
+AllFactor <- lm(b0~factor(attend), data=na.exclude(b0ProjectData))
+
+
+#save this workspace for later loading
+#save.image(file="noenrollmentrest.RData")
+#load("inddata2.RData")
+write.csv(ENROLL_DATA,"C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/noenrollmentrest.csv") 
 
 #OLD=======================================================================================
 #project without fixing any variables
