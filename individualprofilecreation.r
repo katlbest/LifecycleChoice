@@ -31,8 +31,8 @@ fillMissing <- function(IncomeVector, EnrollmentVector, personindex){
   #find longest run of usable data
   for (j in 1:length(IncomeVector)){
     if (j == length(IncomeVector)){
-      #if (incVect[j]>=0 & startIndex ==0 & enrollVect[j]!= 1){ #with enrollment modification
-      if (IncomeVector[j]>0 & startIndex ==0){ #without enrollment modification
+      if (incVect[j]>=0 & startIndex ==0 & enrollVect[j]!= 1){ #with enrollment modification
+      #if (IncomeVector[j]>0 & startIndex ==0){ #without enrollment modification
         endIndex = j
       }
       if (endIndex - startIndex >= 2 & startIndex > 0){
@@ -42,8 +42,8 @@ fillMissing <- function(IncomeVector, EnrollmentVector, personindex){
         returnList = list(incVectOut, ageVectOut, enrollVectOut)
       }
     }
-    #if (incVect[j]>=0 & enrollVect[j]!= 1){ #with enrollment modification: 
-    if (IncomeVector[j]>0){#without enrollment modification: 
+    if (incVect[j]>=0 & enrollVect[j]!= 1){ #with enrollment modification: 
+    #if (IncomeVector[j]>0){#without enrollment modification: 
       if (startIndex ==0){
         startIndex = j
       }
@@ -70,26 +70,43 @@ fillMissing <- function(IncomeVector, EnrollmentVector, personindex){
   #print(returnList)
 }
 
-removeZeros <- function(IncomeVectorList, AgeVectorList, EnrollmentVectorList){
+removeZeros <- function(IncomeVectorList, AgeVectorList, EnrollmentVectorList){ #this one does not change the intermediate values
   outInc = list()
   outAge = list()
   outEnroll = list()
   for (i in 1:length(IncomeVectorList)){
+    firstBigIndex = 0
     outInc[[i]] = IncomeVectorList[[i]]
     outAge[[i]] = AgeVectorList[[i]]
     outEnroll[[i]] = EnrollmentVectorList[[i]]
-    if (IncomeVectorList[[i]][1]>=0){
-      firstBigIndex = 0
+    if (length(IncomeVectorList[[i]]) >1){ #we dont have a -3
+      if (IncomeVectorList[[i]][1]>=10000){ #changed this to 10000, start with first 10000 value
+        firstBigIndex =1
+      }
       for (j in 2:length(IncomeVectorList[[i]])){
-        if (IncomeVectorList[[i]][j]<IncomeVectorList[[i]][j-1]){
-          IncomeVectorList[[i]][j]=IncomeVectorList[[i]][j-1]
-        }
+      if (IncomeVectorList[[i]][j]<IncomeVectorList[[i]][j-1]){
+        IncomeVectorList[[i]][j]=IncomeVectorList[[i]][j-1]
+      }
+      }
+      for (j in 2:length(IncomeVectorList[[i]])){
         if (firstBigIndex == 0){
-          if (IncomeVectorList[[i]][j-1] >= 10000){
-            firstBigIndex = j-1
+          if (IncomeVectorList[[i]][j] >= 10000){
+            firstBigIndex = j
           }
         }
       }
+      if (firstBigIndex ==0){
+        outInc[[i]]= c(-3)
+        outAge[[i]]= c(-3)
+        outEnroll[[i]]= c(-3)
+      }
+      else{
+        outInc[[i]]= IncomeVectorList[[i]][firstBigIndex:length(IncomeVectorList[[i]])]
+        outAge[[i]]= AgeVectorList[[i]][firstBigIndex:length(AgeVectorList[[i]])]
+        outEnroll[[i]]= EnrollmentVectorList[[i]][firstBigIndex:length(EnrollmentVectorList[[i]])]
+      }
+    }
+    else{
       outInc[[i]]= IncomeVectorList[[i]][firstBigIndex:length(IncomeVectorList[[i]])]
       outAge[[i]]= AgeVectorList[[i]][firstBigIndex:length(AgeVectorList[[i]])]
       outEnroll[[i]]= EnrollmentVectorList[[i]][firstBigIndex:length(EnrollmentVectorList[[i]])]
@@ -98,6 +115,53 @@ removeZeros <- function(IncomeVectorList, AgeVectorList, EnrollmentVectorList){
   outList = list(outInc, outAge, outEnroll)
   return(outList)
 }
+
+removeZeros2 <- function(IncomeVectorList, AgeVectorList, EnrollmentVectorList){ #this one does not change the intermediate values
+  outInc = list()
+  outAge = list()
+  outEnroll = list()
+  for (i in 1:length(IncomeVectorList)){
+    firstBigIndex = 0
+    outInc[[i]] = IncomeVectorList[[i]]
+    outAge[[i]] = AgeVectorList[[i]]
+    outEnroll[[i]] = EnrollmentVectorList[[i]]
+    if (length(IncomeVectorList[[i]]) >1){ #we dont have a -3
+      if (IncomeVectorList[[i]][1]>=10000){ #changed this to 10000, start with first 10000 value
+        firstBigIndex =1
+      }
+      #for (j in 2:length(IncomeVectorList[[i]])){
+        #if (IncomeVectorList[[i]][j]<IncomeVectorList[[i]][j-1]){
+        #  IncomeVectorList[[i]][j]=IncomeVectorList[[i]][j-1]
+        #}
+      #}
+      for (j in 2:length(IncomeVectorList[[i]])){
+        if (firstBigIndex == 0){
+          if (IncomeVectorList[[i]][j] >= 10000){
+            firstBigIndex = j
+          }
+        }
+      }
+      if (firstBigIndex ==0){
+        outInc[[i]]= c(-3)
+        outAge[[i]]= c(-3)
+        outEnroll[[i]]= c(-3)
+      }
+      else{
+        outInc[[i]]= IncomeVectorList[[i]][firstBigIndex:length(IncomeVectorList[[i]])]
+        outAge[[i]]= AgeVectorList[[i]][firstBigIndex:length(AgeVectorList[[i]])]
+        outEnroll[[i]]= EnrollmentVectorList[[i]][firstBigIndex:length(EnrollmentVectorList[[i]])]
+      }
+    }
+    else{
+      outInc[[i]]= IncomeVectorList[[i]][firstBigIndex:length(IncomeVectorList[[i]])]
+      outAge[[i]]= AgeVectorList[[i]][firstBigIndex:length(AgeVectorList[[i]])]
+      outEnroll[[i]]= EnrollmentVectorList[[i]][firstBigIndex:length(EnrollmentVectorList[[i]])]
+    }
+    }
+  outList = list(outInc, outAge, outEnroll)
+  return(outList)
+}
+
 #set up vector lists of input data==============================================================================
 ageVectListNm <- list()
 incomeVectListNm <- list()
@@ -201,7 +265,7 @@ enrollVectListLabM <- list()
     }
   }
 
-#OPTIONAL: if lower than previous, set to previous, and remove leading zeros======================
+#OPTION1 if lower than previous, set to previous, and remove leading zeros======================
 #NOTE: this leaves you with vectors without zeros
 
 NmReturn <- removeZeros(incomeVectListNm, ageVectListNm, enrollVectListNm)
@@ -223,6 +287,30 @@ LabMReturn <-removeZeros(incomeVectListLabM, ageVectListLabM, enrollVectListLabM
 incomeVectListLabM<-LabMReturn[[1]]
 ageVectListLabM<-LabMReturn[[2]]
 enrollVectListLabM<-LabMReturn[[3]]
+
+#OPTION2 remove small leadings======================
+
+NmReturn <- removeZeros2(incomeVectListNm, ageVectListNm, enrollVectListNm)
+incomeVectListNm<-NmReturn[[1]]
+ageVectListNm<-NmReturn[[2]]
+enrollVectListNm<-NmReturn[[3]]
+
+MReturn <-removeZeros2(incomeVectListM, ageVectListM, enrollVectListM)
+incomeVectListM<-MReturn[[1]]
+ageVectListM<-MReturn[[2]]
+enrollVectListM<-MReturn[[3]]
+
+LabNmReturn <-removeZeros2(incomeVectListLabNm, ageVectListLabNm, enrollVectListLabNm)
+incomeVectListLabNm<-LabNmReturn[[1]]
+ageVectListLabNm<-LabNmReturn[[2]]
+enrollVectListLabNm<-LabNmReturn[[3]]
+
+LabMReturn <-removeZeros2(incomeVectListLabM, ageVectListLabM, enrollVectListLabM)
+incomeVectListLabM<-LabMReturn[[1]]
+ageVectListLabM<-LabMReturn[[2]]
+enrollVectListLabM<-LabMReturn[[3]]
+
+
 
 #Project======================================================================================
 #project with fixed relationship between b2 and b0
@@ -335,6 +423,14 @@ outMatrixList = list(outMatrixMRaw, outMatrixNmRaw,outMatrixLabMRaw,outMatrixLab
 
 #save this workspace for later loading
 #save.image(file="inddata-noenroll.RData")
+#load("inddata.RData")
+
+#save this workspace for later loading
+#save.image(file="inddata-noenroll10K.RData")
+#load("inddata.RData")
+
+#save this workspace for later loading
+#save.image(file="inddata-enrollrest10K.RData")
 #load("inddata.RData")
 
 #create best estimate for each person====================================================
