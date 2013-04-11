@@ -175,6 +175,31 @@ removeZeros2 <- function(IncomeVectorList, AgeVectorList, EnrollmentVectorList, 
   return(outList)
 }
 
+removeNotFT <- function(IncomeVectorList, AgeVectorList, EnrollmentVectorList, EmploymentVectorList){ #this one does not change the intermediate values
+  outInc = list()
+  outAge = list()
+  outEnroll = list()
+  outEmploy= list()
+  for (i in 1:length(IncomeVectorList)){
+    outInc[[i]] = IncomeVectorList[[i]]
+    outAge[[i]] = AgeVectorList[[i]]
+    outEnroll[[i]] = EnrollmentVectorList[[i]]
+    outEmploy[[i]]= EmploymentVectorList[[i]]
+    if (length(IncomeVectorList[[i]]) >1){ #we dont have a -3
+      for (j in 1:length(IncomeVectorList[[i]])){
+        if (EmploymentVectorList[[i]][j]<1200){# did not work enough hours
+          outInc[[i]] = outInc[[i]][-j]
+          outAge[[i]] = AgeVectorList[[i]][-j]
+          outEnroll[[i]] = EnrollmentVectorList[[i]][-j]
+          outEmploy[[i]]= EmploymentVectorList[[i]][-j]
+        }
+      }
+    }
+  }
+  outList = list(outInc, outAge, outEnroll, outEmploy)
+  return(outList)
+}
+
 #set up vector lists of input data==============================================================================
 ageVectListNm <- list()
 incomeVectListNm <- list()
@@ -326,19 +351,19 @@ MReturn <-removeZeros(incomeVectListM, ageVectListM, enrollVectListM, employVect
 incomeVectListM<-MReturn[[1]]
 ageVectListM<-MReturn[[2]]
 enrollVectListM<-MReturn[[3]]
-employVectListNm<-NmReturn[[4]]
+employVectListM<-MReturn[[4]]
 
 LabNmReturn <-removeZeros(incomeVectListLabNm, ageVectListLabNm, enrollVectListLabNm, employVectListLabNm)
 incomeVectListLabNm<-LabNmReturn[[1]]
 ageVectListLabNm<-LabNmReturn[[2]]
 enrollVectListLabNm<-LabNmReturn[[3]]
-employVectListNm<-NmReturn[[4]]
+employVectListLabNm<-LabNmReturn[[4]]
 
 LabMReturn <-removeZeros(incomeVectListLabM, ageVectListLabM, enrollVectListLabM, employVectListLabM)
 incomeVectListLabM<-LabMReturn[[1]]
 ageVectListLabM<-LabMReturn[[2]]
 enrollVectListLabM<-LabMReturn[[3]]
-employVectListNm<-NmReturn[[4]]
+employVectListLabM<-LabMReturn[[4]]
 
 #OPTION2 remove small leadings======================
 
@@ -352,41 +377,44 @@ MReturn <-removeZeros2(incomeVectListM, ageVectListM, enrollVectListM, employVec
 incomeVectListM<-MReturn[[1]]
 ageVectListM<-MReturn[[2]]
 enrollVectListM<-MReturn[[3]]
-employVectListNm<-NmReturn[[4]]
+employVectListM<-MReturn[[4]]
 
 LabNmReturn <-removeZeros2(incomeVectListLabNm, ageVectListLabNm, enrollVectListLabNm, employVectListLabNm)
 incomeVectListLabNm<-LabNmReturn[[1]]
 ageVectListLabNm<-LabNmReturn[[2]]
 enrollVectListLabNm<-LabNmReturn[[3]]
-employVectListNm<-NmReturn[[4]]
+employVectListLabNm<-LabNmReturn[[4]]
 
 LabMReturn <-removeZeros2(incomeVectListLabM, ageVectListLabM, enrollVectListLabM, employVectListLabM)
 incomeVectListLabM<-LabMReturn[[1]]
 ageVectListLabM<-LabMReturn[[2]]
 enrollVectListLabM<-LabMReturn[[3]]
-employVectListNm<-NmReturn[[4]]
+employVectListLabM<-LabMReturn[[4]]
 
 #OPTION B: remove entries where not much work occured=======================
-
-NmReturn <- removeNotFT(incomeVectListNm, ageVectListNm, enrollVectListNm)
+NmReturn <- removeNotFT(incomeVectListNm, ageVectListNm, enrollVectListNm, employVectListNm)
 incomeVectListNm<-NmReturn[[1]]
 ageVectListNm<-NmReturn[[2]]
 enrollVectListNm<-NmReturn[[3]]
+employVectListNm <- NmReturn[[4]]
 
-MReturn <-removeNotFT(incomeVectListM, ageVectListM, enrollVectListM)
+MReturn <-removeNotFT(incomeVectListM, ageVectListM, enrollVectListM, employVectListM)
 incomeVectListM<-MReturn[[1]]
 ageVectListM<-MReturn[[2]]
 enrollVectListM<-MReturn[[3]]
+employVectListM <- MReturn[[4]]
 
-LabNmReturn <-removeZeros2(incomeVectListLabNm, ageVectListLabNm, enrollVectListLabNm)
+LabNmReturn <-removeNotFT(incomeVectListLabNm, ageVectListLabNm, enrollVectListLabNm, employVectListLabNm)
 incomeVectListLabNm<-LabNmReturn[[1]]
 ageVectListLabNm<-LabNmReturn[[2]]
 enrollVectListLabNm<-LabNmReturn[[3]]
+employVectListLabNm <- LabNmReturn[[4]]
 
-LabMReturn <-removeZeros2(incomeVectListLabM, ageVectListLabM, enrollVectListLabM)
+LabMReturn <-removeNotFT(incomeVectListLabM, ageVectListLabM, enrollVectListLabM, employVectListLabM)
 incomeVectListLabM<-LabMReturn[[1]]
 ageVectListLabM<-LabMReturn[[2]]
 enrollVectListLabM<-LabMReturn[[3]]
+employVectListLabM <- LabMReturn[[4]]
 
 
 #Project======================================================================================
