@@ -123,6 +123,7 @@ for (i in 1:nrow(ENROLL_DATA)){
 }
 
 #create full datasets========================================================
+
 #no enrollment restriction
   b0ProjectData <- data.frame(b0 = ENROLL_DATA$b0, cat = ENROLL_DATA$cat, admit = ENROLL_DATA$BestAd5, attend = ENROLL_DATA$BestAtt5, major = ENROLL_DATA$MAJOR, major2 = ENROLL_DATA$MAJOR2, gpa = ENROLL_DATA$GRADES, geo = ENROLL_DATA$GEO, collgrad = ENROLL_DATA$COLLEGECOMPLETE)
   #7 values for admission/attendance should not be included, and associated cateogires should be discarded
@@ -136,8 +137,44 @@ for (i in 1:nrow(ENROLL_DATA)){
   b02ProjectData <- b0ProjectData
   b02ProjectData$b0 <- ENROLL_DATA$b02
   b02ProjectData[b02ProjectData == -3] <- NA
+
+#no enrollment restriction and 10 K limit
+  b010KProjectData <- data.frame(b0 = ENROLL_DATA$b010K, cat = ENROLL_DATA$cat, admit = ENROLL_DATA$BestAd5, attend = ENROLL_DATA$BestAtt5, major = ENROLL_DATA$MAJOR, major2 = ENROLL_DATA$MAJOR2, gpa = ENROLL_DATA$GRADES, geo = ENROLL_DATA$GEO, collgrad = ENROLL_DATA$COLLEGECOMPLETE)
+  #7 values for admission/attendance should not be included, and associated cateogires should be discarded
+  b010KProjectData[b010KProjectData$admit == 7,]$cat <- -3
+  b010KProjectData[b010KProjectData$attend == 7,]$cat <- -3
+  b010KProjectData[b010KProjectData$admit == 7,]$admit <- -3
+  b010KProjectData[b010KProjectData$attend == 7,]$attend <- -3
+  b010KProjectData[b010KProjectData == -3] <- NA 
+
+#with enrollment restriction and 10 K limit
+  b010K2ProjectData <- b0ProjectData
+  b010K2ProjectData$b0 <- ENROLL_DATA$b0210K
+  b010K2ProjectData[b010K2ProjectData == -3] <- NA
+
+#using 3rd entry in table
+  IncProjectData <- b0ProjectData
+  IncProjectData$b0 <- ENROLL_DATA$X21Inc
+  IncProjectData$SATM <- ENROLL_DATA$CVC_SAT_MATH_SCORE_2007_XRND
+  IncProjectData$SATV <- ENROLL_DATA$CVC_SAT_VERBAL_SCORE_2007_XRND
+  IncProjectData[IncProjectData$SATM <0,]$SATM <- -3
+  IncProjectData[IncProjectData$SATV <0,]$SATV <- -3
+  IncProjectData[IncProjectData == -3] <- NA
+
+#SAT data
+  SATProjectData <- b0ProjectData
+  SATProjectData$SATM <- ENROLL_DATA$CVC_SAT_MATH_SCORE_2007_XRND
+  SATProjectData$SATV <- ENROLL_DATA$CVC_SAT_VERBAL_SCORE_2007_XRND
+  SATProjectData$b02 <- ENROLL_DATA$b02
+  SATProjectData$b010K <- ENROLL_DATA$b010K
+  SATProjectData$b010K2 <- ENROLL_DATA$b0210K
+  SATProjectData[SATProjectData$SATM <0,]$SATM <- -3
+  SATProjectData[SATProjectData$SATV <0,]$SATV <- -3
+  SATProjectData[SATProjectData == -3] <- NA
+
  
-#project=========================================================================
+
+#project with no 10K restriction=========================================================================
 #model selection with no enrollment restriction
   #we exclude location because it has too many categories
   AllFactor <- lm(b0~factor(cat)+ factor(gpa) + factor(major2)+ factor(collgrad), data=na.exclude(b0ProjectData))
@@ -148,19 +185,134 @@ for (i in 1:nrow(ENROLL_DATA)){
   AdmitMod <- lm(b0~ factor(admit), data=na.exclude(b0ProjectData))
   AttendMod <- lm(b0~ factor(attend), data=na.exclude(b0ProjectData))
 
+  AVGPAMod <- aov(b0~ factor(gpa), data=na.exclude(b0ProjectData))
+  AVMajorMod <-aov(b0~ factor(major2), data=na.exclude(b0ProjectData))
+  AVGradMod <- lm(b0~ factor(collgrad), data=na.exclude(b0ProjectData))
+  AVCatMod <- lm(b0~ factor(cat), data=na.exclude(b0ProjectData))
+  AVAdmitMod <- lm(b0~ factor(admit), data=na.exclude(b0ProjectData))
+  AVAttendMod <- lm(b0~ factor(attend), data=na.exclude(b0ProjectData))
+
 #model selection with enrollment restriction
 #we exclude location because it has too many categories
-AllFactor <- lm(b0~factor(cat)+ factor(gpa) + factor(major2)+ factor(collgrad), data=na.exclude(b02ProjectData))
-summary(AllFactor)
-GPAMod <- lm(b0~ factor(gpa), data=na.exclude(b02ProjectData))
-summary(GPAMod)
-MajorMod <- lm(b0~ factor(major2), data=na.exclude(b02ProjectData))
-summary(MajorMod)
-GradMod <- lm(b0~ factor(collgrad), data=na.exclude(b02ProjectData))
-summary(GradMod)
-CatMod <- lm(b0~ factor(cat), data=na.exclude(b02ProjectData))
-summary(CatMod)
-AdmitMod <- lm(b0~ factor(admit), data=na.exclude(b02ProjectData))
-summary(AdmitMod)
-AttendMod <- lm(b0~ factor(attend), data=na.exclude(b02ProjectData))
-summary(AttendMod)
+  AllFactor <- lm(b0~factor(cat)+ factor(gpa) + factor(major2)+ factor(collgrad), data=na.exclude(b02ProjectData))
+  summary(AllFactor)
+  GPAMod <- lm(b0~ factor(gpa), data=na.exclude(b02ProjectData))
+  summary(GPAMod)
+  MajorMod <- lm(b0~ factor(major2), data=na.exclude(b02ProjectData))
+  summary(MajorMod)
+  GradMod <- lm(b0~ factor(collgrad), data=na.exclude(b02ProjectData))
+  summary(GradMod)
+  CatMod <- lm(b0~ factor(cat), data=na.exclude(b02ProjectData))
+  summary(CatMod)
+  AdmitMod <- lm(b0~ factor(admit), data=na.exclude(b02ProjectData))
+  summary(AdmitMod)
+  AttendMod <- lm(b0~ factor(attend), data=na.exclude(b02ProjectData))
+  summary(AttendMod)
+
+  AVGPAMod <- aov(b0~ factor(gpa), data=na.exclude(b02ProjectData))
+  AVMajorMod <-aov(b0~ factor(major2), data=na.exclude(b02ProjectData))
+  AVGradMod <- lm(b0~ factor(collgrad), data=na.exclude(b02ProjectData))
+  AVCatMod <- lm(b0~ factor(cat), data=na.exclude(b02ProjectData))
+  AVAdmitMod <- lm(b0~ factor(admit), data=na.exclude(b02ProjectData))
+  AVAttendMod <- lm(b0~ factor(attend), data=na.exclude(b02ProjectData))
+
+#model selection with no enrollment restriction, using 3rd entry in income table
+#we exclude location because it has too many categories
+  AllFactor <- lm(b0~factor(cat)+ factor(gpa) + factor(major2)+ factor(collgrad), data=na.exclude(IncProjectData))
+  summary(AllFactor)
+  GPAMod <- lm(b0~ factor(gpa), data=na.exclude(IncProjectData))
+  summary(GPAMod)
+  MajorMod <- lm(b0~ factor(major2), data=na.exclude(IncProjectData))
+  summary(MajorMod)
+  GradMod <- lm(b0~ factor(collgrad), data=na.exclude(IncProjectData))
+  summary(GradMod)
+  CatMod <- lm(b0~ factor(cat), data=na.exclude(IncProjectData))
+  summary(CatMod)
+  AdmitMod <- lm(b0~ factor(admit), data=na.exclude(IncProjectData))
+  summary(AdmitMod)
+  AttendMod <- lm(b0~ factor(attend), data=na.exclude(IncProjectData))
+  summary(AttendMod)
+
+#project with  10K restriction=========================================================================
+#model selection with no enrollment restriction
+#we exclude location because it has too many categories
+  AllFactor <- lm(b0~factor(cat)+ factor(gpa) + factor(major2)+ factor(collgrad), data=na.exclude(b010KProjectData))
+  GPAMod <- lm(b0~ factor(gpa), data=na.exclude(b010KProjectData))
+  MajorMod <- lm(b0~ factor(major2), data=na.exclude(b010KProjectData))
+  GradMod <- lm(b0~ factor(collgrad), data=na.exclude(b010KProjectData))
+  CatMod <- lm(b0~ factor(cat), data=na.exclude(b010KProjectData))
+  AdmitMod <- lm(b0~ factor(admit), data=na.exclude(b010KProjectData))
+  AttendMod <- lm(b0~ factor(attend), data=na.exclude(b010KProjectData))
+
+#model selection with enrollment restriction
+#we exclude location because it has too many categories
+  AllFactor <- lm(b0~factor(cat)+ factor(gpa) + factor(major2)+ factor(collgrad), data=na.exclude(b010K2ProjectData))
+  summary(AllFactor)
+  GPAMod <- lm(b0~ factor(gpa), data=na.exclude(b010K2ProjectData))
+  summary(GPAMod)
+  MajorMod <- lm(b0~ factor(major2), data=na.exclude(b010K2ProjectData))
+  summary(MajorMod)
+  GradMod <- lm(b0~ factor(collgrad), data=na.exclude(b010K2ProjectData))
+  summary(GradMod)
+  CatMod <- lm(b0~ factor(cat), data=na.exclude(b010K2ProjectData))
+  summary(CatMod)
+  AdmitMod <- lm(b0~ factor(admit), data=na.exclude(b010K2ProjectData))
+  summary(AdmitMod)
+  AttendMod <- lm(b0~ factor(attend), data=na.exclude(b010K2ProjectData))
+  summary(AttendMod)
+
+#model selection with no enrollment restriction (better), and SAT
+#we exclude location because it has too many categories
+  SATMod <- lm(b010K~ factor(SATM) +factor(SATV), data=na.exclude(SATProjectData))
+  summary(SATMod)
+
+#use 10K limit, no enrollment restriction===============================
+  boxplot(b0~factor(cat), data = na.exclude(b010KProjectData))
+  boxplot(b0~factor(admit), data = na.exclude(b010KProjectData))
+  boxplot(b0~factor(attend), data = na.exclude(b010KProjectData))
+  admit_cats <- c(1,2, 3, 4, 6, 7)
+  attend_cats <- c(-3,1,2, 3, 4, 6, 7)
+  byAdmitCoeffVect = data.frame(matrix(ncol = 15, nrow = length(admit_cats)))
+  colnames(byAdmitCoeffVect)=c("intercept","1", "2", "3", "4", "6", "intsig", "1sig", "2sig", "3sig", "4sig", "6sig","R2", "NumObservations", "levels")
+  outMatrix = data.frame(matrix(ncol = length(ENROLL_DATA), nrow =82))
+  b010KProjectData[is.na(b010KProjectData)] <- -3
+  for (i in 1:length(admit_cats)){
+    curData = b010KProjectData[b010KProjectData$admit==admit_cats[i],]
+    curCount = nrow(curData)
+    if (curCount >0){
+      curData[curData == -3] <- NA
+      numCoeffs <- length(levels(factor(curData$attend)))
+      if (numCoeffs >1 & curCount > numCoeffs){
+        curModel = lm(b0~factor(attend), data = na.exclude(curData))
+        numCoeffs <- length(curModel$coefficients)
+        for (j in 1:numCoeffs){
+          byAdmitCoeffVect[i,j]= curModel$coefficients[j]
+          byAdmitCoeffVect[i,j+6]= summary(curModel)$coefficients[j,4]
+        }
+        #for (j in numCoeffs:6){
+        #  byAdmitCoeffVect[i,j]= -3
+        #}
+        byAdmitCoeffVect[i,13]= summary(curModel)$r.squared
+        byAdmitCoeffVect[i,15]= toString(levels(factor(curData$attend)))
+      } #else{
+        #byAdmitCoeffVect[i,1]= -3
+        #byAdmitCoeffVect[i,2]= -3
+        #byAdmitCoeffVect[i,3]= -3
+        #byAdmitCoeffVect[i,4]= -3
+        #byAdmitCoeffVect[i,5]= -3
+       # byAdmitCoeffVect[i,6]= -3
+      #  byAdmitCoeffVect[i,7]= -3
+     # }
+    }# else{
+    #  byAdmitCoeffVect[i,1]= -3
+    #  byAdmitCoeffVect[i,2]= -3
+     # byAdmitCoeffVect[i,3]= -3
+     # byAdmitCoeffVect[i,4]= -3
+    #  byAdmitCoeffVect[i,5]= -3
+     # byAdmitCoeffVect[i,6]= -3
+      #byAdmitCoeffVect[i,6]= -3
+    #}
+    byAdmitCoeffVect[i,14]= curCount
+  }
+
+write.csv(byAdmitCoeffVect, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/byAdmit.csv") )
