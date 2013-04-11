@@ -186,14 +186,16 @@ removeNotFT <- function(IncomeVectorList, AgeVectorList, EnrollmentVectorList, E
     outEnroll[[i]] = EnrollmentVectorList[[i]]
     outEmploy[[i]]= EmploymentVectorList[[i]]
     if (length(IncomeVectorList[[i]]) >1){ #we dont have a -3
+      removeVect = c()
       for (j in 1:length(IncomeVectorList[[i]])){
         if (EmploymentVectorList[[i]][j]<1200){# did not work enough hours
-          outInc[[i]] = outInc[[i]][-j]
-          outAge[[i]] = AgeVectorList[[i]][-j]
-          outEnroll[[i]] = EnrollmentVectorList[[i]][-j]
-          outEmploy[[i]]= EmploymentVectorList[[i]][-j]
+          removeVect[length(removeVect)+1]<- -j
         }
       }
+      outInc[[i]] = outInc[[i]][removeVect]
+      outAge[[i]] = AgeVectorList[[i]][removeVect]
+      outEnroll[[i]] = EnrollmentVectorList[[i]][removeVect]
+      outEmploy[[i]]= EmploymentVectorList[[i]][removeVect]
     }
   }
   outList = list(outInc, outAge, outEnroll, outEmploy)
@@ -222,7 +224,6 @@ enrollVectListLabM <- list()
 employVectListLabM <- list()
 
 #minIncomeList <- list() #stores minimum incomes for each person depending on education
-
 
 #populate list===============
 EMPLOY_DATA <- read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/income/hrsworked.csv")
