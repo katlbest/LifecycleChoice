@@ -272,9 +272,10 @@ for (i in 1:nrow(ENROLL_DATA)){
   boxplot(b0~factor(attend), data = na.exclude(b010KProjectData))
   admit_cats <- c(1,2, 3, 4, 6, 7)
   attend_cats <- c(-3,1,2, 3, 4, 6, 7)
+
+#get by admission
   byAdmitCoeffVect = data.frame(matrix(ncol = 15, nrow = length(admit_cats)))
   colnames(byAdmitCoeffVect)=c("intercept","1", "2", "3", "4", "6", "intsig", "1sig", "2sig", "3sig", "4sig", "6sig","R2", "NumObservations", "levels")
-  outMatrix = data.frame(matrix(ncol = length(ENROLL_DATA), nrow =82))
   b010KProjectData[is.na(b010KProjectData)] <- -3
   for (i in 1:length(admit_cats)){
     curData = b010KProjectData[b010KProjectData$admit==admit_cats[i],]
@@ -283,36 +284,44 @@ for (i in 1:nrow(ENROLL_DATA)){
       curData[curData == -3] <- NA
       numCoeffs <- length(levels(factor(curData$attend)))
       if (numCoeffs >1 & curCount > numCoeffs){
+        curData<-curData[c("b0", "attend")]
         curModel = lm(b0~factor(attend), data = na.exclude(curData))
         numCoeffs <- length(curModel$coefficients)
         for (j in 1:numCoeffs){
           byAdmitCoeffVect[i,j]= curModel$coefficients[j]
           byAdmitCoeffVect[i,j+6]= summary(curModel)$coefficients[j,4]
         }
-        #for (j in numCoeffs:6){
-        #  byAdmitCoeffVect[i,j]= -3
-        #}
         byAdmitCoeffVect[i,13]= summary(curModel)$r.squared
         byAdmitCoeffVect[i,15]= toString(levels(factor(curData$attend)))
-      } #else{
-        #byAdmitCoeffVect[i,1]= -3
-        #byAdmitCoeffVect[i,2]= -3
-        #byAdmitCoeffVect[i,3]= -3
-        #byAdmitCoeffVect[i,4]= -3
-        #byAdmitCoeffVect[i,5]= -3
-       # byAdmitCoeffVect[i,6]= -3
-      #  byAdmitCoeffVect[i,7]= -3
-     # }
-    }# else{
-    #  byAdmitCoeffVect[i,1]= -3
-    #  byAdmitCoeffVect[i,2]= -3
-     # byAdmitCoeffVect[i,3]= -3
-     # byAdmitCoeffVect[i,4]= -3
-    #  byAdmitCoeffVect[i,5]= -3
-     # byAdmitCoeffVect[i,6]= -3
-      #byAdmitCoeffVect[i,6]= -3
-    #}
+      } 
+    }
     byAdmitCoeffVect[i,14]= curCount
   }
 
-write.csv(byAdmitCoeffVect, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/byAdmit.csv") )
+write.csv(byAdmitCoeffVect, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/byAdmit.csv")
+
+#get by attendance
+byAttendCoeffVect = data.frame(matrix(ncol = 13, nrow = length(admit_cats)))
+colnames(byAttendCoeffVect)=c("intercept", "2", "3", "4", "6", "intsig", "2sig", "3sig", "4sig", "6sig","R2", "NumObservations", "levels")
+for (i in 1:length(attend_cats)){
+  curData = b010KProjectData[b010KProjectData$attend==attend_cats[i],]
+  curCount = nrow(curData)
+  if (curCount >0){
+    curData[curData == -3] <- NA
+    numCoeffs <- length(levels(factor(curData$admit)))
+    if (numCoeffs >1 & curCount > numCoeffs){
+      curData<-curData[c("b0", "admit")]
+      curModel = lm(b0~factor(admit), data = na.exclude(curData))
+      numCoeffs <- length(curModel$coefficients)
+      for (j in 1:numCoeffs){
+        byAttendCoeffVect[i,j]= curModel$coefficients[j]
+        byAttendCoeffVect[i,j+5]= summary(curModel)$coefficients[j,4]
+      }
+      byAttendCoeffVect[i,11]= summary(curModel)$r.squared
+      byAttendCoeffVect[i,13]= toString(levels(factor(curData$admit)))
+    } 
+  }
+  byAttendCoeffVect[i,12]= curCount
+}
+
+write.csv(byAttendCoeffVect, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/byAttend.csv")
