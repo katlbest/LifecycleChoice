@@ -31,8 +31,8 @@ fillMissing <- function(IncomeVector, EnrollmentVector, EmploymentVector, person
   #find longest run of usable data
   for (j in 1:length(IncomeVector)){
     if (j == length(IncomeVector)){
-      if (incVect[j]>=0 & startIndex ==0 & enrollVect[j]!= 1){ #with enrollment modification
-      #if (IncomeVector[j]>0 & startIndex ==0){ #without enrollment modification
+      #if (incVect[j]>=0 & startIndex ==0 & enrollVect[j]!= 1){ #with enrollment modification
+      if (IncomeVector[j]>0 & startIndex ==0){ #without enrollment modification
         endIndex = j
       }
       if (endIndex - startIndex >= 2 & startIndex > 0){
@@ -43,8 +43,8 @@ fillMissing <- function(IncomeVector, EnrollmentVector, EmploymentVector, person
         returnList = list(incVectOut, ageVectOut, enrollVectOut, employVectOut)
       }
     }
-    if (incVect[j]>=0 & enrollVect[j]!= 1){ #with enrollment modification: 
-    #if (IncomeVector[j]>0){#without enrollment modification: 
+    #if (incVect[j]>=0 & enrollVect[j]!= 1){ #with enrollment modification: 
+    if (IncomeVector[j]>0){#without enrollment modification: 
       if (startIndex ==0){
         startIndex = j
       }
@@ -421,21 +421,25 @@ employVectListLabM <- LabMReturn[[4]]
 #project with fixed relationship between b2 and b0
 #set up
   #Nm
-    #ageVectList <- ageVectListNm
-    #incomeVectList <- incomeVectListNm
-    #enrollVectList <- enrollVectListNm
+    ageVectList <- ageVectListNm
+    incomeVectList <- incomeVectListNm
+    enrollVectList <- enrollVectListNm
+    employVectList <- employVectListNm
   #M
     #ageVectList <- ageVectListM
     #incomeVectList <- incomeVectListM
     #enrollVectList <- enrollVectListM
+    #employVectList <- employVectListM
   #LabNm
     #ageVectList <- ageVectListLabNm
     #incomeVectList <- incomeVectListLabNm
     #enrollVectList <- enrollVectListLabNm
+    #employVectList <- employVectListLabNm
   #LabM
-    ageVectList <- ageVectListLabM
-    incomeVectList <- incomeVectListLabM
-    enrollVectList <- enrollVectListLabM
+    #ageVectList <- ageVectListLabM
+    #incomeVectList <- incomeVectListLabM
+    #enrollVectList <- enrollVectListLabM
+    #employVectList <- employVectListLabM
 
 #inputs
 tau =27.8818
