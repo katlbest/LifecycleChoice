@@ -190,7 +190,7 @@ removeNotFT <- function(IncomeVectorList, AgeVectorList, EnrollmentVectorList, E
       for (j in 1:length(IncomeVectorList[[i]])){
         if (EmploymentVectorList[[i]][j]<1200){# did not work enough hours
           outInc[[i]][j] = -3
-          outAge[[i]][j] = -3
+          #outAge[[i]][j] = -3 # we dont change htis one so that we can index properly at end
           outEnroll[[i]][j] = -3
           outEmploy[[i]][j] = -3
           #removeVect[length(removeVect)+1]<- -j
@@ -457,31 +457,31 @@ coeffVect = data.frame(matrix(ncol = 5, nrow = dim(ENROLL_DATA)[1]))
 colnames(coeffVect)=c("b0","b1" ,"b2", "R2", "NumObservations")
 outMatrix = data.frame(matrix(ncol = length(ENROLL_DATA), nrow =82))
 for (i in 1:nrow(ENROLL_DATA)){
-  if (length(incomeVectList[[i]])>2){
     curData = data.frame(age = ageVectList[[i]], income = incomeVectList[[i]], enroll = enrollVectList[[i]])
     curData[curData == -3] <- NA 
     curData<- na.exclude(curData)
-    numObs = length(ageVectList[[i]])
-    input1 = (1-exp(-curData$age/tau))/(curData$age/tau)
-    B = input1 - exp(-curData$age/tau)
-    input2 = (1+m*B+n*input1)
-    output = curData$income -(b * B)- (a * input1)
-    quadMod <- lm(output~0 + input2)
-
-    coeffVect[i,1] = quadMod$coefficients[1]
-    coeffVect[i,2] = quadMod$coefficients[1] * n + a
-    coeffVect[i,3]= quadMod$coefficients[1] * m + b
-    coeffVect[i,4]= summary(quadMod)$r.squared
-    coeffVect[i,5]= numObs
-    firstDataYear = ageVectList[[i]][1]
-    lastDataYear = ageVectList[[i]][length(ageVectList[[i]])]
-    new <-  c((lastDataYear+1):100)
-    new1 <-(1-exp(-new/tau))/(new/tau)
-    newB <- new1 - exp(-new/tau)
-    new2 <- (1+m*newB+n*new1)
-    new <- data.frame(input2 = new2)
-    newIncs <-predict(quadMod,new)+b*newB + a * new1
-    outMatrix[,i] <- c(rep(-3, firstDataYear-19), curData$income, newIncs)
+    if (dim(curData)[1]>2){
+      numObs = length(ageVectList[[i]])
+      input1 = (1-exp(-curData$age/tau))/(curData$age/tau)
+      B = input1 - exp(-curData$age/tau)
+      input2 = (1+m*B+n*input1)
+      output = curData$income -(b * B)- (a * input1)
+      quadMod <- lm(output~0 + input2)
+  
+      coeffVect[i,1] = quadMod$coefficients[1]
+      coeffVect[i,2] = quadMod$coefficients[1] * n + a
+      coeffVect[i,3]= quadMod$coefficients[1] * m + b
+      coeffVect[i,4]= summary(quadMod)$r.squared
+      coeffVect[i,5]= numObs
+      firstDataYear = curData[1,1]
+      lastDataYear = ageVectList[[i]][length(ageVectList[[i]])]
+      new <-  c((lastDataYear+1):100)
+      new1 <-(1-exp(-new/tau))/(new/tau)
+      newB <- new1 - exp(-new/tau)
+      new2 <- (1+m*newB+n*new1)
+      new <- data.frame(input2 = new2)
+      newIncs <-predict(quadMod,new)+b*newB + a * new1
+      outMatrix[,i] <- c(rep(-3, firstDataYear-19), incomeVectList[[i]], newIncs)
   }
   else{
     outMatrix[,i] <- rep(-3,82)
