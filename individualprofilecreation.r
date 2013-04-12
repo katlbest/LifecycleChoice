@@ -189,13 +189,17 @@ removeNotFT <- function(IncomeVectorList, AgeVectorList, EnrollmentVectorList, E
       removeVect = c()
       for (j in 1:length(IncomeVectorList[[i]])){
         if (EmploymentVectorList[[i]][j]<1200){# did not work enough hours
-          removeVect[length(removeVect)+1]<- -j
+          outInc[[i]][j] = -3
+          outAge[[i]][j] = -3
+          outEnroll[[i]][j] = -3
+          outEmploy[[i]][j] = -3
+          #removeVect[length(removeVect)+1]<- -j
         }
       }
-      outInc[[i]] = outInc[[i]][removeVect]
-      outAge[[i]] = AgeVectorList[[i]][removeVect]
-      outEnroll[[i]] = EnrollmentVectorList[[i]][removeVect]
-      outEmploy[[i]]= EmploymentVectorList[[i]][removeVect]
+      #outInc[[i]] = outInc[[i]][removeVect]
+      #outAge[[i]] = AgeVectorList[[i]][removeVect]
+      #outEnroll[[i]] = EnrollmentVectorList[[i]][removeVect]
+      #outEmploy[[i]]= EmploymentVectorList[[i]][removeVect]
     }
   }
   outList = list(outInc, outAge, outEnroll, outEmploy)
@@ -455,6 +459,8 @@ outMatrix = data.frame(matrix(ncol = length(ENROLL_DATA), nrow =82))
 for (i in 1:nrow(ENROLL_DATA)){
   if (length(incomeVectList[[i]])>2){
     curData = data.frame(age = ageVectList[[i]], income = incomeVectList[[i]], enroll = enrollVectList[[i]])
+    curData[curData == -3] <- NA 
+    curData<- na.exclude(curData)
     numObs = length(ageVectList[[i]])
     input1 = (1-exp(-curData$age/tau))/(curData$age/tau)
     B = input1 - exp(-curData$age/tau)
