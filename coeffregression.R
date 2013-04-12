@@ -1,3 +1,6 @@
+library(ggplot2)
+library(plyr)
+
 ENROLL_DATA<-read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/compileddata-allways.csv")
 
 #read in relevant predictors=================================================
@@ -172,8 +175,6 @@ for (i in 1:nrow(ENROLL_DATA)){
   SATProjectData[SATProjectData$SATV <0,]$SATV <- -3
   SATProjectData[SATProjectData == -3] <- NA
 
- 
-
 #project with no 10K restriction=========================================================================
 #model selection with no enrollment restriction
   #we exclude location because it has too many categories
@@ -270,6 +271,13 @@ for (i in 1:nrow(ENROLL_DATA)){
   boxplot(b0~factor(cat), data = na.exclude(b010KProjectData))
   boxplot(b0~factor(admit), data = na.exclude(b010KProjectData))
   boxplot(b0~factor(attend), data = na.exclude(b010KProjectData))
+  #b0.sum = ddply(na.exclude(b010KProjectData), .(cat), summarise, avg = mean(b0), sd = sd(b0))
+  #b0.avg = b0.sum$avg
+  #b0.sd = b0.sum$sd
+  #qplot(factor(cat), b0, data = na.exclude(b010KProjectData), geom = "boxplot", position = "dodge")+theme_bw()+geom_errorbar(aes(ymax=b0.avg+b0.sd, ymin=b0.avg-b0.sd), position="dodge")
+  qplot(factor(cat), b0, data = na.exclude(b010KProjectData), notch= TRUE, geom = "boxplot", position = "dodge")+theme_bw()
+  qplot(factor(admit), b0, data = na.exclude(b010KProjectData), notch= TRUE, geom = "boxplot", position = "dodge")+theme_bw()
+  qplot(factor(attend), b0, data = na.exclude(b010KProjectData), notch= TRUE, geom = "boxplot", position = "dodge")+theme_bw()
   admit_cats <- c(1,2, 3, 4, 6, 7)
   attend_cats <- c(-3,1,2, 3, 4, 6, 7)
 

@@ -426,10 +426,10 @@ employVectListLabM <- LabMReturn[[4]]
 #project with fixed relationship between b2 and b0
 #set up
   #Nm
-    ageVectList <- ageVectListNm
-    incomeVectList <- incomeVectListNm
-    enrollVectList <- enrollVectListNm
-    employVectList <- employVectListNm
+    #ageVectList <- ageVectListNm
+    #incomeVectList <- incomeVectListNm
+    #enrollVectList <- enrollVectListNm
+    #employVectList <- employVectListNm
   #M
     #ageVectList <- ageVectListM
     #incomeVectList <- incomeVectListM
@@ -441,10 +441,10 @@ employVectListLabM <- LabMReturn[[4]]
     #enrollVectList <- enrollVectListLabNm
     #employVectList <- employVectListLabNm
   #LabM
-    #ageVectList <- ageVectListLabM
-    #incomeVectList <- incomeVectListLabM
-    #enrollVectList <- enrollVectListLabM
-    #employVectList <- employVectListLabM
+    ageVectList <- ageVectListLabM
+    incomeVectList <- incomeVectListLabM
+    enrollVectList <- enrollVectListLabM
+    employVectList <- employVectListLabM
 
 #inputs
 tau =27.8818
@@ -547,6 +547,10 @@ outMatrixList = list(outMatrixMRaw, outMatrixNmRaw,outMatrixLabMRaw,outMatrixLab
 
 #save this workspace for later loading
 #save.image(file="inddata-enrollrest10K.RData")
+#load("inddata.RData")
+
+#save this workspace for later loading
+#save.image(file="inddata-noenrollrest10Kemployrest.RData")
 #load("inddata.RData")
 
 #create best estimate for each person====================================================
