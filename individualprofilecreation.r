@@ -473,7 +473,7 @@ for (i in 1:nrow(ENROLL_DATA)){
       coeffVect[i,3]= quadMod$coefficients[1] * m + b
       coeffVect[i,4]= summary(quadMod)$r.squared
       coeffVect[i,5]= numObs
-      firstDataYear = curData[1,1]
+      firstDataYear = ageVectList[[i]][1]
       lastDataYear = ageVectList[[i]][length(ageVectList[[i]])]
       new <-  c((lastDataYear+1):100)
       new1 <-(1-exp(-new/tau))/(new/tau)
