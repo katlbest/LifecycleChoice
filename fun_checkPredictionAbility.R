@@ -9,9 +9,16 @@ checkPredictionAbility<- function(inputDatast, b0Name, nameString){
   inputDataset[inputDataset$attend == 7,]$attend <- -3
   inputDataset[inputDataset == -3] <- NA
   #plot
+  myDir = "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/Curve fitting/Plots/"
+  fileName = paste(myDir, nameString, "Cat.pdf",sep ="")
   qplot(factor(cat), b0, data = na.exclude(inputDataset), notch= TRUE, geom = "boxplot", position = "dodge")+theme_bw() + labs(title = paste("By Category, ", nameString, sep =""))
+  ggsave(file = fileName)
+  fileName = paste(myDir, nameString, "Admit.pdf",sep ="")
   qplot(factor(admit), b0, data = na.exclude(inputDataset), notch= TRUE, geom = "boxplot", position = "dodge")+theme_bw()+ labs(title = paste("By best admitted, ", nameString, sep= ""))
+  ggsave(file = fileName)
+  fileName = paste(myDir, nameString, "Attend.pdf",sep ="")
   qplot(factor(attend), b0, data = na.exclude(inputDataset), notch= TRUE, geom = "boxplot", position = "dodge")+theme_bw()+ labs(title =paste("By best applied, ", nameString, sep=""))
+  ggsave(file = fileName)
   #regress
   CatMod <- lm(b0~ factor(cat), data=na.exclude(inputDataset))
   print(summary(CatMod))
