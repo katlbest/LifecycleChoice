@@ -1,4 +1,5 @@
 library(plyr)
+library(ggplot2)
 
 #data i/o=======================================================================
 INCOME_DATA <- read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/INCOME_DATA.csv")
@@ -402,7 +403,7 @@ LabEmployReturn <-removeZeros(incomeVectListLabEmploy, ageVectListLabEmploy, enr
 incomeVectListLabEmploy<-LabEmployReturn[[1]]
 ageVectListLabEmploy<-LabEmployReturn[[2]]
 enrollVectListLabEmploy<-LabEmployReturn[[3]]
-employVectListLabEmploy <- LabEmployReturn[[4]]
+employVectListLabEmploy<- LabEmployReturn[[4]]
 
 #Project======================================================================================
 #project with fixed relationship between b2 and b0
@@ -477,104 +478,180 @@ write.csv(coeffVect, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/I
   #save this workspace for later loading
   save.image(file="alloptions.RData")
 
-#check which method predicts (if any)
+#check which method predicts (if any)=====================================================================
   #add all possibilities to data set
   ENROLL_DATA$b0NmFillMiddle<- coeffVectNmFillMiddle[,1]
   ENROLL_DATA$b0EmployFillMiddle<-coeffVectEmployFillMiddle[,1]
   ENROLL_DATA$b0NmNoFill<-coeffVectNmNoFill[,1]
   ENROLL_DATA$b0EmployNoFill<-coeffVectEmployNoFill[,1]
+  ENROLL_DATA$cat <- -3
+  for (i in 1:nrow(ENROLL_DATA)){
+    ENROLL_DATA$cat[i] <- toString(paste(ENROLL_DATA$BestAd5b[i],ENROLL_DATA$BestAtt5b[i], sep = ""))
+  }
+  ENROLL_DATA[is.na(ENROLL_DATA)] <- -3
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#create best estimate for each person====================================================
-outMatrixList = list(outMatrixMRaw, outMatrixNmRaw,outMatrixLabMRaw,outMatrixLabNmRaw,outMatrixMFilled,outMatrixNmFilled,outMatrixLabMFilled,outMatrixLabNmFilled)
-#outMatrixList = list(outMatrixMFilled,outMatrixNmFilled,outMatrixLabMFilled,outMatrixLabNmFilled,outMatrixMRaw, outMatrixNmRaw,outMatrixLabMRaw,outMatrixLabNmRaw)
-
-incomeEstimate<- list()
-incomeb0 <- list()
-b0Min = -500000 #upper limit of about 140K top salary
-b0Max = -100 #lower limit of about 12K top salary
-
-for (i in 1:length(incomeVectList)){
-  b0Vect <- c(coeffVectMRaw[i,1], coeffVectNmRaw[i,1],coeffVectLabMRaw[i,1],coeffVectLabNmRaw[i,1],coeffVectMFilled[i,1],coeffVectNmFilled[i,1],coeffVectLabMFilled[i,1],coeffVectLabNmFilled[i,1])
-  #b0Vect <- c(coeffVectMFilled[i,1],coeffVectNmFilled[i,1],coeffVectLabMFilled[i,1],coeffVectLabNmFilled[i,1],coeffVectMRaw[i,1], coeffVectNmRaw[i,1],coeffVectLabMRaw[i,1],coeffVectLabNmRaw[i,1])
-  useIndex = 0
-  for (j in 1:length(b0Vect)){
-    if (useIndex == 0 & !(is.na(b0Vect[j]))){
-      if ((b0Vect[j]>=b0Min) & (b0Vect[j] <= b0Max)){
-        useIndex = j
+#create prediction datasets
+  NmFillMiddleData <- data.frame(b0 = ENROLL_DATA$b0NmFillMiddle, cat = ENROLL_DATA$cat, admit = ENROLL_DATA$BestAd5b, attend = ENROLL_DATA$BestAtt5b)
+  #7 values for admission/attendance should not be included, and associated cateogires should be discarded
+    levels(NmFillMiddleData$cat) <- c(levels(NmFillMiddleData$cat),-3)
+    NmFillMiddleData[NmFillMiddleData$attend == 7,]$cat <- -3
+    NmFillMiddleData[NmFillMiddleData$admit == 7,]$cat <- -3
+    NmFillMiddleData[NmFillMiddleData$admit == 7,]$admit <- -3
+    NmFillMiddleData[NmFillMiddleData$attend == 7,]$attend <- -3
+  NmFillMiddleData[NmFillMiddleData == -3] <- NA
+  #plot
+    qplot(factor(cat), b0, data = na.exclude(NmFillMiddleData), notch= TRUE, geom = "boxplot", position = "dodge")+theme_bw() + labs(title = "By Category, middle filled, employ restriction")
+    qplot(factor(admit), b0, data = na.exclude(NmFillMiddleData), notch= TRUE, geom = "boxplot", position = "dodge")+theme_bw()+ labs(title = "By best admitted, middle filled, employ restriction")
+    qplot(factor(attend), b0, data = na.exclude(NmFillMiddleData), notch= TRUE, geom = "boxplot", position = "dodge")+theme_bw()+ labs(title = "By best applied, middle filled, employ restriction")
+  #regress
+    CatMod <- lm(b0~ factor(cat), data=na.exclude(NmFillMiddleData))
+    summary(CatMod)
+    AdmitMod <- lm(b0~ factor(admit), data=na.exclude(NmFillMiddleData))
+    summary(AdmitMod)
+    AttendMod <- lm(b0~ factor(attend), data=na.exclude(NmFillMiddleData))
+    summary(AttendMod)
+  #regress by admit
+    admit_cats <- c(1, 2, 3, 4, 5)
+    byAdmitCoeffVect = data.frame(matrix(ncol = 15, nrow = length(admit_cats)))
+    colnames(byAdmitCoeffVect)=c("intercept","1",  "2", "3", "4", "5/6", "intsig", "1sig", "2sig", "3sig", "4sig", "5/6sig","R2", "NumObservations", "levels")
+    NmFillMiddleData[is.na(NmFillMiddleData)] <- -3
+    for (i in 1:length(admit_cats)){
+      curData = NmFillMiddleData[NmFillMiddleData$admit==admit_cats[i],]
+      curCount = nrow(curData)
+      if (curCount >0){
+        curData[curData$attend == -3,]$attend <- -4 #change attends to -4 so they dont get deleted
+        curData[curData == -3] <- NA
+        curCount = nrow(na.exclude(curData))
+        numCoeffs <- length(levels(factor(curData$attend)))
+        if (numCoeffs >1 & curCount > numCoeffs){
+          curData<-curData[c("b0", "attend")]
+          curModel = lm(b0~factor(attend), data = na.exclude(curData))
+          numCoeffs <- length(curModel$coefficients)
+          for (j in 1:numCoeffs){
+            byAdmitCoeffVect[i,j]= curModel$coefficients[j]
+            byAdmitCoeffVect[i,j+6]= summary(curModel)$coefficients[j,4]
+          }
+          byAdmitCoeffVect[i,13]= summary(curModel)$r.squared
+          byAdmitCoeffVect[i,15]= toString(levels(factor(curData$attend)))
+        } 
       }
+      byAdmitCoeffVect[i,14]= curCount
     }
+    
+    write.csv(byAdmitCoeffVect, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/byAdmit.csv")
+
+#get by attendance
+    attend_cats <- c(-3, 1, 2, 3, 4, 5)
+    byAttendCoeffVect = data.frame(matrix(ncol = 13, nrow = length(attend_cats)))
+    colnames(byAttendCoeffVect)=c("intercept",  "2", "3", "4", "5/6", "intsig", "2sig", "3sig", "4sig", "5/6sig","R2", "NumObservations", "levels")
+    for (i in 1:length(attend_cats)){
+      curData = NmFillMiddleData[NmFillMiddleData$attend==attend_cats[i],]
+      curCount = nrow(curData)
+      if (curCount >0){
+        if (i == 1){
+          curData[curData$attend == -3,]$attend <- -4 #change attends to -4 so they dont get deleted
+        }
+        curData[curData == -3] <- NA
+        curCount = nrow(na.exclude(curData))
+        numCoeffs <- length(levels(factor(curData$admit)))
+        if (numCoeffs >1 & curCount > numCoeffs){
+          curData<-curData[c("b0", "admit")]
+          curModel = lm(b0~factor(admit), data = na.exclude(curData))
+          numCoeffs <- length(curModel$coefficients)
+          for (j in 1:numCoeffs){
+            byAttendCoeffVect[i,j]= curModel$coefficients[j]
+            byAttendCoeffVect[i,j+5]= summary(curModel)$coefficients[j,4]
+          }
+          byAttendCoeffVect[i,11]= summary(curModel)$r.squared
+          byAttendCoeffVect[i,13]= toString(levels(factor(curData$admit)))
+        } 
+      }
+      byAttendCoeffVect[i,12]= curCount
+    }
+    
+    write.csv(byAttendCoeffVect, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/byAttend.csv")
+
+
+#create prediction datasets
+EmployFillMiddleData <- data.frame(b0 = ENROLL_DATA$b0EmployFillMiddle, cat = ENROLL_DATA$cat, admit = ENROLL_DATA$BestAd5b, attend = ENROLL_DATA$BestAtt5b)
+#7 values for admission/attendance should not be included, and associated cateogires should be discarded
+levels(EmployFillMiddleData$cat) <- c(levels(EmployFillMiddleData$cat),-3)
+EmployFillMiddleData[EmployFillMiddleData$attend == 7,]$cat <- -3
+EmployFillMiddleData[EmployFillMiddleData$admit == 7,]$cat <- -3
+EmployFillMiddleData[EmployFillMiddleData$admit == 7,]$admit <- -3
+EmployFillMiddleData[EmployFillMiddleData$attend == 7,]$attend <- -3
+EmployFillMiddleData[EmployFillMiddleData == -3] <- NA
+#plot
+qplot(factor(cat), b0, data = na.exclude(EmployFillMiddleData), notch= TRUE, geom = "boxplot", position = "dodge")+theme_bw() + labs(title = "By Category, middle filled, employ restriction")
+qplot(factor(admit), b0, data = na.exclude(EmployFillMiddleData), notch= TRUE, geom = "boxplot", position = "dodge")+theme_bw()+ labs(title = "By best admitted, middle filled, employ restriction")
+qplot(factor(attend), b0, data = na.exclude(EmployFillMiddleData), notch= TRUE, geom = "boxplot", position = "dodge")+theme_bw()+ labs(title = "By best applied, middle filled, employ restriction")
+#regress
+CatMod <- lm(b0~ factor(cat), data=na.exclude(EmployFillMiddleData))
+summary(CatMod)
+AdmitMod <- lm(b0~ factor(admit), data=na.exclude(EmployFillMiddleData))
+summary(AdmitMod)
+AttendMod <- lm(b0~ factor(attend), data=na.exclude(EmployFillMiddleData))
+summary(AttendMod)
+#regress by admit
+admit_cats <- c(1, 2, 3, 4, 5)
+byAdmitCoeffVect = data.frame(matrix(ncol = 15, nrow = length(admit_cats)))
+colnames(byAdmitCoeffVect)=c("intercept","1",  "2", "3", "4", "5/6", "intsig", "1sig", "2sig", "3sig", "4sig", "5/6sig","R2", "NumObservations", "levels")
+EmployFillMiddleData[is.na(EmployFillMiddleData)] <- -3
+for (i in 1:length(admit_cats)){
+  curData = EmployFillMiddleData[EmployFillMiddleData$admit==admit_cats[i],]
+  curCount = nrow(curData)
+  if (curCount >0){
+    curData[curData$attend == -3,]$attend <- -4 #change attends to -4 so they dont get deleted
+    curData[curData == -3] <- NA
+    curCount = nrow(na.exclude(curData))
+    numCoeffs <- length(levels(factor(curData$attend)))
+    if (numCoeffs >1 & curCount > numCoeffs){
+      curData<-curData[c("b0", "attend")]
+      curModel = lm(b0~factor(attend), data = na.exclude(curData))
+      numCoeffs <- length(curModel$coefficients)
+      for (j in 1:numCoeffs){
+        byAdmitCoeffVect[i,j]= curModel$coefficients[j]
+        byAdmitCoeffVect[i,j+6]= summary(curModel)$coefficients[j,4]
+      }
+      byAdmitCoeffVect[i,13]= summary(curModel)$r.squared
+      byAdmitCoeffVect[i,15]= toString(levels(factor(curData$attend)))
+    } 
   }
-  if (useIndex >0){
-    incomeEstimate[[i]] <- outMatrixList[[useIndex]][[i]]
-    incomeb0[[i]]<- b0Vect[useIndex]
-  }
-  else{
-    incomeEstimate[[i]] <- rep(-3, 82)
-    incomeb0[[i]]<--3
-  }
+  byAdmitCoeffVect[i,14]= curCount
 }
 
-write.csv(incomeEstimate, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/incomeEsts.csv")
-write.csv(incomeb0, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/incomeb0.csv")
+write.csv(byAdmitCoeffVect, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/byAdmit.csv")
 
-#add b0 to data points
-ENROLL_DATA$b0 <- unlist(incomeb0)
-write.csv(ENROLL_DATA, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/datawithb0-noenroll.csv")
-
-#extract data on differences in betas===========================================
-#categories (currently using 5)
-ENROLL_DATA$cat <-NA
-admit_cats <- c('1','2', '3', '4', '6', '7')
-apply_cats <- c('-3','1','2', '3', '4', '6', '7')
-cat_vector <- rep(NA, length(admit_cats)*length(apply_cats))
-pop_counter <- rep(0, length(cat_vector))
-avg_beta0 <- rep(0, length(cat_vector))
-var_beta0 <- rep(0, length(cat_vector))
-beta0byCat <- list()
-length(beta0byCat) <- length(cat_vector)
-
-k=1
-for (i in 1:length(admit_cats)){#populate what will be the "lookup vector"
-  for (j in 1:length(apply_cats)){
-    cat_vector[k]= paste(admit_cats[i],apply_cats[j], sep = "")
-    k = k+1
+#get by attendance
+attend_cats <- c(-3, 1, 2, 3, 4, 5)
+byAttendCoeffVect = data.frame(matrix(ncol = 13, nrow = length(attend_cats)))
+colnames(byAttendCoeffVect)=c("intercept",  "2", "3", "4", "5/6", "intsig", "2sig", "3sig", "4sig", "5/6sig","R2", "NumObservations", "levels")
+for (i in 1:length(attend_cats)){
+  curData = EmployFillMiddleData[EmployFillMiddleData$attend==attend_cats[i],]
+  curCount = nrow(curData)
+  if (curCount >0){
+    if (i == 1){
+      curData[curData$attend == -3,]$attend <- -4 #change attends to -4 so they dont get deleted
+    }
+    curData[curData == -3] <- NA
+    curCount = nrow(na.exclude(curData))
+    numCoeffs <- length(levels(factor(curData$admit)))
+    if (numCoeffs >1 & curCount > numCoeffs){
+      curData<-curData[c("b0", "admit")]
+      curModel = lm(b0~factor(admit), data = na.exclude(curData))
+      numCoeffs <- length(curModel$coefficients)
+      for (j in 1:numCoeffs){
+        byAttendCoeffVect[i,j]= curModel$coefficients[j]
+        byAttendCoeffVect[i,j+5]= summary(curModel)$coefficients[j,4]
+      }
+      byAttendCoeffVect[i,11]= summary(curModel)$r.squared
+      byAttendCoeffVect[i,13]= toString(levels(factor(curData$admit)))
+    } 
   }
+  byAttendCoeffVect[i,12]= curCount
 }
 
-for (i in 1:nrow(ENROLL_DATA)){
-  curCat = toString(paste(ENROLL_DATA$BestAd5[i],ENROLL_DATA$BestAtt5[i], sep = ""))
-  ENROLL_DATA$cat[i]=curCat
-  curIndex = match(curCat, cat_vector)
-  if (ENROLL_DATA$b0[i]!=-3){
-    #add it to corresponding list
-    beta0byCat[[curIndex]][[length(beta0byCat[[curIndex]])+1]]<-ENROLL_DATA$b0[i]
-  }
-}
+write.csv(byAttendCoeffVect, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/byAttend.csv")
 
-for (i in 1:length(beta0byCat)){
-  curbetalist = beta0byCat[[i]]
-  pop_counter[i]<- length(curbetalist)
-  if (pop_counter[i]> 0){
-    avg_beta0[i] <- sum(curbetalist)
-    var_beta0[i] <- var(curbetalist)
-  }  
-}
 
-outdat <- data.frame(name = cat_vector, number = pop_counter, average = avg_beta0, variance = var_beta0)
-write.csv(ENROLL_DATA, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/datawithb0.csv")
-write.csv(outdat, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/b0output.csv")
+
