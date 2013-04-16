@@ -175,6 +175,13 @@ for (i in 1:nrow(ENROLL_DATA)){
   SATProjectData[SATProjectData$SATV <0,]$SATV <- -3
   SATProjectData[SATProjectData == -3] <- NA
 
+#without enrollment restriction, with 10K limit, with employment restriction
+  b010KEmpProjectData <- b0ProjectData
+  b010KEmpProjectData$b0 <- ENROLL_DATA$b010Kemp
+  b010KEmpProjectData[b010KEmpProjectData == -3] <- NA
+  b010KEmpProjectData$SATM <- SATProjectData$SATM
+  b010KEmpProjectData$SATV<- SATProjectData$SATV
+
 #project with no 10K restriction=========================================================================
 #model selection with no enrollment restriction
   #we exclude location because it has too many categories
@@ -267,6 +274,19 @@ for (i in 1:nrow(ENROLL_DATA)){
   SATMod <- lm(b010K~ factor(SATM) +factor(SATV), data=na.exclude(SATProjectData))
   summary(SATMod)
 
+
+
+#project with  10K restriction and employment restriction=========================================================================
+#model selection with no enrollment restriction
+#we exclude location because it has too many categories
+AllFactor <- lm(b0~factor(cat)+ factor(gpa) + factor(major2)+ factor(collgrad), data=na.exclude(b010KEmpProjectData))
+GPAMod <- lm(b0~ factor(gpa), data=na.exclude(b010KEmpProjectData))
+MajorMod <- lm(b0~ factor(major2), data=na.exclude(b010KEmpProjectData))
+GradMod <- lm(b0~ factor(collgrad), data=na.exclude(b010KEmpProjectData))
+CatMod <- lm(b0~ factor(cat), data=na.exclude(b010KEmpProjectData))
+AdmitMod <- lm(b0~ factor(admit), data=na.exclude(b010KEmpProjectData))
+AttendMod <- lm(b0~ factor(attend), data=na.exclude(b010KEmpProjectData))
+
 #use 10K limit, no enrollment restriction===============================
   boxplot(b0~factor(cat), data = na.exclude(b010KProjectData))
   boxplot(b0~factor(admit), data = na.exclude(b010KProjectData))
@@ -289,7 +309,9 @@ for (i in 1:nrow(ENROLL_DATA)){
     curData = b010KProjectData[b010KProjectData$admit==admit_cats[i],]
     curCount = nrow(curData)
     if (curCount >0){
+      curData[curData$attend == -3,]$attend <- -4 #change attends to -4 so they dont get deleted
       curData[curData == -3] <- NA
+      curCount = nrow(na.exclude(curData))
       numCoeffs <- length(levels(factor(curData$attend)))
       if (numCoeffs >1 & curCount > numCoeffs){
         curData<-curData[c("b0", "attend")]
@@ -315,7 +337,79 @@ for (i in 1:length(attend_cats)){
   curData = b010KProjectData[b010KProjectData$attend==attend_cats[i],]
   curCount = nrow(curData)
   if (curCount >0){
+    if (i == 1){
+      curData[curData$attend == -3,]$attend <- -4 #change attends to -4 so they dont get deleted
+    }
     curData[curData == -3] <- NA
+    curCount = nrow(na.exclude(curData))
+    numCoeffs <- length(levels(factor(curData$admit)))
+    if (numCoeffs >1 & curCount > numCoeffs){
+      curData<-curData[c("b0", "admit")]
+      curModel = lm(b0~factor(admit), data = na.exclude(curData))
+      numCoeffs <- length(curModel$coefficients)
+      for (j in 1:numCoeffs){
+        byAttendCoeffVect[i,j]= curModel$coefficients[j]
+        byAttendCoeffVect[i,j+5]= summary(curModel)$coefficients[j,4]
+      }
+      byAttendCoeffVect[i,11]= summary(curModel)$r.squared
+      byAttendCoeffVect[i,13]= toString(levels(factor(curData$admit)))
+    } 
+  }
+  byAttendCoeffVect[i,12]= curCount
+}
+
+write.csv(byAttendCoeffVect, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/byAttend.csv")
+
+
+
+#use 10K limit and employment restriction, no enrollment restriction===============================
+qplot(factor(cat), b0, data = na.exclude(b010KEmpProjectData), notch= TRUE, geom = "boxplot", position = "dodge")+theme_bw()
+qplot(factor(admit), b0, data = na.exclude(b010KEmpProjectData), notch= TRUE, geom = "boxplot", position = "dodge")+theme_bw()
+qplot(factor(attend), b0, data = na.exclude(b010KEmpProjectData), notch= TRUE, geom = "boxplot", position = "dodge")+theme_bw()
+admit_cats <- c(1,2, 3, 4, 6, 7)
+attend_cats <- c(-3,1,2, 3, 4, 6, 7)
+
+#get by admission
+byAdmitCoeffVect = data.frame(matrix(ncol = 15, nrow = length(admit_cats)))
+colnames(byAdmitCoeffVect)=c("intercept","1", "2", "3", "4", "6", "intsig", "1sig", "2sig", "3sig", "4sig", "6sig","R2", "NumObservations", "levels")
+b010KEmpProjectData[is.na(b010KEmpProjectData)] <- -3
+for (i in 1:length(admit_cats)){
+  curData = b010KEmpProjectData[b010KEmpProjectData$admit==admit_cats[i],]
+  curCount = nrow(curData)
+  if (curCount >0){
+    curData[curData$attend == -3,]$attend <- -4 #change attends to -4 so they dont get deleted
+    curData[curData == -3] <- NA
+    curCount = nrow(na.exclude(curData))
+    numCoeffs <- length(levels(factor(curData$attend)))
+    if (numCoeffs >1 & curCount > numCoeffs){
+      curData<-curData[c("b0", "attend")]
+      curModel = lm(b0~factor(attend), data = na.exclude(curData))
+      numCoeffs <- length(curModel$coefficients)
+      for (j in 1:numCoeffs){
+        byAdmitCoeffVect[i,j]= curModel$coefficients[j]
+        byAdmitCoeffVect[i,j+6]= summary(curModel)$coefficients[j,4]
+      }
+      byAdmitCoeffVect[i,13]= summary(curModel)$r.squared
+      byAdmitCoeffVect[i,15]= toString(levels(factor(curData$attend)))
+    } 
+  }
+  byAdmitCoeffVect[i,14]= curCount
+}
+
+write.csv(byAdmitCoeffVect, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/byAdmit.csv")
+
+#get by attendance
+byAttendCoeffVect = data.frame(matrix(ncol = 13, nrow = length(admit_cats)))
+colnames(byAttendCoeffVect)=c("intercept", "2", "3", "4", "6", "intsig", "2sig", "3sig", "4sig", "6sig","R2", "NumObservations", "levels")
+for (i in 1:length(attend_cats)){
+  curData = b010KEmpProjectData[b010KEmpProjectData$attend==attend_cats[i],]
+  curCount = nrow(curData)
+  if (curCount >0){
+    if (i == 1){
+      curData[curData$attend == -3,]$attend <- -4 #change attends to -4 so they dont get deleted
+    }
+    curData[curData == -3] <- NA
+    curCount = nrow(na.exclude(curData))
     numCoeffs <- length(levels(factor(curData$admit)))
     if (numCoeffs >1 & curCount > numCoeffs){
       curData<-curData[c("b0", "admit")]

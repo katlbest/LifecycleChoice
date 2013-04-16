@@ -34,9 +34,9 @@ projectIncomes <- function(ageVectList, incomeVectList, enrollVectList, nameStri
     }
   }  
   colnames(outMatrix)=ENROLL_DATA$PUBID_1997
-  outMatrixString <- paste("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/",nameString ,"-individualoutput.csv" sep = "")
+  outMatrixString <- paste("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/",nameString ,"-individualoutput.csv", sep = "")
   write.csv(outMatrix, outMatrixString)
-  outCoeffString <- paste("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/",nameString ,"-individualcoefficients.csv" sep = "")
+  outCoeffString <- paste("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/",nameString ,"-individualcoefficients.csv" ,sep = "")
   write.csv(coeffVect, outCoeffString)
   outList <- list(coeffVect, outMatrix)
   return(outList)
