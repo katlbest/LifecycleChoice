@@ -90,7 +90,7 @@ getTotal2 <- function(data, indicator, mainvar, secondvar, clarify, lookupType) 
       }
       else if (lookupType ==1){ #we don't use this check
         totalVect[j]= -100000000 #very negativenumber so it doesn't become positive
-        #print("yes")
+        print("yes")
       }
     }
     #if (realIndicator==-1 | realIndicator == -2 | realIndicator == -5){ #when this is used, we check that no one refused or don't know for income variable indicator
@@ -101,6 +101,7 @@ getTotal2 <- function(data, indicator, mainvar, secondvar, clarify, lookupType) 
     #}
   }
   invisible(return(totalVect))
+  print(totalVect)
 }
 
 lookupCategory <- function(varType, curValue){ #varType 1 =  biggest range, 3 = smallers
