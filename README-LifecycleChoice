@@ -1,0 +1,26 @@
+README-Lifecycle choice
+
+
+EXTRACTING SCHOOLING DATA FROM TEXT FILES
+1. original work done in SAS before data is desensitized (not included here)
+2. datamanip_main.r: determines college enrollment, application, and admission statuses, does sanity checks, and creates inputs for python. This file is out of date. 
+3. datamanip_main-underscore.r: new version of the file that uses new input data where all disallowed symbols (such as - and ~) are replaced with _. This file is out of date. 
+4. datamanip_main-alternate.r: Uses alternative approach with fewer sanity checks to get data on more students. This file is out of date. 
+5. datamanip_main.py: Original python file for extracting schooling information from text files, uses COMPILED_DATA_APPLYER as input. This file is out of date. 
+datamanip_main_underscore.py: new version of the file that uses new input data where all disallowed symbols (such as - and ~) are replaced with _. This file is out of date.
+datamanip_main_appsonly.py: Code for extracting schooling information from text files, Input data is those who applied to at least one school. Output of this file gives inputs to income prediction. This file is up to date. 
+
+PROJECTING INDIVIDUAL INCOMES
+1. incomeclean.R: original file to full income data and create usable time series. This file is out of date. 
+2. incomeclean-incomeonly.r: uses labor income only, ignoring farm, business, social security, etc. This file is out of date. 
+3. individualprofilecreation.r: attempts projection of individual incomes using various approaches (single parameter, two parameter, three parameter, quadratic, etc.) and projects individual incomes. This file is out of date.
+4. coeffregression.R: Performs regressions to determine whether b0 is predicted by education. This file is out of date.
+
+5. incomeclean-conservative.r: Code to perform individual income predictions and check their predictive power; includes only labor income, with or without 10K limit and filled in data, with or without employment restriction. This file is up to date.
+6. fun_checkPredictionAbility.R: function run from incomeclean-conservative; does regressions and plots to test how well education predicts b0. This file is up to date.
+7. fun_fillMissingMiddle.R: function run from incomeclean-conservative; fills missing data in the middle of the time series and enforces 10K minimum income limit. This file is up to date.
+8. fun_projectIncomes.R: function run from incomeclean-conservative; projects incomes using a specific set of input data. This file is up to date.
+9. fun_removeNotFT.R: function run from incomeclean-conservative; enforces 1200 hour per year minimum employment. This file is up to date.
+
+1979 DATA
+1. incomeclear-79.r: beginning of extraction of 1979 income, to be used in assessing covariance of stock returns and incomes
