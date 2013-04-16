@@ -58,7 +58,8 @@ checkPredictionAbility<- function(b0Name, nameString){
       }
       byAdmitCoeffVect[i,14]= curCount
     }
-    write.csv(byAdmitCoeffVect, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/byAdmit.csv")
+    outFile <- paste("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/",nameString,"-byAdmit.csv", sep = "")
+    write.csv(byAdmitCoeffVect, outFile)
     
   #get by attendance
     attend_cats <- c(-3, 1, 2, 3, 4, 5)
@@ -88,6 +89,7 @@ checkPredictionAbility<- function(b0Name, nameString){
       }
       byAttendCoeffVect[i,12]= curCount
     }
-    write.csv(byAttendCoeffVect, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/byAttend.csv")
+    outFile <- paste("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/",nameString,"-byAttend.csv", sep = "")
+    write.csv(byAttendCoeffVect, outFile)
   
 }
