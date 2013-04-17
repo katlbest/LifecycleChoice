@@ -3,6 +3,11 @@ checkPredictionAbility<- function(b0Name, nameString){
   #create prediction datasets
     inputDataset <- data.frame(b0 = b0Name, cat = ENROLL_DATA$cat, admit = ENROLL_DATA$BestAd5b, attend = ENROLL_DATA$BestAtt5b)
   
+  #remove those entries where b0 out of range
+    b0Min = -500000 #upper limit of about 140K top salary
+    b0Max = -100 #lower limit of about 12K top salary
+    inputDataset[inputDataset$b0 < -500000 | inputDataset$b0 > -100,]$b0 <- -3
+    
   #7 values for admission/attendance should not be included, and associated cateogires should be discarded
     levels(inputDataset$cat) <- c(levels(inputDataset$cat),-3)
     inputDataset[inputDataset$attend == 7,]$cat <- -3
@@ -10,6 +15,7 @@ checkPredictionAbility<- function(b0Name, nameString){
     inputDataset[inputDataset$admit == 7,]$admit <- -3
     inputDataset[inputDataset$attend == 7,]$attend <- -3
     inputDataset[inputDataset == -3] <- NA
+    inputDataset[inputDataset == -4] <- NA
 
   #plot
     myDir = "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/Curve fitting/Plots/"

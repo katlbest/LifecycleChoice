@@ -4,10 +4,11 @@ projectIncomes <- function(ageVectList, incomeVectList, enrollVectList, nameStri
   outMatrix = data.frame(matrix(ncol = length(ENROLL_DATA), nrow =82))
   for (i in 1:nrow(ENROLL_DATA)){
     curData = data.frame(age = ageVectList[[i]], income = incomeVectList[[i]], enroll = enrollVectList[[i]])
-    curData[curData == -3] <- NA 
+    curData[curData == -3] <- NA
+    curData[curData == -4] <- NA 
     curData<- na.exclude(curData)
     if (dim(curData)[1]>2){
-      numObs = length(ageVectList[[i]])
+      numObs = length(na.exclude(curData$age))
       input1 = (1-exp(-curData$age/tau))/(curData$age/tau)
       B = input1 - exp(-curData$age/tau)
       input2 = (1+m*B+n*input1)

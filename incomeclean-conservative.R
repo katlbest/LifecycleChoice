@@ -4,6 +4,7 @@
     #NmNoFill: don't fill in middle values or throw out 10K or fewer entries
     #EmployFillMiddle: fill in middle values and throw out 10K or fewer entries, include only those years worked nmore than 1200 hrs
     #EmployNoFill: don't fill in middle values or throw out 10K or fewer entries, include only those years worked nmore than 1200 hrs
+    #Employ10K: throw out 10K and use employment restriction (1200 hrs)
 
 #libraries ====================================================================
   library(plyr)
@@ -281,6 +282,17 @@ source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulati
   enrollVectListLabEmployFilled<-LabEmployReturnFilled[[3]]
   employVectListLabEmployFilled<- LabEmployReturnFilled[[4]]
 
+#create employ restricted vector with 10K restriction onlys==================================================================
+#note: remove entries < 10000
+
+source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_TenKMin.R")
+
+LabEmployReturn10K <-TenKMin(incomeVectListLabEmploy, ageVectListLabEmploy, enrollVectListLabEmploy, employVectListLabEmploy)
+incomeVectListLabEmploy10K<-LabEmployReturn10K[[1]]
+ageVectListLabEmploy10K<-LabEmployReturn10K[[2]]
+enrollVectListLabEmploy10K<-LabEmployReturn10K[[3]]
+employVectListLabEmploy10K<- LabEmployReturn10K[[4]]
+
 #Project======================================================================================
   #inputs
     tau =27.8818
@@ -303,6 +315,9 @@ source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulati
       outListLabEmployFilled <- projectIncomes(ageVectListLabEmployFilled, incomeVectListLabEmployFilled, enrollVectListLabEmployFilled, "EmployFillMiddle")
         coeffVectLabEmployFilled<- outListLabEmployFilled[[1]]
         outMatrixLabEmployFilled<- outListLabEmployFilled[[2]]
+      outListLabEmploy10K <- projectIncomes(ageVectListLabEmploy10K, incomeVectListLabEmploy10K, enrollVectListLabEmploy10K, "Employ10K")
+        coeffVectLabEmploy10K<- outListLabEmploy10K[[1]]
+        outMatrixLabEmploy10K<- outListLabEmploy10K[[2]]
 
   #save this workspace for later loading
     save.image(file="alloptions.RData")
@@ -313,6 +328,7 @@ source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulati
     ENROLL_DATA$b0EmployFilled<-coeffVectLabEmployFilled[,1]
     ENROLL_DATA$b0Nm<-coeffVectLabNm[,1]
     ENROLL_DATA$b0Employ<-coeffVectLabEmploy[,1]
+    ENROLL_DATA$b0Employ10K<-coeffVectLabEmploy10K[,1]
   
   #add category variable
     ENROLL_DATA$cat <- -3
@@ -324,8 +340,10 @@ source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulati
     ENROLL_DATA[is.na(ENROLL_DATA)] <- -3
 
   #do check for each data set type
+    #this check now excludes entries where b0 is out of range
     source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_checkPredictionAbility.R")
     checkPredictionAbility(ENROLL_DATA$b0NmFilled, "b0NmFillMiddle")
     checkPredictionAbility(ENROLL_DATA$b0EmployFilled, "b0EmployFillMiddle")
     checkPredictionAbility(ENROLL_DATA$b0Nm, "b0NmNoFill")
     checkPredictionAbility(ENROLL_DATA$b0Employ, "b0EmployNoFill")
+    checkPredictionAbility(ENROLL_DATA$b0Employ10K, "b0EmployNoFill10K")
