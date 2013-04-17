@@ -10,6 +10,9 @@
   library(plyr)
   library(ggplot2)
 
+#clear workspace ==============================================================
+  rm(list = ls())
+
 #data i/o=======================================================================
   INCOME_DATA <- read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/INCOME_DATA.csv")
   #this file has a lot of the information necessary for projections;can always add needed columns from compileddata_allways.csv
