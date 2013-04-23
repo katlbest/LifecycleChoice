@@ -378,4 +378,40 @@ employVectListLabEmploy10K<- LabEmployReturn10K[[4]]
 
 #investigate getting stronger predictor using best strategy and other variables==========================
   #best strategy is NmEmploy10K
+  #read in other relevant predictors
+    INCOME_PREDS<- read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/incomepredictors.csv")
+    ENROLL_DATA2<- merge(x = ENROLL_DATA, y = INCOME_PREDS, by = "PUBID_1997", all.x = TRUE)
+    COLLEGE_NUM<- read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/collegenumber.csv")
+    ENROLL_DATA2<- merge(x = ENROLL_DATA2, y = COLLEGE_NUM, by = "PUBID_1997", all.x = TRUE)
+    LOC_DATA <- read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/desensitizedloc.csv")
+    ENROLL_DATA2<- merge(x = ENROLL_DATA2, y = LOC_DATA, by = "PUBID_1997", all.x = TRUE)
+    ENROLL_DATA<-ENROLL_DATA2
 
+#create second major variable (categorical)===========================================
+  hardSci <- c(6, 21, 25)
+  softSci <- c(3, 10, 11, 31, 32)
+  bus <- c(7, 8, 9, 13)
+  health <- c(22, 23, 27, 29, 30, 28)
+  hum <- c(1,2,5,12,14,15,17,19,18,20,24,26,33,4,16)
+  ENROLL_DATA$MAJOR2
+  #reduce categories
+  for (i in 1:nrow(ENROLL_DATA)){
+    if (ENROLL_DATA$MAJOR[i] %in% hardSci){
+      ENROLL_DATA$MAJOR2[i]= 1
+    }
+    else if (ENROLL_DATA$MAJOR[i] %in% softSci){
+      ENROLL_DATA$MAJOR2[i]= 2
+    }
+    else if (ENROLL_DATA$MAJOR[i] %in% bus){
+      ENROLL_DATA$MAJOR2[i]= 3
+    }
+    else if (ENROLL_DATA$MAJOR[i] %in% health){
+      ENROLL_DATA$MAJOR2[i]= 4
+    }
+    else if (ENROLL_DATA$MAJOR[i] %in% hum){
+      ENROLL_DATA$MAJOR2[i]= 5
+    }
+    else {
+      ENROLL_DATA$MAJOR2[i]= -3
+    }
+  }
