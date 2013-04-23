@@ -365,4 +365,17 @@ employVectListLabEmploy10K<- LabEmployReturn10K[[4]]
   outFile <- "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/stErOut.csv"
   write.csv(outDat, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/stErOut.csv")
 
+#calcualte standard errors using only "real" values
+  source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_getStErrorReals.R")
+  stErLabNm = getStErrorReals(outMatrixLabNm, coeffVectLabNm[1])
+  stErLabEmploy = getStErrorReals(outMatrixLabEmploy, coeffVectLabEmploy[1])
+  stErLabNmFilled = getStErrorReals(outMatrixLabNmFilled, coeffVectLabNmFilled[1])
+  stErLabEmployFilled = getStErrorReals(outMatrixLabEmployFilled, coeffVectLabEmployFilled[1])
+  stErLabEmploy10K = getStErrorReals(outMatrixLabEmploy10K, coeffVectLabEmploy10K[1])
+
+  outDat = data.frame(stErLabNmFilled, stErLabEmployFilled, stErLabNm, stErLabEmploy, stErLabEmploy10K)
+  write.csv(outDat, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/stErOutReals.csv")
+
 #investigate getting stronger predictor using best strategy and other variables==========================
+  #best strategy is NmEmploy10K
+
