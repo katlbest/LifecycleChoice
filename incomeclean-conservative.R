@@ -359,5 +359,10 @@ employVectListLabEmploy10K<- LabEmployReturn10K[[4]]
   stErLabEmployFilled = getStError(outMatrixLabEmployFilled, coeffVectLabEmployFilled[1])
   stErLabEmploy10K = getStError(outMatrixLabEmploy10K, coeffVectLabEmploy10K[1])
 
+#save this workspace for later loading and save output to file
+  save.image(file="wsterr.RData")
+  outDat = data.frame(stErLabNmFilled, stErLabEmployFilled, stErLabNm, stErLabEmploy, stErLabEmploy10K)
+  outFile <- "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/stErOut.csv"
+  write.csv(outDat, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/stErOut.csv")
 
 #investigate getting stronger predictor using best strategy and other variables==========================
