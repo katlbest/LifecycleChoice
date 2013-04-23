@@ -351,24 +351,13 @@ employVectListLabEmploy10K<- LabEmployReturn10K[[4]]
     checkPredictionAbility(ENROLL_DATA$b0Employ, "b0EmployNoFill")
     checkPredictionAbility(ENROLL_DATA$b0Employ10K, "b0EmployNoFill10K")
 
-#investigate getting stronger predictor using best strategy and other variables==========================
-
 #investigate standard errors for each category
   source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_getStError.R")
   stErLabNm = getStError(outMatrixLabNm, coeffVectLabNm[1])
-inData = outMatrixLabNm
-inb0 = coeffVectLabNm[1]
+  stErLabEmploy = getStError(outMatrixLabEmploy, coeffVectLabEmploy[1])
+  stErLabNmFilled = getStError(outMatrixLabNmFilled, coeffVectLabNmFilled[1])
+  stErLabEmployFilled = getStError(outMatrixLabEmployFilled, coeffVectLabEmployFilled[1])
+  stErLabEmploy10K = getStError(outMatrixLabEmploy10K, coeffVectLabEmploy10K[1])
 
 
-outListLabEmploy <- projectIncomes(ageVectListLabEmploy, incomeVectListLabEmploy, enrollVectListLabEmploy, "EmployNoFill")
-coeffVectLabEmploy<- outListLabEmploy[[1]]
-outMatrixLabEmploy<- outListLabEmploy[[2]]
-outListLabNmFilled <- projectIncomes(ageVectListLabNmFilled, incomeVectListLabNmFilled, enrollVectListLabNmFilled, "NmFillMiddle")
-coeffVectLabNmFilled<- outListLabNmFilled[[1]]
-outMatrixLabNmFilled<- outListLabNmFilled[[2]]
-outListLabEmployFilled <- projectIncomes(ageVectListLabEmployFilled, incomeVectListLabEmployFilled, enrollVectListLabEmployFilled, "EmployFillMiddle")
-coeffVectLabEmployFilled<- outListLabEmployFilled[[1]]
-outMatrixLabEmployFilled<- outListLabEmployFilled[[2]]
-outListLabEmploy10K <- projectIncomes(ageVectListLabEmploy10K, incomeVectListLabEmploy10K, enrollVectListLabEmploy10K, "Employ10K")
-coeffVectLabEmploy10K<- outListLabEmploy10K[[1]]
-outMatrixLabEmploy10K<- outListLabEmploy10K[[2]]
+#investigate getting stronger predictor using best strategy and other variables==========================

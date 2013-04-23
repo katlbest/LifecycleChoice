@@ -21,7 +21,7 @@ getStError<- function(inData, inb0){
   #calc standard errors
   for (i in 1:length(catList)){
     curData = transData[transData$cat == catList[i],]
-    if (nrow(curData) > 0){ #if there are people in this category
+    if (nrow(curData) > 1){ #if there are at least two people in this category
       avgVect = rep(NA, 82)
       outData = data.frame(matrix(ncol = 82, nrow = nrow(curData)))
       colnames(outData) = colnames(curData)[1:82]
@@ -37,7 +37,11 @@ getStError<- function(inData, inb0){
       }
       outData = outData[,1:82]
       allObs = na.exclude(unlist(outData))
-      stdVect[i]=sd(allObs)
+      if (length(allObs) > 5){ #must have at least 5 data points to determine st. error
+        stdVect[i]=sd(allObs)
+      } else{
+        stdVect[i]=NA
+      }  
     } else{
       stdVect[i]=NA
     }
