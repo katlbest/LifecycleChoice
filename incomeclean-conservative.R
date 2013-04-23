@@ -350,3 +350,46 @@ employVectListLabEmploy10K<- LabEmployReturn10K[[4]]
     checkPredictionAbility(ENROLL_DATA$b0Nm, "b0NmNoFill")
     checkPredictionAbility(ENROLL_DATA$b0Employ, "b0EmployNoFill")
     checkPredictionAbility(ENROLL_DATA$b0Employ10K, "b0EmployNoFill10K")
+
+#investigate getting stronger predictor using best strategy and other variables==========================
+
+#investigate standard errors for each category
+  inData = outMatrixLabNm
+  inb0 = coeffVectLabNm[1]
+  catList = levels(as.factor(ENROLL_DATA$cat))
+  transData = data.frame(t(inData))
+  colnames(transData)= c(19:100)
+  transData$cat = ENROLL_DATA$cat
+  inb0[is.na(inb0)]=-3
+  inb0 = unlist(inb0)
+  transData$b0 = inb0
+  #remove those with out of range values
+    b0Min = -500000 #upper limit of about 140K top salary
+    b0Max = -100 #lower limit of about 12K top salary
+    transData = transData[transData$b0 >= -500000 & transData$b0 <= -100,]
+  transData[transData == -3] = NA
+  transData[transData == -4] = NA
+  stdVect = rep(NA, length(catList))
+  for (i in 1:length(catList)){
+    curData = transData[transData$cat == catList[i],] #must test if there are any observations!
+    if (nrow(curData) > 0){ #TBD this doesnt work
+      avgVect = rep(NA, 82)
+      outData = data.frame(matrix(ncol = 82, nrow = nrow(curData)))
+      colnames(outData) = colnames(curData)[1:82]
+      for (j in 1:length(avgVect)){
+        avgVect[j]= mean(na.exclude(curData[,j]))
+        for (k in 1:nrow(curData)){
+          if (is.na(curData[k,j])){
+            outData[k,j] = NA
+          } else {
+            outData[k,j] = curData[k,j]-avgVect[j]
+          }
+        }
+      }
+      outData = outData[,1:82]
+      allObs = na.exclude(unlist(outData))
+      stdVect[i]=sd(allObs)
+    } else{
+      stdVect[i]=NA
+    }
+  }
