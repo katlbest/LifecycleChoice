@@ -377,19 +377,34 @@ employVectListLabEmploy10K<- LabEmployReturn10K[[4]]
 #save this workspace for later loading and save output to file
   save.image(file="wsterr.RData")
   outDat = data.frame(stErLabNmFilled, stErLabEmployFilled, stErLabNm, stErLabEmploy, stErLabEmploy10K, stDevLabNmFilled, stDevLabEmployFilled, stDevLabNm, stDevLabEmploy, stDevLabEmploy10K,nLabNmFilled, nLabEmployFilled, nLabNm, nLabEmploy, nLabEmploy10K)
-  outFile <- "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/stErOut.csv"
   write.csv(outDat, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/stErOut.csv")
 
 #calcualte standard errors using only "real" values
   source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_getStErrorReals.R")
-  stErLabNm = getStErrorReals(outMatrixLabNm, coeffVectLabNm[1])
-  stErLabEmploy = getStErrorReals(outMatrixLabEmploy, coeffVectLabEmploy[1])
-  stErLabNmFilled = getStErrorReals(outMatrixLabNmFilled, coeffVectLabNmFilled[1])
-  stErLabEmployFilled = getStErrorReals(outMatrixLabEmployFilled, coeffVectLabEmployFilled[1])
-  stErLabEmploy10K = getStErrorReals(outMatrixLabEmploy10K, coeffVectLabEmploy10K[1])
+  stErListLabNm = getStErrorReals(outMatrixLabNm, coeffVectLabNm[1])
+    stDevLabNm = stErListLabNm[[1]]
+    nLabNm = stErListLabNm[[2]]
+    stErLabNm = stDevLabNm/(sqrt(nLabNm))
+  stErListLabEmploy = getStErrorReals(outMatrixLabEmploy, coeffVectLabEmploy[1])
+    stDevLabEmploy = stErListLabEmploy[[1]]
+    nLabEmploy = stErListLabEmploy[[2]]
+    stErLabEmploy = stDevLabEmploy/(sqrt(nLabEmploy))
+  stErListLabNmFilled = getStErrorReals(outMatrixLabNmFilled, coeffVectLabNmFilled[1])
+    stDevLabNmFilled = stErListLabNmFilled[[1]]
+    nLabNmFilled = stErListLabNmFilled[[2]]
+    stErLabNmFilled = stDevLabNmFilled/(sqrt(nLabNmFilled))
+  stErListLabEmployFilled = getStErrorReals(outMatrixLabEmployFilled, coeffVectLabEmployFilled[1])
+    stDevLabEmployFilled = stErListLabEmployFilled[[1]]
+    nLabEmployFilled = stErListLabEmployFilled[[2]]
+    stErLabEmployFilled = stDevLabEmployFilled/(sqrt(nLabEmployFilled))
+  stErListLabEmploy10K = getStErrorReals(outMatrixLabEmploy10K, coeffVectLabEmploy10K[1])
+    stDevLabEmploy10K = stErListLabEmploy10K[[1]]
+    nLabEmploy10K = stErListLabEmploy10K[[2]]
+    stErLabEmploy10K = stDevLabEmploy10K/(sqrt(nLabEmploy10K))
 
-  outDat = data.frame(stErLabNmFilled, stErLabEmployFilled, stErLabNm, stErLabEmploy, stErLabEmploy10K)
+  outDat = data.frame(stErLabNmFilled, stErLabEmployFilled, stErLabNm, stErLabEmploy, stErLabEmploy10K, stDevLabNmFilled, stDevLabEmployFilled, stDevLabNm, stDevLabEmploy, stDevLabEmploy10K,nLabNmFilled, nLabEmployFilled, nLabNm, nLabEmploy, nLabEmploy10K)
   write.csv(outDat, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/stErOutReals.csv")
+  save.image(file="wsterr.RData")
 
 #investigate getting stronger predictor using best strategy and other variables==========================
   #best strategy is NmEmploy10K

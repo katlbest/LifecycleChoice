@@ -18,6 +18,7 @@ getStErrorReals<- function(inData, inb0){
   
   #output vector
   stdVect = rep(NA, length(catList))
+  nVect = rep(NA, length(catList)) #stores sample sizes
   
   #calc standard errors
   for (i in 1:length(catList)){
@@ -40,12 +41,16 @@ getStErrorReals<- function(inData, inb0){
       allObs = na.exclude(unlist(outData))
       if (length(allObs) > 5){ #must have at least 5 data points to determine st. error
         stdVect[i]=sd(allObs)
+        nVect[i]= length(allObs)
       } else{
         stdVect[i]=NA
+        nVect[i]= Na
       }  
     } else{
       stdVect[i]=NA
+      nVect[i]= NA
     }
   }
-  return(stdVect)
+  outList = list(stdVect, nVect)
+  return(outList)
 }
