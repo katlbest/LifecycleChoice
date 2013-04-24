@@ -380,7 +380,7 @@ employVectListLabEmploy10K<- LabEmployReturn10K[[4]]
     outDat = data.frame(stErLabNmFilled, stErLabEmployFilled, stErLabNm, stErLabEmploy, stErLabEmploy10K, stDevLabNmFilled, stDevLabEmployFilled, stDevLabNm, stDevLabEmploy, stDevLabEmploy10K,nLabNmFilled, nLabEmployFilled, nLabNm, nLabEmploy, nLabEmploy10K)
     write.csv(outDat, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/stErOut.csv")
 
-  #calcualte standard errors using only "real" values
+  #calculate standard errors using only "real" values
     source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_getStErrorReals.R")
     stErListLabNm = getStErrorReals(outMatrixLabNm, coeffVectLabNm[1])
       stDevLabNm = stErListLabNm[[1]]
@@ -430,6 +430,30 @@ employVectListLabEmploy10K<- LabEmployReturn10K[[4]]
     source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_fillIncomePredictors.R")
     PREDICT_DATA = fillIncomePredictors(ENROLL_DATA)
 
+  #create prediction datasets (only for Employ10K here)
+      b0ProjectData <- data.frame(b0 = PREDICT_DATA$b0Employ10K, cat = PREDICT_DATA$cat, admit = PREDICT_DATA$BestAd5, attend = PREDICT_DATA$BestAtt5, major = PREDICT_DATA$MAJOR, major2 = PREDICT_DATA$MAJOR2, gpa = PREDICT_DATA$GRADES, geo = PREDICT_DATA$GEO, collgrad = PREDICT_DATA$COLLEGECOMPLETE, satm <- PREDICT_DATA$CVC_SAT_MATH_SCORE_2007_XRND, satv <- PREDICT_DATA$CVC_SAT_VERBAL_SCORE_2007_XRND)
+      levels(b0ProjectData$cat) <- c(levels(b0ProjectData$cat),-3)
+      b0ProjectData[b0ProjectData$attend == 7,]$cat <- -3
+      b0ProjectData[b0ProjectData$admit == 7,]$cat <- -3
+      b0ProjectData[b0ProjectData$admit == 7,]$admit <- -3
+      b0ProjectData[b0ProjectData$attend == 7,]$attend <- -3
+      b0ProjectData[b0ProjectData == -3] <- NA
+      b0ProjectData[b0ProjectData == -4] <- NA
 
+
+
+
+      #7 values for admission/attendance should not be included, and associated categories should be discarded
+      b0ProjectData[b0ProjectData$admit == 7,]$cat <- -3
+      b0ProjectData[b0ProjectData$attend == 7,]$cat <- -3
+      b0ProjectData[b0ProjectData$admit == 7,]$admit <- -3
+      b0ProjectData[b0ProjectData$attend == 7,]$attend <- -3
+      b0ProjectData[b0ProjectData == -3] <- NA 
+
+IncProjectData$SATM <- ENROLL_DATA$CVC_SAT_MATH_SCORE_2007_XRND
+IncProjectData$SATV <- ENROLL_DATA$CVC_SAT_VERBAL_SCORE_2007_XRND
+IncProjectData[IncProjectData$SATM <0,]$SATM <- -3
+IncProjectData[IncProjectData$SATV <0,]$SATV <- -3
+IncProjectData[IncProjectData == -3] <- NA
 
   

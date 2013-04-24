@@ -13,9 +13,11 @@ checkPredictionAbility<- function(b0Name, nameString){
     inputDataset[inputDataset$attend == 7,]$cat <- -3
     inputDataset[inputDataset$admit == 7,]$cat <- -3
     inputDataset[inputDataset$admit == 7,]$admit <- -3
+    inputDataset[inputDataset$attend == -3,]$attend <- -10
     inputDataset[inputDataset$attend == 7,]$attend <- -3
     inputDataset[inputDataset == -3] <- NA
     inputDataset[inputDataset == -4] <- NA
+    inputDataset[inputDataset == -5] <- NA
 
   #plot
     myDir = "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/Curve fitting/Plots/"
@@ -46,7 +48,7 @@ checkPredictionAbility<- function(b0Name, nameString){
       curData = inputDataset[inputDataset$admit==admit_cats[i],]
       curCount = nrow(curData)
       if (curCount >0){
-        curData[curData$attend == -3,]$attend <- -4 #change attends to -4 so they dont get deleted
+        #curData[curData$attend == -3,]$attend <- -4 #change attends to -4 so they dont get deleted
         curData[curData == -3] <- NA
         curCount = nrow(na.exclude(curData))
         numCoeffs <- length(levels(factor(curData$attend)))
@@ -79,9 +81,9 @@ checkPredictionAbility<- function(b0Name, nameString){
       curCount = nrow(curData)
       if (curCount >0){
         if (i == 1){
-          curData[curData$attend == -3,]$attend <- -4 #change attends to -4 so they dont get deleted
+          #curData[curData$attend == -3,]$attend <- -4 #change attends to -4 so they dont get deleted
         }
-        curData[curData == -3] <- NA
+        #curData[curData == -3] <- NA
         curCount = nrow(na.exclude(curData))
         numCoeffs <- length(levels(factor(curData$admit)))
         if (numCoeffs >1 & curCount > numCoeffs){
