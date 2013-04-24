@@ -431,29 +431,30 @@ employVectListLabEmploy10K<- LabEmployReturn10K[[4]]
     PREDICT_DATA = fillIncomePredictors(ENROLL_DATA)
 
   #create prediction datasets (only for Employ10K here)
-      b0ProjectData <- data.frame(b0 = PREDICT_DATA$b0Employ10K, cat = PREDICT_DATA$cat, admit = PREDICT_DATA$BestAd5, attend = PREDICT_DATA$BestAtt5, major = PREDICT_DATA$MAJOR, major2 = PREDICT_DATA$MAJOR2, gpa = PREDICT_DATA$GRADES, geo = PREDICT_DATA$GEO, collgrad = PREDICT_DATA$COLLEGECOMPLETE, satm <- PREDICT_DATA$CVC_SAT_MATH_SCORE_2007_XRND, satv <- PREDICT_DATA$CVC_SAT_VERBAL_SCORE_2007_XRND)
-      levels(b0ProjectData$cat) <- c(levels(b0ProjectData$cat),-3)
-      b0ProjectData[b0ProjectData$attend == 7,]$cat <- -3
-      b0ProjectData[b0ProjectData$admit == 7,]$cat <- -3
-      b0ProjectData[b0ProjectData$admit == 7,]$admit <- -3
-      b0ProjectData[b0ProjectData$attend == 7,]$attend <- -3
-      b0ProjectData[b0ProjectData == -3] <- NA
-      b0ProjectData[b0ProjectData == -4] <- NA
+    b0ProjectData = data.frame(b0 = PREDICT_DATA$b0Employ10K, cat = PREDICT_DATA$cat, admit = PREDICT_DATA$BestAd5, attend = PREDICT_DATA$BestAtt5, major = PREDICT_DATA$MAJOR, major2 = PREDICT_DATA$MAJOR2, gpa = PREDICT_DATA$GRADES, geo = PREDICT_DATA$GEO, collgrad = PREDICT_DATA$COLLEGECOMPLETE, satm = PREDICT_DATA$CVC_SAT_MATH_SCORE_2007_XRND, satv = PREDICT_DATA$CVC_SAT_VERBAL_SCORE_2007_XRND)
+    levels(b0ProjectData$cat) <- c(levels(b0ProjectData$cat),-3)
+    b0ProjectData[b0ProjectData$attend == 7,]$cat = -3
+    b0ProjectData[b0ProjectData$admit == 7,]$cat = -3
+    b0ProjectData[b0ProjectData$admit == 7,]$admit = -3
+    b0ProjectData[b0ProjectData$attend == -3,]$attend = -10
+    b0ProjectData[b0ProjectData$attend == 7,]$attend = -3
+    b0ProjectData[b0ProjectData$satm <0,]$satm = -3
+    b0ProjectData[b0ProjectData$satv <0,]$satv = -3
+    b0ProjectData[b0ProjectData == -3] = NA
+    b0ProjectData[b0ProjectData == -4] = NA
 
+  #run sub-models
+    GPAMod = lm(b0~ factor(gpa), data=na.exclude(b0ProjectData))
+    summary(GPAMod) #no
+    MajorMod = lm(b0~ factor(major2), data=na.exclude(b0ProjectData))
+    summary(MajorMod) #maybe
+    GradMod = lm(b0~ factor(collgrad), data=na.exclude(b0ProjectData))
+    summary(GradMod) #yes
+    LocMod = lm(b0~ factor(geo), data=na.exclude(b0ProjectData))
+    summary(LocMod) #yes but too many entries
+    SATMod = lm(b0~ satm + satv, data=na.exclude(b0ProjectData))
+    summary(SATMod) #math highly significant
 
-
-
-      #7 values for admission/attendance should not be included, and associated categories should be discarded
-      b0ProjectData[b0ProjectData$admit == 7,]$cat <- -3
-      b0ProjectData[b0ProjectData$attend == 7,]$cat <- -3
-      b0ProjectData[b0ProjectData$admit == 7,]$admit <- -3
-      b0ProjectData[b0ProjectData$attend == 7,]$attend <- -3
-      b0ProjectData[b0ProjectData == -3] <- NA 
-
-IncProjectData$SATM <- ENROLL_DATA$CVC_SAT_MATH_SCORE_2007_XRND
-IncProjectData$SATV <- ENROLL_DATA$CVC_SAT_VERBAL_SCORE_2007_XRND
-IncProjectData[IncProjectData$SATM <0,]$SATM <- -3
-IncProjectData[IncProjectData$SATV <0,]$SATV <- -3
-IncProjectData[IncProjectData == -3] <- NA
-
-  
+  #run complete model
+    AllFactor =lm(b0~factor(cat) +factor(collgrad) + factor(major2)+ factor(collgrad) + satm +satv , data=na.exclude(b0ProjectData))
+    summary(AllFactor)
