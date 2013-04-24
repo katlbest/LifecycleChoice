@@ -28,7 +28,7 @@ checkPredictionAbility<- function(b0Name, nameString){
     qplot(factor(admit), b0, data = na.exclude(inputDataset), notch= TRUE, geom = "boxplot", position = "dodge")+theme_bw()+ labs(title = paste("By best admitted, ", nameString, sep= ""))
     ggsave(file = fileName)
     fileName = paste(myDir, nameString, "Attend.pdf",sep ="")
-    qplot(factor(attend), b0, data = na.exclude(inputDataset), notch= TRUE, geom = "boxplot", position = "dodge")+theme_bw()+ labs(title =paste("By best applied, ", nameString, sep=""))
+    qplot(factor(attend), b0, data = na.exclude(inputDataset), notch= TRUE, geom = "boxplot", position = "dodge")+theme_bw()+ labs(title =paste("By best attended, ", nameString, sep=""))
     ggsave(file = fileName)
  
   #regress
