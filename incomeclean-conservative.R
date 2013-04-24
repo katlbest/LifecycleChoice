@@ -352,96 +352,84 @@ employVectListLabEmploy10K<- LabEmployReturn10K[[4]]
     checkPredictionAbility(ENROLL_DATA$b0Employ10K, "b0EmployNoFill10K")
 
 #investigate standard errors for each category=============================================================
-  source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_getStError.R")
-  stErListLabNm = getStError(outMatrixLabNm, coeffVectLabNm[1])
-    stDevLabNm = stErListLabNm[[1]]
-    nLabNm = stErListLabNm[[2]]
-    stErLabNm = stDevLabNm/(sqrt(nLabNm))
-  stErListLabEmploy = getStError(outMatrixLabEmploy, coeffVectLabEmploy[1])
-    stDevLabEmploy = stErListLabEmploy[[1]]
-    nLabEmploy = stErListLabEmploy[[2]]
-    stErLabEmploy = stDevLabEmploy/(sqrt(nLabEmploy))
-  stErListLabNmFilled = getStError(outMatrixLabNmFilled, coeffVectLabNmFilled[1])
-    stDevLabNmFilled = stErListLabNmFilled[[1]]
-    nLabNmFilled = stErListLabNmFilled[[2]]
-    stErLabNmFilled = stDevLabNmFilled/(sqrt(nLabNmFilled))
-  stErListLabEmployFilled = getStError(outMatrixLabEmployFilled, coeffVectLabEmployFilled[1])
-    stDevLabEmployFilled = stErListLabEmployFilled[[1]]
-    nLabEmployFilled = stErListLabEmployFilled[[2]]
-    stErLabEmployFilled = stDevLabEmployFilled/(sqrt(nLabEmployFilled))
-  stErListLabEmploy10K = getStError(outMatrixLabEmploy10K, coeffVectLabEmploy10K[1])
-    stDevLabEmploy10K = stErListLabEmploy10K[[1]]
-    nLabEmploy10K = stErListLabEmploy10K[[2]]
-    stErLabEmploy10K = stDevLabEmploy10K/(sqrt(nLabEmploy10K))
+  #pull standard deviations and errors using all data
+    source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_getStError.R")
+    stErListLabNm = getStError(outMatrixLabNm, coeffVectLabNm[1])
+      stDevLabNm = stErListLabNm[[1]]
+      nLabNm = stErListLabNm[[2]]
+      stErLabNm = stDevLabNm/(sqrt(nLabNm))
+    stErListLabEmploy = getStError(outMatrixLabEmploy, coeffVectLabEmploy[1])
+      stDevLabEmploy = stErListLabEmploy[[1]]
+      nLabEmploy = stErListLabEmploy[[2]]
+      stErLabEmploy = stDevLabEmploy/(sqrt(nLabEmploy))
+    stErListLabNmFilled = getStError(outMatrixLabNmFilled, coeffVectLabNmFilled[1])
+      stDevLabNmFilled = stErListLabNmFilled[[1]]
+      nLabNmFilled = stErListLabNmFilled[[2]]
+      stErLabNmFilled = stDevLabNmFilled/(sqrt(nLabNmFilled))
+    stErListLabEmployFilled = getStError(outMatrixLabEmployFilled, coeffVectLabEmployFilled[1])
+      stDevLabEmployFilled = stErListLabEmployFilled[[1]]
+      nLabEmployFilled = stErListLabEmployFilled[[2]]
+      stErLabEmployFilled = stDevLabEmployFilled/(sqrt(nLabEmployFilled))
+    stErListLabEmploy10K = getStError(outMatrixLabEmploy10K, coeffVectLabEmploy10K[1])
+      stDevLabEmploy10K = stErListLabEmploy10K[[1]]
+      nLabEmploy10K = stErListLabEmploy10K[[2]]
+      stErLabEmploy10K = stDevLabEmploy10K/(sqrt(nLabEmploy10K))
 
-#save this workspace for later loading and save output to file
-  save.image(file="wsterr.RData")
-  outDat = data.frame(stErLabNmFilled, stErLabEmployFilled, stErLabNm, stErLabEmploy, stErLabEmploy10K, stDevLabNmFilled, stDevLabEmployFilled, stDevLabNm, stDevLabEmploy, stDevLabEmploy10K,nLabNmFilled, nLabEmployFilled, nLabNm, nLabEmploy, nLabEmploy10K)
-  write.csv(outDat, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/stErOut.csv")
+  #save this workspace for later loading and save output to file
+    save.image(file="wsterr.RData")
+    outDat = data.frame(stErLabNmFilled, stErLabEmployFilled, stErLabNm, stErLabEmploy, stErLabEmploy10K, stDevLabNmFilled, stDevLabEmployFilled, stDevLabNm, stDevLabEmploy, stDevLabEmploy10K,nLabNmFilled, nLabEmployFilled, nLabNm, nLabEmploy, nLabEmploy10K)
+    write.csv(outDat, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/stErOut.csv")
 
-#calcualte standard errors using only "real" values
-  source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_getStErrorReals.R")
-  stErListLabNm = getStErrorReals(outMatrixLabNm, coeffVectLabNm[1])
-    stDevLabNm = stErListLabNm[[1]]
-    nLabNm = stErListLabNm[[2]]
-    stErLabNm = stDevLabNm/(sqrt(nLabNm))
-  stErListLabEmploy = getStErrorReals(outMatrixLabEmploy, coeffVectLabEmploy[1])
-    stDevLabEmploy = stErListLabEmploy[[1]]
-    nLabEmploy = stErListLabEmploy[[2]]
-    stErLabEmploy = stDevLabEmploy/(sqrt(nLabEmploy))
-  stErListLabNmFilled = getStErrorReals(outMatrixLabNmFilled, coeffVectLabNmFilled[1])
-    stDevLabNmFilled = stErListLabNmFilled[[1]]
-    nLabNmFilled = stErListLabNmFilled[[2]]
-    stErLabNmFilled = stDevLabNmFilled/(sqrt(nLabNmFilled))
-  stErListLabEmployFilled = getStErrorReals(outMatrixLabEmployFilled, coeffVectLabEmployFilled[1])
-    stDevLabEmployFilled = stErListLabEmployFilled[[1]]
-    nLabEmployFilled = stErListLabEmployFilled[[2]]
-    stErLabEmployFilled = stDevLabEmployFilled/(sqrt(nLabEmployFilled))
-  stErListLabEmploy10K = getStErrorReals(outMatrixLabEmploy10K, coeffVectLabEmploy10K[1])
-    stDevLabEmploy10K = stErListLabEmploy10K[[1]]
-    nLabEmploy10K = stErListLabEmploy10K[[2]]
-    stErLabEmploy10K = stDevLabEmploy10K/(sqrt(nLabEmploy10K))
+  #calcualte standard errors using only "real" values
+    source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_getStErrorReals.R")
+    stErListLabNm = getStErrorReals(outMatrixLabNm, coeffVectLabNm[1])
+      stDevLabNm = stErListLabNm[[1]]
+      nLabNm = stErListLabNm[[2]]
+      stErLabNm = stDevLabNm/(sqrt(nLabNm))
+    stErListLabEmploy = getStErrorReals(outMatrixLabEmploy, coeffVectLabEmploy[1])
+      stDevLabEmploy = stErListLabEmploy[[1]]
+      nLabEmploy = stErListLabEmploy[[2]]
+      stErLabEmploy = stDevLabEmploy/(sqrt(nLabEmploy))
+    stErListLabNmFilled = getStErrorReals(outMatrixLabNmFilled, coeffVectLabNmFilled[1])
+      stDevLabNmFilled = stErListLabNmFilled[[1]]
+      nLabNmFilled = stErListLabNmFilled[[2]]
+      stErLabNmFilled = stDevLabNmFilled/(sqrt(nLabNmFilled))
+    stErListLabEmployFilled = getStErrorReals(outMatrixLabEmployFilled, coeffVectLabEmployFilled[1])
+      stDevLabEmployFilled = stErListLabEmployFilled[[1]]
+      nLabEmployFilled = stErListLabEmployFilled[[2]]
+      stErLabEmployFilled = stDevLabEmployFilled/(sqrt(nLabEmployFilled))
+    stErListLabEmploy10K = getStErrorReals(outMatrixLabEmploy10K, coeffVectLabEmploy10K[1])
+      stDevLabEmploy10K = stErListLabEmploy10K[[1]]
+      nLabEmploy10K = stErListLabEmploy10K[[2]]
+      stErLabEmploy10K = stDevLabEmploy10K/(sqrt(nLabEmploy10K))
 
-  outDat = data.frame(stErLabNmFilled, stErLabEmployFilled, stErLabNm, stErLabEmploy, stErLabEmploy10K, stDevLabNmFilled, stDevLabEmployFilled, stDevLabNm, stDevLabEmploy, stDevLabEmploy10K,nLabNmFilled, nLabEmployFilled, nLabNm, nLabEmploy, nLabEmploy10K)
-  write.csv(outDat, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/stErOutReals.csv")
-  save.image(file="wsterr.RData")
+    outDat = data.frame(stErLabNmFilled, stErLabEmployFilled, stErLabNm, stErLabEmploy, stErLabEmploy10K, stDevLabNmFilled, stDevLabEmployFilled, stDevLabNm, stDevLabEmploy, stDevLabEmploy10K,nLabNmFilled, nLabEmployFilled, nLabNm, nLabEmploy, nLabEmploy10K)
+    write.csv(outDat, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/stErOutReals.csv")
+    save.image(file="wsterr.RData")
 
 #investigate getting stronger predictor using best strategy and other variables==========================
   #best strategy is NmEmploy10K
-  #read in other relevant predictors
+
+  #read in other relevant predictor information
     INCOME_PREDS<- read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/incomepredictors.csv")
     ENROLL_DATA2<- merge(x = ENROLL_DATA, y = INCOME_PREDS, by = "PUBID_1997", all.x = TRUE)
     COLLEGE_NUM<- read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/collegenumber.csv")
     ENROLL_DATA2<- merge(x = ENROLL_DATA2, y = COLLEGE_NUM, by = "PUBID_1997", all.x = TRUE)
     LOC_DATA <- read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/desensitizedloc.csv")
     ENROLL_DATA2<- merge(x = ENROLL_DATA2, y = LOC_DATA, by = "PUBID_1997", all.x = TRUE)
+    SIC_DATA <- read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/sic.csv")
+    ENROLL_DATA2<- merge(x = ENROLL_DATA2, y = SIC_DATA, by = "PUBID_1997", all.x = TRUE)
     ENROLL_DATA<-ENROLL_DATA2
 
-#create second major variable (categorical)===========================================
-  hardSci <- c(6, 21, 25)
-  softSci <- c(3, 10, 11, 31, 32)
-  bus <- c(7, 8, 9, 13)
-  health <- c(22, 23, 27, 29, 30, 28)
-  hum <- c(1,2,5,12,14,15,17,19,18,20,24,26,33,4,16)
-  ENROLL_DATA$MAJOR2
-  #reduce categories
-  for (i in 1:nrow(ENROLL_DATA)){
-    if (ENROLL_DATA$MAJOR[i] %in% hardSci){
-      ENROLL_DATA$MAJOR2[i]= 1
-    }
-    else if (ENROLL_DATA$MAJOR[i] %in% softSci){
-      ENROLL_DATA$MAJOR2[i]= 2
-    }
-    else if (ENROLL_DATA$MAJOR[i] %in% bus){
-      ENROLL_DATA$MAJOR2[i]= 3
-    }
-    else if (ENROLL_DATA$MAJOR[i] %in% health){
-      ENROLL_DATA$MAJOR2[i]= 4
-    }
-    else if (ENROLL_DATA$MAJOR[i] %in% hum){
-      ENROLL_DATA$MAJOR2[i]= 5
-    }
-    else {
-      ENROLL_DATA$MAJOR2[i]= -3
-    }
-  }
+  #create neceessary variables
+    #MAJOR gives major
+    #GEO gives desensitized geography code
+    #GRADES gives highschool grades
+    #COLLEGECOMPLETED says whether college has been completed; those still enrolled in original college have a value of -3
+    #MAJOR2 is a categorical variable of majors
+    source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_fillIncomePredictors.R")
+    PREDICT_DATA = fillIncomePredictors(ENROLL_DATA)
+
+
+
+  
