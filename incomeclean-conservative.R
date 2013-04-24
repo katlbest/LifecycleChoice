@@ -351,17 +351,32 @@ employVectListLabEmploy10K<- LabEmployReturn10K[[4]]
     checkPredictionAbility(ENROLL_DATA$b0Employ, "b0EmployNoFill")
     checkPredictionAbility(ENROLL_DATA$b0Employ10K, "b0EmployNoFill10K")
 
-#investigate standard errors for each category
+#investigate standard errors for each category=============================================================
   source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_getStError.R")
-  stErLabNm = getStError(outMatrixLabNm, coeffVectLabNm[1])
-  stErLabEmploy = getStError(outMatrixLabEmploy, coeffVectLabEmploy[1])
-  stErLabNmFilled = getStError(outMatrixLabNmFilled, coeffVectLabNmFilled[1])
-  stErLabEmployFilled = getStError(outMatrixLabEmployFilled, coeffVectLabEmployFilled[1])
-  stErLabEmploy10K = getStError(outMatrixLabEmploy10K, coeffVectLabEmploy10K[1])
+  stErListLabNm = getStError(outMatrixLabNm, coeffVectLabNm[1])
+    stDevLabNm = stErListLabNm[[1]]
+    nLabNm = stErListLabNm[[2]]
+    stErLabNm = stDevLabNm/(sqrt(nLabNm))
+  stErListLabEmploy = getStError(outMatrixLabEmploy, coeffVectLabEmploy[1])
+    stDevLabEmploy = stErListLabEmploy[[1]]
+    nLabEmploy = stErListLabEmploy[[2]]
+    stErLabEmploy = stDevLabEmploy/(sqrt(nLabEmploy))
+  stErListLabNmFilled = getStError(outMatrixLabNmFilled, coeffVectLabNmFilled[1])
+    stDevLabNmFilled = stErListLabNmFilled[[1]]
+    nLabNmFilled = stErListLabNmFilled[[2]]
+    stErLabNmFilled = stDevLabNmFilled/(sqrt(nLabNmFilled))
+  stErListLabEmployFilled = getStError(outMatrixLabEmployFilled, coeffVectLabEmployFilled[1])
+    stDevLabEmployFilled = stErListLabEmployFilled[[1]]
+    nLabEmployFilled = stErListLabEmployFilled[[2]]
+    stErLabEmployFilled = stDevLabEmployFilled/(sqrt(nLabEmployFilled))
+  stErListLabEmploy10K = getStError(outMatrixLabEmploy10K, coeffVectLabEmploy10K[1])
+    stDevLabEmploy10K = stErListLabEmploy10K[[1]]
+    nLabEmploy10K = stErListLabEmploy10K[[2]]
+    stErLabEmploy10K = stDevLabEmploy10K/(sqrt(nLabEmploy10K))
 
 #save this workspace for later loading and save output to file
   save.image(file="wsterr.RData")
-  outDat = data.frame(stErLabNmFilled, stErLabEmployFilled, stErLabNm, stErLabEmploy, stErLabEmploy10K)
+  outDat = data.frame(stErLabNmFilled, stErLabEmployFilled, stErLabNm, stErLabEmploy, stErLabEmploy10K, stDevLabNmFilled, stDevLabEmployFilled, stDevLabNm, stDevLabEmploy, stDevLabEmploy10K,nLabNmFilled, nLabEmployFilled, nLabNm, nLabEmploy, nLabEmploy10K)
   outFile <- "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/stErOut.csv"
   write.csv(outDat, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/stErOut.csv")
 
