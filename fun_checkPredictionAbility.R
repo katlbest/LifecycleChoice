@@ -37,7 +37,7 @@ checkPredictionAbility<- function(b0Name, nameString){
     AttendMod <- lm(b0~ factor(attend), data=na.exclude(inputDataset))
     print(summary(AttendMod))
 
-  #regress by admit
+  #regress and anova by admit
     admit_cats <- c(1, 2, 3, 4, 5)
     byAdmitCoeffVect = data.frame(matrix(ncol = 15, nrow = length(admit_cats)))
     colnames(byAdmitCoeffVect)=c("intercept","1",  "2", "3", "4", "5/6", "intsig", "1sig", "2sig", "3sig", "4sig", "5/6sig","R2", "NumObservations", "levels")
@@ -60,6 +60,9 @@ checkPredictionAbility<- function(b0Name, nameString){
           }
           byAdmitCoeffVect[i,13]= summary(curModel)$r.squared
           byAdmitCoeffVect[i,15]= toString(levels(factor(curData$attend)))
+          fit = aov(b0~factor(attend), data = na.exclude(curData))
+          print(admit_cats[i])
+          print(summary(fit))
         } 
       }
       byAdmitCoeffVect[i,14]= curCount
@@ -91,6 +94,9 @@ checkPredictionAbility<- function(b0Name, nameString){
           }
           byAttendCoeffVect[i,11]= summary(curModel)$r.squared
           byAttendCoeffVect[i,13]= toString(levels(factor(curData$admit)))
+          fit = aov(b0~factor(admit), data = na.exclude(curData))
+          print(attend_cats[i])
+          print(summary(fit))
         } 
       }
       byAttendCoeffVect[i,12]= curCount
