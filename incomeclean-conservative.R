@@ -351,6 +351,11 @@ employVectListLabEmploy10K<- LabEmployReturn10K[[4]]
     checkPredictionAbility(ENROLL_DATA$b0Employ, "b0EmployNoFill")
     checkPredictionAbility(ENROLL_DATA$b0Employ10K, "b0EmployNoFill10K")
 
+#get dataset of only relevant variables, transformed and with category and b0 information, for later use====================
+  source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_getRelevantData.R")
+  relDataEmploy10K = getRelevantData(outMatrixLabEmploy10K, coeffVectLabEmploy10K[1])
+  write.csv(relDataEmploy10K, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/relevantOnly.csv")
+
 #investigate standard errors for each category=============================================================
   #pull standard deviations and errors using all data
     source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_getStError.R")
