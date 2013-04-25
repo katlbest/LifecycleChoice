@@ -18,7 +18,6 @@ checkPredictionAbility<- function(b0Name, nameString){
     inputDataset[inputDataset == -3] <- NA
     inputDataset[inputDataset == -4] <- NA
     inputDataset[inputDataset == -5] <- NA
-    print(dim(na.exclude(inputDataset))) #there are 537
     
   #plot
     myDir = "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/Curve fitting/Plots/"
