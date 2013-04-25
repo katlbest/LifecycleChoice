@@ -1,8 +1,8 @@
 checkPredictionAbility<- function(b0Name, nameString){
   
   #create prediction datasets
-    inputDataset <- data.frame(b0 = b0Name, cat = ENROLL_DATA$cat, admit = ENROLL_DATA$BestAd5b, attend = ENROLL_DATA$BestAtt5b)
-  
+    inputDataset = data.frame(b0 = b0Name, cat = ENROLL_DATA$cat, admit = ENROLL_DATA$BestAd5b, attend = ENROLL_DATA$BestAtt5b)
+
   #remove those entries where b0 out of range
     b0Min = -500000 #upper limit of about 140K top salary
     b0Max = -100 #lower limit of about 12K top salary
@@ -18,7 +18,8 @@ checkPredictionAbility<- function(b0Name, nameString){
     inputDataset[inputDataset == -3] <- NA
     inputDataset[inputDataset == -4] <- NA
     inputDataset[inputDataset == -5] <- NA
-
+    print(dim(na.exclude(inputDataset))) #there are 537
+    
   #plot
     myDir = "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/Curve fitting/Plots/"
     fileName = paste(myDir, nameString, "Cat.pdf",sep ="")
@@ -73,7 +74,7 @@ checkPredictionAbility<- function(b0Name, nameString){
     write.csv(byAdmitCoeffVect, outFile)
     
   #get by attendance
-    attend_cats <- c(-3, 1, 2, 3, 4, 5)
+    attend_cats <- c(-10, 1, 2, 3, 4, 5)
     byAttendCoeffVect = data.frame(matrix(ncol = 13, nrow = length(attend_cats)))
     colnames(byAttendCoeffVect)=c("intercept",  "2", "3", "4", "5/6", "intsig", "2sig", "3sig", "4sig", "5/6sig","R2", "NumObservations", "levels")
     for (i in 1:length(attend_cats)){
@@ -83,7 +84,7 @@ checkPredictionAbility<- function(b0Name, nameString){
         if (i == 1){
           #curData[curData$attend == -3,]$attend <- -4 #change attends to -4 so they dont get deleted
         }
-        #curData[curData == -3] <- NA
+        curData[curData == -3] <- NA
         curCount = nrow(na.exclude(curData))
         numCoeffs <- length(levels(factor(curData$admit)))
         if (numCoeffs >1 & curCount > numCoeffs){
