@@ -19,48 +19,84 @@
   #set up vector lists for storing data needed for projection
     ageVectList <- list()
     incomeVectList <- list()
-    employVectList <- list()
 
   #populate income vector
-  yearVect = c("1979", "1980", "1981", "1982", "1983", "1984", "1985", "1986", "1987", "1988", "1989", "1990", "1991", "1992", "1994", "1996", "1998", "2000", "2002", "2004", "2006", "2008", "2010")
+    yearVect = c("1979", "1980", "1981", "1982", "1983", "1984", "1985", "1986", "1987", "1988", "1989", "1990", "1991", "1992", "1994", "1996", "1998", "2000", "2002", "2004", "2006", "2008", "2010")
+      for (i in 1:nrow(INCOME_DATA)){
+      incVect = rep(NA, length(yearVect))
+      for (j in 1: length(yearVect)){
+        curStr = paste("Q13_5_", yearVect[j], sep = "")
+        curInc = INCOME_DATA[i,curStr]
+        if (yearVect[j]== "1989"){ #we are missing data for 1989 for some reason
+          curStr2 = paste("HRSWK_PCY_", yearVect[j-1], sep = "") 
+        }
+        else{
+          curStr2 = paste("HRSWK_PCY_", yearVect[j], sep = "")
+        }
+        curHrsWkd = INCOME_DATA[i,curStr2]
+        if (curInc >= 10000 & curHrsWkd >= 1200){ #10K and enrollment restriction, as imposed in other data
+          incVect[j]=curInc
+        }
+      }
+      startYear = 78-INCOME_DATA$BIRTH_YEAR[i] #1979 variables gives information about 1978
+      incomeVectList[[i]]= incVect
+      ageVectList[[i]]= c(startYear:(startYear+22))
+    }
+
+#Project income and calculate errors
+  #project without fixing any variables
+  tau = 27.8818
+  newIncsList = list()
+  R2List = rep(NA, nrow(INCOME_DATA))
   for (i in 1:nrow(INCOME_DATA)){
-    incVect = rep(NA, length(yearVect))
-    for (j in 1: length(yearVect)){
-      curStr = paste("Q13_5_", yearVect[j], sep = "")
-      curInc = INCOME_DATA[i,curStr]
-      if (curInc >= 10000){ #this is 10K restriction we imposed on our own data, TBD add hours worked description here
-        incvect[j]==curInc
+    curData = data.frame(age = ageVectList[[i]], income = incomeVectList[[i]])
+    curData = na.exclude(curData)
+    if (nrow(curData)>5){
+      numObs = length(ageVectList[[i]])
+      input1 = (1-exp(-curData$age/tau))/(curData$age/tau)
+      input2 = input1 - exp(-curData$age/tau)
+      quadMod = lm(curData$income~input1 + input2)
+      new =  ageVectList[[i]] #we want to predict over the space where we have actual data
+      new1 =(1-exp(-new/tau))/(new/tau)
+      new2 = new1 - exp(-new/tau)
+      new = data.frame(input1 = new1, input2 = new2)
+      newIncs =predict(quadMod,new)
+      newIncsList[[i]] = newIncs
+      R2List[i] = summary(quadMod)$r.squared
+    }
+    else{
+      newIncsList[[i]] = rep(NA, length(ageVectList[[i]]))
+    }
+  }
+  
+
+#calculate errors
+  errList = list()
+  for (i in 1:nrow(INCOME_DATA)){
+    newIncVect = newIncsList[[i]]
+    oldIncVect = incomeVectList[[i]]
+    newIncVect[is.na(newIncVect)]= -3
+    oldIncVect[is.na(oldIncVect)]= -3
+    errVect = c()
+    if (is.na(R2List[i])){
+      errList[[i]]= NA
+    } else{
+      if (R2List[i]> .5){#good fit, this excludes1200 out of 12.5K people
+        for (j in 1:length(newIncVect)){
+          if (newIncVect[j]>0 & oldIncVect[j]>0){
+            errVect[length(errVect)+1]= oldIncVect[j]- newIncVect[j]
+          }
+        }
+        errList[[i]]= errVect
+      } else{
+        errList[[i]]= NA
       }
     }
   }
+
+
 #next steps
-  fix above to make sure all restrictins met
+fix above to make sure all restrictins met
 want correlation of errors
 take the correlation of each time series with the errors and then take avg correlation value or plot by characteristics
 see if ed or major predicts correlation
-    
-    
-    
-    incVect = c(ENROLL_DATA$znm1[i], ENROLL_DATA$znm2[i], ENROLL_DATA$znm3[i], ENROLL_DATA$znm4[i], ENROLL_DATA$znm5[i], ENROLL_DATA$znm6[i],ENROLL_DATA$znm7[i],ENROLL_DATA$znm8[i])
-    enrollVect = c(ENROLL_DATA$enroll2[i], ENROLL_DATA$enroll3[i], ENROLL_DATA$enroll4[i], ENROLL_DATA$enroll5[i], ENROLL_DATA$enroll6[i], ENROLL_DATA$enroll7[i], ENROLL_DATA$enroll8[i], ENROLL_DATA$enroll9[i])
-    employVect = c()
-    curStr= paste('CVC_HOURS_WK_YR_ALL_',toString(ENROLL_DATA$START_YEAR[i]),'_XRND',sep = "")
-    colIndex = grep(curStr, colnames(ENROLL_DATA))[1] #use the first occurence
-    for (j in 0:7){
-      if (colIndex + j <= ncol(ENROLL_DATA)){ #have to make sure that we aren't out of bounds!! these should be last columns since i added them
-        curEmploy = ENROLL_DATA[i, colIndex+j]
-        employVect[length(employVect)+1]= curEmploy
-      }
-      else {
-        employVect[length(employVect)+1]= -3
-      }
-    }
-    #store results in vector lists
-    incomeVectListLabNm[[i]]<-incVectLabNm
-    ageVectListLabNm[[i]]<-c(1:length(incVectLabNm))
-    enrollVectListLabNm[[i]]<-enrollVect
-    employVectListLabNm[[i]]<-employVect
-  }
-
-  
-  
