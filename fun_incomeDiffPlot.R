@@ -1,7 +1,14 @@
 incomeDiffPlot<- function(completeData, listByAttend, coeffList){
 
   #fetch data
-    #myDat = dataList[[1]]
+    coeffListCopy = coeffList
+    for (i in 1:length(coeffList)){ #this removes null entries, which is not relevant since we don't have any
+      if (is.na(coeffList[[i]])[1]){
+        coeffListCopy[[i]]= NULL
+      } 
+    }
+    coeffList = coeffListCopy
+    stackedData = ldply(coeffList)
   
   #ribbon plot
     #ggplot(outData, aes(x = attend2, y = mean, group = admit, colour=admit))+ geom_ribbon(aes(ymin=lb, ymax=ub, fill =admit),alpha=0.3)+geom_line(aes(y=mean))+ theme_bw()
