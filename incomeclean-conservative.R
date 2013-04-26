@@ -351,10 +351,36 @@ employVectListLabEmploy10K<- LabEmployReturn10K[[4]]
     coeffEmploy = checkPredictionAbility(ENROLL_DATA$b0Employ, "b0EmployNoFill")
     coeffEmploy10K = checkPredictionAbility(ENROLL_DATA$b0Employ10K, "b0EmployNoFill10K") #this does not return whole list TBD
 
-#get dataset of only relevant variables, transformed and with category and b0 information, for later use====================
+#get dataset of only relevant variables==============================================================================
+  #transformed and with category and b0 information, for later use
   source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_getRelevantData.R")
   relDataEmploy10K = getRelevantData(outMatrixLabEmploy10K, coeffVectLabEmploy10K[1])
   write.csv(relDataEmploy10K, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/relevantOnly.csv")
+
+#plotting of salary differences by attendance================================================================
+  #get standard errors of means of data
+    admit_cats <- c(1, 2, 3, 4, 5)
+    outData = data.frame(matrix(ncol = 5, nrow = 0))
+    colnames(outData)= c("attend","mean","sd","count","admit" )
+    dataList = list()
+    for (i in 1:length(admit_cats)){
+      curData = relDataEmploy10K[relDataEmploy10K$admit==admit_cats[i],]
+      curCount = nrow(curData)
+      if (curCount > 1){
+        curOutData = ddply(curData,~attend,summarise,mean=mean(b0),sd=sd(b0), count = length(b0))
+        curOutData$se =1.96*((curOutData$sd)/(sqrt(curOutData$count)))
+        curOutData$attend2 = curOutData$attend
+        curOutData[curOutData$attend2==-10,]$attend2 = 6 #set nonattending to worse than no school
+        curOutData$lb = curOutData$mean-curOutData$se
+        curOutData$ub = curOutData$mean+curOutData$se
+      }
+      curOutData$admit = admit_cats[i]
+      dataList[[i]]= curOutData #this is totally wrong
+      outData = rbind(outData, curOutData)
+    }
+    #plot
+      source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_incomeDiffPlot.R")
+      incomeDiffPlot(outData, dataList, coeffEmploy10K)                                                                             
 
 #investigate standard errors for each category=============================================================
   #pull standard deviations and errors using all data

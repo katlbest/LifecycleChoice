@@ -25,6 +25,9 @@ PROJECTING INDIVIDUAL INCOMES
 11. fun_getStError.R: This function calculates standard errors for incomes in each category. Incomes are normalized by average income for each age year. All data points, including projected incomes, are used. This file is up to date.
 12. fun_getStErrorReals.R: This function calculates standard errors for incomes in each category. Incomes are normalized by average income for each age year. Only "real" data points are used, excluding projected incomes. This file is up to date.
 13. fun_getRevelevantData.R: Creates a dataset that includes only those individuals for who we have acceptable parameter estiamtes. Includes their parameter, category, admit, attend, and income. This file is up to date. 
+14. fun_lookupCetegory.R
+15. fun_TenKMin.R
+16. fun_incomeDiffPlot.R: attempts creation of a plot revealing income differences
 
 1979 DATA
 1. incomeclean-79.r: Extraction of 1979 income, projection of income using NS, and estimation of correlation with stock returns using two methods. This file is up to date.
