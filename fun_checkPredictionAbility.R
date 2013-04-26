@@ -44,6 +44,7 @@ checkPredictionAbility<- function(b0Name, nameString){
     byAdmitCoeffVect = data.frame(matrix(ncol = 15, nrow = length(admit_cats)))
     colnames(byAdmitCoeffVect)=c("intercept","1",  "2", "3", "4", "5/6", "intsig", "1sig", "2sig", "3sig", "4sig", "5/6sig","R2", "NumObservations", "levels")
     inputDataset[is.na(inputDataset)] <- -3
+    coeffList = list()
     for (i in 1:length(admit_cats)){
       curData = inputDataset[inputDataset$admit==admit_cats[i],]
       curCount = nrow(curData)
@@ -62,12 +63,16 @@ checkPredictionAbility<- function(b0Name, nameString){
           }
           byAdmitCoeffVect[i,13]= summary(curModel)$r.squared
           byAdmitCoeffVect[i,15]= toString(levels(factor(curData$attend)))
+          coeffList[[i]]=summary(curModel)$coefficients
           fit = aov(b0~factor(attend), data = na.exclude(curData))
           print(admit_cats[i])
           print(summary(fit))
         } 
+      } else{
+        coeffList[[i]]= NA #this isnt' working TBD
       }
       byAdmitCoeffVect[i,14]= curCount
+      return(coeffList)
     }
     outFile <- paste("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/",nameString,"-byAdmit.csv", sep = "")
     write.csv(byAdmitCoeffVect, outFile)

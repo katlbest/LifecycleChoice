@@ -345,11 +345,11 @@ employVectListLabEmploy10K<- LabEmployReturn10K[[4]]
   #do check for each data set type
     #this check now excludes entries where b0 is out of range
     source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_checkPredictionAbility.R")
-    checkPredictionAbility(ENROLL_DATA$b0NmFilled, "b0NmFillMiddle")
-    checkPredictionAbility(ENROLL_DATA$b0EmployFilled, "b0EmployFillMiddle")
-    checkPredictionAbility(ENROLL_DATA$b0Nm, "b0NmNoFill")
-    checkPredictionAbility(ENROLL_DATA$b0Employ, "b0EmployNoFill")
-    checkPredictionAbility(ENROLL_DATA$b0Employ10K, "b0EmployNoFill10K")
+    coeffNmFilled = checkPredictionAbility(ENROLL_DATA$b0NmFilled, "b0NmFillMiddle")
+    coeffEmployFilled = checkPredictionAbility(ENROLL_DATA$b0EmployFilled, "b0EmployFillMiddle")
+    coeffNm = checkPredictionAbility(ENROLL_DATA$b0Nm, "b0NmNoFill")
+    coeffEmploy = checkPredictionAbility(ENROLL_DATA$b0Employ, "b0EmployNoFill")
+    coeffEmploy10K = checkPredictionAbility(ENROLL_DATA$b0Employ10K, "b0EmployNoFill10K") #this does not return whole list TBD
 
 #get dataset of only relevant variables, transformed and with category and b0 information, for later use====================
   source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_getRelevantData.R")
