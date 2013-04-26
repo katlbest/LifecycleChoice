@@ -2,6 +2,7 @@
 
 #libraries ====================================================================
   library(reshape)
+  library(ggplot2)
 
 #data i/o=======================================================================
   INCOME_DATA = read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Stock market correlation/79income_revisednames.csv")
@@ -102,15 +103,30 @@
 
 #check overall error correlations
   INCOME_DATA$corr = NA
+  longYear = c()
+  longIncError = c()
+  longStockError = c()
   STOCKERR_DATA = read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Stock market correlation/stockreturnin.csv")
-  #for (i in 1:nrow(INCOME_DATA)){
-  for (i in 1:20){
+  for (i in 1:nrow(INCOME_DATA)){
+  #for (i in 1:20){
     if ((is.na(errList[[i]])==FALSE)[1]){
       #create dataset
         curData = data.frame(year = yearList[[i]], incError = errList[[i]])
         curData <- merge(x = curData, y = STOCKERR_DATA, by = "year", all.x = TRUE)
         INCOME_DATA$corr[i]= cor(curData)[2,5]
+        longYear = c(longYear, curData$year)
+        longIncError = c(longIncError, curData$incError)
+        longStockError = c(longStockError, curData$stockError)
     } #else do nothing
   }
-
-#check error correlatins by specific characteristics
+ 
+  #histogram
+    ggplot(INCOME_DATA, aes(x=corr))+ geom_histogram()
+    ggsave(file="C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Stock market correlation/corrhist.pdf")
+  #save workspace
+    save.image(file="corrsAdded.RData")
+  
+#calculate correlation by stacking
+  LONG_DATA = data.frame(year= longYear, incError= longIncError, stockError=longStockError)
+  totalCor = cor(LONG_DATA)[2,3]
+  print(totalCor)
