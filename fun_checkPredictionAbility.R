@@ -72,7 +72,6 @@ checkPredictionAbility<- function(b0Name, nameString){
         coeffList[[i]]= NA #this isnt' working TBD
       }
       byAdmitCoeffVect[i,14]= curCount
-      return(coeffList)
     }
     outFile <- paste("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/",nameString,"-byAdmit.csv", sep = "")
     write.csv(byAdmitCoeffVect, outFile)
@@ -111,4 +110,6 @@ checkPredictionAbility<- function(b0Name, nameString){
     outFile <- paste("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/",nameString,"-byAttend.csv", sep = "")
     write.csv(byAttendCoeffVect, outFile)
   
+    #return from by admit
+      return(coeffList)
 }

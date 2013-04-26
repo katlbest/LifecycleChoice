@@ -7,8 +7,8 @@ EXTRACTING SCHOOLING DATA FROM TEXT FILES
 3. datamanip_main-underscore.r: new version of the file that uses new input data where all disallowed symbols (such as - and ~) are replaced with _. This file is out of date. 
 4. datamanip_main-alternate.r: Uses alternative approach with fewer sanity checks to get data on more students. This file is out of date. 
 5. datamanip_main.py: Original python file for extracting schooling information from text files, uses COMPILED_DATA_APPLYER as input. This file is out of date. 
-datamanip_main_underscore.py: new version of the file that uses new input data where all disallowed symbols (such as - and ~) are replaced with _. This file is out of date.
-datamanip_main_appsonly.py: Code for extracting schooling information from text files, Input data is those who applied to at least one school. Output of this file gives inputs to income prediction. This file is up to date. 
+6. datamanip_main_underscore.py: new version of the file that uses new input data where all disallowed symbols (such as - and ~) are replaced with _. This file is out of date.
+7. datamanip_main_appsonly.py: Code for extracting schooling information from text files, Input data is those who applied to at least one school. Output of this file gives inputs to income prediction. This file is up to date. 
 
 PROJECTING INDIVIDUAL INCOMES
 1. incomeclean.R: original file to full income data and create usable time series. This file is out of date. 
@@ -23,7 +23,8 @@ PROJECTING INDIVIDUAL INCOMES
 9. fun_removeNotFT.R: function run from incomeclean-conservative; enforces 1200 hour per year minimum employment. This file is up to date.
 10. fun_checkPredictionAbilityStErr.R: a modified version of checkPrdictionAbility. This file is out of date and unused since this strategy for testing relevance of standard errors is not correct. 
 11. fun_getStError.R: This function calculates standard errors for incomes in each category. Incomes are normalized by average income for each age year. All data points, including projected incomes, are used. This file is up to date.
-11. fun_getStErrorReals.R: This function calculates standard errors for incomes in each category. Incomes are normalized by average income for each age year. Only "real" data points are used, excluding projected incomes. This file is up to date.
+12. fun_getStErrorReals.R: This function calculates standard errors for incomes in each category. Incomes are normalized by average income for each age year. Only "real" data points are used, excluding projected incomes. This file is up to date.
+13. fun_getRevelevantData.R: Creates a dataset that includes only those individuals for who we have acceptable parameter estiamtes. Includes their parameter, category, admit, attend, and income. This file is up to date. 
 
 1979 DATA
-1. incomeclear-79.r: beginning of extraction of 1979 income, to be used in assessing covariance of stock returns and incomes
+1. incomeclean-79.r: Extraction of 1979 income, projection of income using NS, and estimation of correlation with stock returns using two methods. This file is up to date.
