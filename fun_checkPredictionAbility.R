@@ -63,13 +63,20 @@ checkPredictionAbility<- function(b0Name, nameString){
           }
           byAdmitCoeffVect[i,13]= summary(curModel)$r.squared
           byAdmitCoeffVect[i,15]= toString(levels(factor(curData$attend)))
-          coeffList[[i]]=summary(curModel)$coefficients
+          curCoeffs = summary(curModel)$coefficients
+          curCoeffs= data.frame(curCoeffs)
+          colnames(curCoeffs) = c("mean", "se", "t", "p")
+          curCoeffs$admit = admit_cats[i]
+          curCoeffs$attend = levels(factor(curData$attend))
+          curCoeffs$lb = curCoeffs$mean - curCoeffs$se 
+          curCoeffs$ub= curCoeffs$mean + curCoeffs$se
+          coeffList[[i]]=curCoeffs
           fit = aov(b0~factor(attend), data = na.exclude(curData))
           print(admit_cats[i])
           print(summary(fit))
         } 
       } else{
-        coeffList[[i]]= NA #this isnt' working TBD
+        coeffList[[i]]= NA 
       }
       byAdmitCoeffVect[i,14]= curCount
     }

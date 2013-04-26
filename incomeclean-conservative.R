@@ -353,12 +353,12 @@ employVectListLabEmploy10K<- LabEmployReturn10K[[4]]
 
 #get dataset of only relevant variables==============================================================================
   #transformed and with category and b0 information, for later use
+  #note only done for relevant method here. This is true from now on in this file. 
   source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_getRelevantData.R")
   relDataEmploy10K = getRelevantData(outMatrixLabEmploy10K, coeffVectLabEmploy10K[1])
   write.csv(relDataEmploy10K, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/relevantOnly.csv")
 
-#plotting of salary differences by attendance================================================================
-  #get standard errors of means of data
+#pull mean-based standard errors================================================================
     admit_cats <- c(1, 2, 3, 4, 5)
     outData = data.frame(matrix(ncol = 5, nrow = 0))
     colnames(outData)= c("attend","mean","sd","count","admit" )
@@ -378,6 +378,11 @@ employVectListLabEmploy10K<- LabEmployReturn10K[[4]]
       dataList[[i]]= curOutData #this is totally wrong
       outData = rbind(outData, curOutData)
     }
+
+  #save workspace
+    save.image(file="forPlot.RData")
+
+#plot salary differences by attendance decision==================================================
     #plot
       source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_incomeDiffPlot.R")
       incomeDiffPlot(outData, dataList, coeffEmploy10K)                                                                             

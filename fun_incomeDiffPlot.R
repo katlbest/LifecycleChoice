@@ -1,19 +1,26 @@
 incomeDiffPlot<- function(completeData, listByAttend, coeffList){
 
   #fetch data
-    coeffListCopy = coeffList
     for (i in 1:length(coeffList)){ #this removes null entries, which is not relevant since we don't have any
-      if (is.na(coeffList[[i]])[1]){
-        coeffListCopy[[i]]= NULL
-      } 
+      current = coeffList[[i]]
+      current$attend2 = current$attend
+      current[current$attend2==-10,]$attend2 = 6 #set nonattending to worse than no school
+      current$attend2 = as.numeric(current$attend2)
+      coeffList[[i]]= current
     }
-    coeffList = coeffListCopy
     stackedData = ldply(coeffList)
   
-  #ribbon plot
-    #ggplot(outData, aes(x = attend2, y = mean, group = admit, colour=admit))+ geom_ribbon(aes(ymin=lb, ymax=ub, fill =admit),alpha=0.3)+geom_line(aes(y=mean))+ theme_bw()
+  #ribbon plot for al groups
+    ggplot(stackedData, aes(x = attend2, y = mean, group = admit, colour=admit))+ geom_ribbon(aes(ymin=lb, ymax=ub, fill =admit),alpha=0.3)+geom_line(aes(y=mean))+ theme_bw()
+  
+  #by group ribbon plot
+    plotList = list()
+    for (i in (1:length(coeffList))){
+      current = coeffList[[i]]
+      plotList[[i]]= ggplot(current, aes(x=attend2, y=mean))+ geom_ribbon(aes(ymin=lb, ymax=ub),alpha=0.3)+geom_line(aes(y=mean))+ theme_bw()
+    } #TBD drop missing values
     #ggplot(outData, aes(x = attend2, y = mean, group = admit, colour=admit))+geom_line(aes(y=mean)+ theme_bw() + scale_fill_brewer(palette = "Set1")
-
+    #+ geom_ribbon(aes(ymin=lb, ymax=ub),alpha=0.3)+
   #stacked bar graph with error bars
   
   #individual bar graphs with error bars
