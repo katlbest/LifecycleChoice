@@ -75,7 +75,7 @@ checkPredictionAbility<- function(b0Name, nameString){
           fit = aov(b0~factor(attend), data = na.exclude(curData))
           print(admit_cats[i])
           print(summary(fit))
-          curPlot = qplot(factor(attend), b0, data = na.exclude(curData), notch= TRUE, geom = "boxplot", position = "dodge")+theme_bw()+ labs(title =paste("By best attended, ", nameString, sep=""))
+          curPlot = qplot(factor(attend), b0, data = na.exclude(curData), notch= TRUE, geom = "boxplot", position = "dodge")+theme_bw()+ labs(title =paste("Best admitted = ", admit_cats[i], sep=""))
           plotList[[length(plotList)+1]]= curPlot
         } 
       } else{
