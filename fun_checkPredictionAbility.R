@@ -86,9 +86,8 @@ checkPredictionAbility<- function(b0Name, nameString){
     outFile <- paste("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/",nameString,"-byAdmit.csv", sep = "")
     write.csv(byAdmitCoeffVect, outFile)
     multiplot(plotlist = plotList, cols=2, file = "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/outPlot.pdf")
-    dev.copy(pdf,"C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/outPlot.pdf")
+    dev.copy(pdf,paste("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/outplot", nameString, ".pdf", sep = ""))
     dev.off()
-    #ggsave(file = "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/outPlot.pdf")
     
   #get by attendance
     attend_cats <- c(-10, 1, 2, 3, 4, 5)
