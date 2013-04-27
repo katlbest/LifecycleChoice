@@ -6,15 +6,17 @@ incomeDiffPlot<- function(completeData, listByAttend, coeffList){
       current$attend2 = current$attend
       current[current$attend2==-10,]$attend2 = 6 #set nonattending to worse than no school
       current$attend2 = as.numeric(current$attend2)
+      missing = setdiff(1:6,current$attend2)
+      current[(nrow(current)+1):6,]$attend2 = missing;
       coeffList[[i]]= current
     }
     stackedData = ldply(coeffList)
   
-  #ribbon plot for al groups
-    ggplot(stackedData, aes(x = attend2, y = mean, group = admit, colour=admit))+ geom_ribbon(aes(ymin=lb, ymax=ub, fill =admit),alpha=0.3)+geom_line(aes(y=mean))+ theme_bw()
+  #ribbon plot for all groups
+    #ggplot(stackedData, aes(x = attend2, y = mean, group = admit, colour=admit))+ geom_ribbon(aes(ymin=lb, ymax=ub, fill =admit),alpha=0.3)+geom_line(aes(y=mean))+ theme_bw()
   
   #by group ribbon plot
-    plotList = list()
+    #plotList = list()
     for (i in (1:length(coeffList))){
       current = coeffList[[i]]
       plotList[[i]]= ggplot(current, aes(x=attend2, y=mean))+ geom_ribbon(aes(ymin=lb, ymax=ub),alpha=0.3)+geom_line(aes(y=mean))+ theme_bw()

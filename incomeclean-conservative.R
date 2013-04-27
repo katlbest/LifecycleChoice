@@ -345,6 +345,7 @@ employVectListLabEmploy10K<- LabEmployReturn10K[[4]]
   #do check for each data set type
     #this check now excludes entries where b0 is out of range
     source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_checkPredictionAbility.R")
+    source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/multiplot.R")
     coeffNmFilled = checkPredictionAbility(ENROLL_DATA$b0NmFilled, "b0NmFillMiddle")
     coeffEmployFilled = checkPredictionAbility(ENROLL_DATA$b0EmployFilled, "b0EmployFillMiddle")
     coeffNm = checkPredictionAbility(ENROLL_DATA$b0Nm, "b0NmNoFill")
@@ -384,8 +385,8 @@ employVectListLabEmploy10K<- LabEmployReturn10K[[4]]
 
 #plot salary differences by attendance decision==================================================
     #plot
-      source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_incomeDiffPlot.R")
-      incomeDiffPlot(outData, dataList, coeffEmploy10K)                                                                             
+      #source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_incomeDiffPlot.R")
+      #incomeDiffPlot(outData, dataList, coeffEmploy10K)                                                                             
 
 #investigate standard errors for each category=============================================================
   #pull standard deviations and errors using all data

@@ -45,6 +45,7 @@ checkPredictionAbility<- function(b0Name, nameString){
     colnames(byAdmitCoeffVect)=c("intercept","1",  "2", "3", "4", "5/6", "intsig", "1sig", "2sig", "3sig", "4sig", "5/6sig","R2", "NumObservations", "levels")
     inputDataset[is.na(inputDataset)] <- -3
     coeffList = list()
+    plotList= list()
     for (i in 1:length(admit_cats)){
       curData = inputDataset[inputDataset$admit==admit_cats[i],]
       curCount = nrow(curData)
@@ -74,6 +75,8 @@ checkPredictionAbility<- function(b0Name, nameString){
           fit = aov(b0~factor(attend), data = na.exclude(curData))
           print(admit_cats[i])
           print(summary(fit))
+          curPlot = qplot(factor(attend), b0, data = na.exclude(curData), notch= TRUE, geom = "boxplot", position = "dodge")+theme_bw()+ labs(title =paste("By best attended, ", nameString, sep=""))
+          plotList[[length(plotList)+1]]= curPlot
         } 
       } else{
         coeffList[[i]]= NA 
@@ -82,6 +85,10 @@ checkPredictionAbility<- function(b0Name, nameString){
     }
     outFile <- paste("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/",nameString,"-byAdmit.csv", sep = "")
     write.csv(byAdmitCoeffVect, outFile)
+    multiplot(plotlist = plotList, cols=2, file = "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/outPlot.pdf")
+    dev.copy(pdf,"C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/outPlot.pdf")
+    dev.off()
+    #ggsave(file = "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/outPlot.pdf")
     
   #get by attendance
     attend_cats <- c(-10, 1, 2, 3, 4, 5)
