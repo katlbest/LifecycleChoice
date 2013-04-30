@@ -27,9 +27,7 @@ getRelevantData<- function(inData, inb0){
     transData[transData$cat == -3,]$cat <- NA
     transData[transData$admit == -3,]$admit <- NA
     transData[transData$attend == -3,]$attend <- NA
-    #inputDataset[inputDataset == -4] <- NA
-    #inputDataset[inputDataset == -5] <- NA
-
+    
   #return
     outData = na.exclude(transData)
     return(outData)
