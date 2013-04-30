@@ -323,18 +323,18 @@ employVectListLabEmploy10K<- LabEmployReturn10K[[4]]
         outMatrixLabEmploy10K<- outListLabEmploy10K[[2]]
 
   #create additional dataset which is equivalent to outMatrixLabEmploy10K but tih a college completion restriction
-    coeffVectLabEmploy10KGrad <- coeffVectLabEmploy10K
-    outMatrixLabEmploy10KGrad <- outMatrixLabEmploy10K
-    for (i in 1:nrow(ENROLL_DATA)){
-      if (ENROLL_DATA$CVC_BA_DEGREE_XRND[i]<0) {
-        coeffVectLabEmploy10KGrad[i,]= NA
-      }
-    }
-    nameString = "LabEmploy10KGrad"
-    outMatrixString <- paste("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/",nameString ,"-individualoutput.csv", sep = "")
-    write.csv(outMatrixLabEmploy10KGrad, outMatrixString)
-    outCoeffString <- paste("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/",nameString ,"-individualcoefficients.csv" ,sep = "")
-    write.csv(coeffVectLabEmploy10KGrad, outCoeffString)
+    #coeffVectLabEmploy10KGrad <- coeffVectLabEmploy10K
+    #outMatrixLabEmploy10KGrad <- outMatrixLabEmploy10K
+    #for (i in 1:nrow(ENROLL_DATA)){
+    #  if (ENROLL_DATA$CVC_BA_DEGREE_XRND[i]<0) {
+    #    coeffVectLabEmploy10KGrad[i,]= NA
+    #  }
+    #}
+    #nameString = "LabEmploy10KGrad"
+    #outMatrixString <- paste("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/",nameString ,"-individualoutput.csv", sep = "")
+    #write.csv(outMatrixLabEmploy10KGrad, outMatrixString)
+    #outCoeffString <- paste("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/",nameString ,"-individualcoefficients.csv" ,sep = "")
+    #write.csv(coeffVectLabEmploy10KGrad, outCoeffString)
 
   #save this workspace for later loading
     save.image(file="alloptions.RData")
@@ -346,7 +346,7 @@ employVectListLabEmploy10K<- LabEmployReturn10K[[4]]
     ENROLL_DATA$b0Nm<-coeffVectLabNm[,1]
     ENROLL_DATA$b0Employ<-coeffVectLabEmploy[,1]
     ENROLL_DATA$b0Employ10K<-coeffVectLabEmploy10K[,1]
-    ENROLL_DATA$b0Employ10KGrad<-coeffVectLabEmploy10KGrad[,1]
+    #ENROLL_DATA$b0Employ10KGrad<-coeffVectLabEmploy10KGrad[,1]
   
   #add category variable
     ENROLL_DATA$cat <- -3
@@ -366,7 +366,7 @@ employVectListLabEmploy10K<- LabEmployReturn10K[[4]]
     coeffNm = checkPredictionAbility(ENROLL_DATA$b0Nm, "b0NmNoFill")
     coeffEmploy = checkPredictionAbility(ENROLL_DATA$b0Employ, "b0EmployNoFill")
     coeffEmploy10K = checkPredictionAbility(ENROLL_DATA$b0Employ10K, "b0EmployNoFill10K") 
-    coeffEmploy10KGrad = checkPredictionAbility(ENROLL_DATA$b0Employ10KGrad, "b0EmployNoFill10KGrad") 
+    #coeffEmploy10KGrad = checkPredictionAbility(ENROLL_DATA$b0Employ10KGrad, "b0EmployNoFill10KGrad") 
 
 #get dataset of only relevant variables==============================================================================
   #transformed and with category and b0 information, for later use
@@ -375,7 +375,7 @@ employVectListLabEmploy10K<- LabEmployReturn10K[[4]]
   relDataEmploy10K = getRelevantData(outMatrixLabEmploy10K, coeffVectLabEmploy10K[1])
   write.csv(relDataEmploy10K, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/relevantOnly.csv")
 
-  relDataEmploy10KGrad = getRelevantData(outMatrixLabEmploy10KGrad, coeffVectLabEmploy10KGrad[1])
+  #relDataEmploy10KGrad = getRelevantData(outMatrixLabEmploy10KGrad, coeffVectLabEmploy10KGrad[1])
     #note this is run with a temporary edit to getRelevantData
 
 #investigate getting stronger predictor using best strategy and other variables==========================
@@ -454,26 +454,25 @@ employVectListLabEmploy10K<- LabEmployReturn10K[[4]]
         }
   
       #run checkPredictionAbility using this indicator
-        source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_checkPredictionAbility2Cat.R")
-        coeff2CatEmploy10K = checkPredictionAbility2Cat(relDataEmploy10K)
-
+        #source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_checkPredictionAbility2Cat.R")
+        #coeff2CatEmploy10K = checkPredictionAbility2Cat(relDataEmploy10K)
 
       #create indicator for whether beast school was attended
-      relDataEmploy10KGrad$bestSchool = NA
-      for (i in 1:nrow(relDataEmploy10KGrad)){
-        if(relDataEmploy10KGrad$attend[i]==-10){
-          relDataEmploy10KGrad$bestSchool[i] = -10
-        }
-        else if (relDataEmploy10KGrad$attend[i]==relDataEmploy10KGrad$admit[i]){
-          relDataEmploy10KGrad$bestSchool[i] = 1
-        } else{
-          relDataEmploy10KGrad$bestSchool[i] = 0
-        }
-      }
+      #relDataEmploy10KGrad$bestSchool = NA
+      #for (i in 1:nrow(relDataEmploy10KGrad)){
+        #if(relDataEmploy10KGrad$attend[i]==-10){
+          #relDataEmploy10KGrad$bestSchool[i] = -10
+        #}
+        #else if (relDataEmploy10KGrad$attend[i]==relDataEmploy10KGrad$admit[i]){
+          #relDataEmploy10KGrad$bestSchool[i] = 1
+        #} else{
+          #relDataEmploy10KGrad$bestSchool[i] = 0
+        #}
+      #}
       
       #run checkPredictionAbility using this indicator
-      source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_checkPredictionAbility2CatGrad.R")
-      coeff2CatEmploy10KGrad = checkPredictionAbility2Cat(relDataEmploy10KGrad)
+        #source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_checkPredictionAbility2CatGrad.R")
+        #coeff2CatEmploy10KGrad = checkPredictionAbility2Cat(relDataEmploy10KGrad)
 
 #pull mean-based standard errors================================================================
   admit_cats <- c(1, 2, 3, 4, 5)
