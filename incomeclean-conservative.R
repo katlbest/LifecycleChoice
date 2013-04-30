@@ -322,6 +322,8 @@ employVectListLabEmploy10K<- LabEmployReturn10K[[4]]
         coeffVectLabEmploy10K<- outListLabEmploy10K[[1]]
         outMatrixLabEmploy10K<- outListLabEmploy10K[[2]]
 
+  #create additional dataset which is equivalent to outMatrixLabEmploy10K but tih a college completion restriction
+
   #save this workspace for later loading
     save.image(file="alloptions.RData")
 
@@ -425,7 +427,7 @@ employVectListLabEmploy10K<- LabEmployReturn10K[[4]]
       relDataEmploy10K$bestSchool = NA
       for (i in 1:nrow(relDataEmploy10K)){
         if(relDataEmploy10K$attend[i]==-10){
-          relDataEmploy10K$bestSchool[i] = -3
+          relDataEmploy10K$bestSchool[i] = -10
         }
         else if (relDataEmploy10K$attend[i]==relDataEmploy10K$admit[i]){
           relDataEmploy10K$bestSchool[i] = 1
@@ -435,7 +437,8 @@ employVectListLabEmploy10K<- LabEmployReturn10K[[4]]
       }
 
     #run checkPredictionAbility using this indicator
-
+      source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_checkPredictionAbility2Cat.R")
+      coeff2CatEmploy10K = checkPredictionAbility2Cat(relDataEmploy10K)
 
 #pull mean-based standard errors================================================================
   admit_cats <- c(1, 2, 3, 4, 5)
