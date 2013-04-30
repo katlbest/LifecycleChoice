@@ -421,7 +421,20 @@ employVectListLabEmploy10K<- LabEmployReturn10K[[4]]
 
   #redo with two categories=========================================================================================
     #categories are best school you got into or not
-    relDataEmploy10K
+    #create indicator for whether beast school was attended
+      relDataEmploy10K$bestSchool = NA
+      for (i in 1:nrow(relDataEmploy10K)){
+        if(relDataEmploy10K$attend[i]==-10){
+          relDataEmploy10K$bestSchool[i] = -3
+        }
+        else if (relDataEmploy10K$attend[i]==relDataEmploy10K$admit[i]){
+          relDataEmploy10K$bestSchool[i] = 1
+        } else{
+          relDataEmploy10K$bestSchool[i] = 0
+        }
+      }
+
+    #run checkPredictionAbility using this indicator
 
 
 #pull mean-based standard errors================================================================
