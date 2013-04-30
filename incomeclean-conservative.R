@@ -359,91 +359,6 @@ employVectListLabEmploy10K<- LabEmployReturn10K[[4]]
   relDataEmploy10K = getRelevantData(outMatrixLabEmploy10K, coeffVectLabEmploy10K[1])
   write.csv(relDataEmploy10K, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/relevantOnly.csv")
 
-#pull mean-based standard errors================================================================
-    admit_cats <- c(1, 2, 3, 4, 5)
-    outData = data.frame(matrix(ncol = 5, nrow = 0))
-    colnames(outData)= c("attend","mean","sd","count","admit" )
-    dataList = list()
-    for (i in 1:length(admit_cats)){
-      curData = relDataEmploy10K[relDataEmploy10K$admit==admit_cats[i],]
-      curCount = nrow(curData)
-      if (curCount > 1){
-        curOutData = ddply(curData,~attend,summarise,mean=mean(b0),sd=sd(b0), count = length(b0))
-        curOutData$se =1.96*((curOutData$sd)/(sqrt(curOutData$count)))
-        curOutData$attend2 = curOutData$attend
-        curOutData[curOutData$attend2==-10,]$attend2 = 6 #set nonattending to worse than no school
-        curOutData$lb = curOutData$mean-curOutData$se
-        curOutData$ub = curOutData$mean+curOutData$se
-      }
-      curOutData$admit = admit_cats[i]
-      dataList[[i]]= curOutData #this is totally wrong
-      outData = rbind(outData, curOutData)
-    }
-
-  #save workspace
-    save.image(file="forPlot.RData")
-
-#plot salary differences by attendance decision==================================================
-    #plot
-      #source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_incomeDiffPlot.R")
-      #incomeDiffPlot(outData, dataList, coeffEmploy10K)                                                                             
-
-#investigate standard errors for each category=============================================================
-  #pull standard deviations and errors using all data
-    source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_getStError.R")
-    stErListLabNm = getStError(outMatrixLabNm, coeffVectLabNm[1])
-      stDevLabNm = stErListLabNm[[1]]
-      nLabNm = stErListLabNm[[2]]
-      stErLabNm = stDevLabNm/(sqrt(nLabNm))
-    stErListLabEmploy = getStError(outMatrixLabEmploy, coeffVectLabEmploy[1])
-      stDevLabEmploy = stErListLabEmploy[[1]]
-      nLabEmploy = stErListLabEmploy[[2]]
-      stErLabEmploy = stDevLabEmploy/(sqrt(nLabEmploy))
-    stErListLabNmFilled = getStError(outMatrixLabNmFilled, coeffVectLabNmFilled[1])
-      stDevLabNmFilled = stErListLabNmFilled[[1]]
-      nLabNmFilled = stErListLabNmFilled[[2]]
-      stErLabNmFilled = stDevLabNmFilled/(sqrt(nLabNmFilled))
-    stErListLabEmployFilled = getStError(outMatrixLabEmployFilled, coeffVectLabEmployFilled[1])
-      stDevLabEmployFilled = stErListLabEmployFilled[[1]]
-      nLabEmployFilled = stErListLabEmployFilled[[2]]
-      stErLabEmployFilled = stDevLabEmployFilled/(sqrt(nLabEmployFilled))
-    stErListLabEmploy10K = getStError(outMatrixLabEmploy10K, coeffVectLabEmploy10K[1])
-      stDevLabEmploy10K = stErListLabEmploy10K[[1]]
-      nLabEmploy10K = stErListLabEmploy10K[[2]]
-      stErLabEmploy10K = stDevLabEmploy10K/(sqrt(nLabEmploy10K))
-
-  #save this workspace for later loading and save output to file
-    save.image(file="wsterr.RData")
-    outDat = data.frame(stErLabNmFilled, stErLabEmployFilled, stErLabNm, stErLabEmploy, stErLabEmploy10K, stDevLabNmFilled, stDevLabEmployFilled, stDevLabNm, stDevLabEmploy, stDevLabEmploy10K,nLabNmFilled, nLabEmployFilled, nLabNm, nLabEmploy, nLabEmploy10K)
-    write.csv(outDat, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/stErOut.csv")
-
-  #calculate standard errors using only "real" values
-    source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_getStErrorReals.R")
-    stErListLabNm = getStErrorReals(outMatrixLabNm, coeffVectLabNm[1])
-      stDevLabNm = stErListLabNm[[1]]
-      nLabNm = stErListLabNm[[2]]
-      stErLabNm = stDevLabNm/(sqrt(nLabNm))
-    stErListLabEmploy = getStErrorReals(outMatrixLabEmploy, coeffVectLabEmploy[1])
-      stDevLabEmploy = stErListLabEmploy[[1]]
-      nLabEmploy = stErListLabEmploy[[2]]
-      stErLabEmploy = stDevLabEmploy/(sqrt(nLabEmploy))
-    stErListLabNmFilled = getStErrorReals(outMatrixLabNmFilled, coeffVectLabNmFilled[1])
-      stDevLabNmFilled = stErListLabNmFilled[[1]]
-      nLabNmFilled = stErListLabNmFilled[[2]]
-      stErLabNmFilled = stDevLabNmFilled/(sqrt(nLabNmFilled))
-    stErListLabEmployFilled = getStErrorReals(outMatrixLabEmployFilled, coeffVectLabEmployFilled[1])
-      stDevLabEmployFilled = stErListLabEmployFilled[[1]]
-      nLabEmployFilled = stErListLabEmployFilled[[2]]
-      stErLabEmployFilled = stDevLabEmployFilled/(sqrt(nLabEmployFilled))
-    stErListLabEmploy10K = getStErrorReals(outMatrixLabEmploy10K, coeffVectLabEmploy10K[1])
-      stDevLabEmploy10K = stErListLabEmploy10K[[1]]
-      nLabEmploy10K = stErListLabEmploy10K[[2]]
-      stErLabEmploy10K = stDevLabEmploy10K/(sqrt(nLabEmploy10K))
-
-    outDat = data.frame(stErLabNmFilled, stErLabEmployFilled, stErLabNm, stErLabEmploy, stErLabEmploy10K, stDevLabNmFilled, stDevLabEmployFilled, stDevLabNm, stDevLabEmploy, stDevLabEmploy10K,nLabNmFilled, nLabEmployFilled, nLabNm, nLabEmploy, nLabEmploy10K)
-    write.csv(outDat, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/stErOutReals.csv")
-    save.image(file="wsterr.RData")
-
 #investigate getting stronger predictor using best strategy and other variables==========================
   #best strategy is NmEmploy10K
 
@@ -495,3 +410,96 @@ employVectListLabEmploy10K<- LabEmployReturn10K[[4]]
   #run complete model
     AllFactor =lm(b0~factor(cat) +factor(collgrad) + factor(major2)+ factor(collgrad) + satm +satv , data=na.exclude(b0ProjectData))
     summary(AllFactor)
+  
+  #save image
+    save.image(file="alsterrdone.RData")
+
+  #plot salary differences by attendance decision==================================================
+  #plot
+  #source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_incomeDiffPlot.R")
+  #incomeDiffPlot(outData, dataList, coeffEmploy10K)   
+
+  #redo with two categories=========================================================================================
+    #categories are best school you got into or not
+    relDataEmploy10K
+
+
+#pull mean-based standard errors================================================================
+  admit_cats <- c(1, 2, 3, 4, 5)
+  outData = data.frame(matrix(ncol = 5, nrow = 0))
+  colnames(outData)= c("attend","mean","sd","count","admit" )
+  dataList = list()
+  for (i in 1:length(admit_cats)){
+    curData = relDataEmploy10K[relDataEmploy10K$admit==admit_cats[i],]
+    curCount = nrow(curData)
+    if (curCount > 1){
+      curOutData = ddply(curData,~attend,summarise,mean=mean(b0),sd=sd(b0), count = length(b0))
+      curOutData$se =1.96*((curOutData$sd)/(sqrt(curOutData$count)))
+      curOutData$attend2 = curOutData$attend
+      curOutData[curOutData$attend2==-10,]$attend2 = 6 #set nonattending to worse than no school
+      curOutData$lb = curOutData$mean-curOutData$se
+      curOutData$ub = curOutData$mean+curOutData$se
+    }
+    curOutData$admit = admit_cats[i]
+    dataList[[i]]= curOutData #this is totally wrong
+    outData = rbind(outData, curOutData)
+  }
+
+  #save workspace
+  save.image(file="forPlot.RData")                                                                          
+
+  #investigate standard errors for each category=============================================================
+  #pull standard deviations and errors using all data
+  source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_getStError.R")
+  stErListLabNm = getStError(outMatrixLabNm, coeffVectLabNm[1])
+  stDevLabNm = stErListLabNm[[1]]
+  nLabNm = stErListLabNm[[2]]
+  stErLabNm = stDevLabNm/(sqrt(nLabNm))
+  stErListLabEmploy = getStError(outMatrixLabEmploy, coeffVectLabEmploy[1])
+  stDevLabEmploy = stErListLabEmploy[[1]]
+  nLabEmploy = stErListLabEmploy[[2]]
+  stErLabEmploy = stDevLabEmploy/(sqrt(nLabEmploy))
+  stErListLabNmFilled = getStError(outMatrixLabNmFilled, coeffVectLabNmFilled[1])
+  stDevLabNmFilled = stErListLabNmFilled[[1]]
+  nLabNmFilled = stErListLabNmFilled[[2]]
+  stErLabNmFilled = stDevLabNmFilled/(sqrt(nLabNmFilled))
+  stErListLabEmployFilled = getStError(outMatrixLabEmployFilled, coeffVectLabEmployFilled[1])
+  stDevLabEmployFilled = stErListLabEmployFilled[[1]]
+  nLabEmployFilled = stErListLabEmployFilled[[2]]
+  stErLabEmployFilled = stDevLabEmployFilled/(sqrt(nLabEmployFilled))
+  stErListLabEmploy10K = getStError(outMatrixLabEmploy10K, coeffVectLabEmploy10K[1])
+  stDevLabEmploy10K = stErListLabEmploy10K[[1]]
+  nLabEmploy10K = stErListLabEmploy10K[[2]]
+  stErLabEmploy10K = stDevLabEmploy10K/(sqrt(nLabEmploy10K))
+  
+  #save this workspace for later loading and save output to file
+  save.image(file="wsterr.RData")
+  outDat = data.frame(stErLabNmFilled, stErLabEmployFilled, stErLabNm, stErLabEmploy, stErLabEmploy10K, stDevLabNmFilled, stDevLabEmployFilled, stDevLabNm, stDevLabEmploy, stDevLabEmploy10K,nLabNmFilled, nLabEmployFilled, nLabNm, nLabEmploy, nLabEmploy10K)
+  write.csv(outDat, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/stErOut.csv")
+  
+  #calculate standard errors using only "real" values
+  source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_getStErrorReals.R")
+  stErListLabNm = getStErrorReals(outMatrixLabNm, coeffVectLabNm[1])
+  stDevLabNm = stErListLabNm[[1]]
+  nLabNm = stErListLabNm[[2]]
+  stErLabNm = stDevLabNm/(sqrt(nLabNm))
+  stErListLabEmploy = getStErrorReals(outMatrixLabEmploy, coeffVectLabEmploy[1])
+  stDevLabEmploy = stErListLabEmploy[[1]]
+  nLabEmploy = stErListLabEmploy[[2]]
+  stErLabEmploy = stDevLabEmploy/(sqrt(nLabEmploy))
+  stErListLabNmFilled = getStErrorReals(outMatrixLabNmFilled, coeffVectLabNmFilled[1])
+  stDevLabNmFilled = stErListLabNmFilled[[1]]
+  nLabNmFilled = stErListLabNmFilled[[2]]
+  stErLabNmFilled = stDevLabNmFilled/(sqrt(nLabNmFilled))
+  stErListLabEmployFilled = getStErrorReals(outMatrixLabEmployFilled, coeffVectLabEmployFilled[1])
+  stDevLabEmployFilled = stErListLabEmployFilled[[1]]
+  nLabEmployFilled = stErListLabEmployFilled[[2]]
+  stErLabEmployFilled = stDevLabEmployFilled/(sqrt(nLabEmployFilled))
+  stErListLabEmploy10K = getStErrorReals(outMatrixLabEmploy10K, coeffVectLabEmploy10K[1])
+  stDevLabEmploy10K = stErListLabEmploy10K[[1]]
+  nLabEmploy10K = stErListLabEmploy10K[[2]]
+  stErLabEmploy10K = stDevLabEmploy10K/(sqrt(nLabEmploy10K))
+  
+  outDat = data.frame(stErLabNmFilled, stErLabEmployFilled, stErLabNm, stErLabEmploy, stErLabEmploy10K, stDevLabNmFilled, stDevLabEmployFilled, stDevLabNm, stDevLabEmploy, stDevLabEmploy10K,nLabNmFilled, nLabEmployFilled, nLabNm, nLabEmploy, nLabEmploy10K)
+  write.csv(outDat, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/stErOutReals.csv")
+  save.image(file="wsterr.RData")
