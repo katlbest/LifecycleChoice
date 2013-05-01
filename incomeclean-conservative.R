@@ -322,15 +322,15 @@ employVectListLabEmploy10K<- LabEmployReturn10K[[4]]
         coeffVectLabEmploy10K<- outListLabEmploy10K[[1]]
         outMatrixLabEmploy10K<- outListLabEmploy10K[[2]]
 
-  #create additional dataset which is equivalent to outMatrixLabEmploy10K but tih a college completion restriction
-    #coeffVectLabEmploy10KGrad <- coeffVectLabEmploy10K
-    #outMatrixLabEmploy10KGrad <- outMatrixLabEmploy10K
-    #for (i in 1:nrow(ENROLL_DATA)){
-    #  if (ENROLL_DATA$CVC_BA_DEGREE_XRND[i]<0) {
-    #    coeffVectLabEmploy10KGrad[i,]= NA
-    #  }
-    #}
-    #nameString = "LabEmploy10KGrad"
+  #create additional dataset which is equivalent to outMatrixLabEmploy but tih a college completion restriction
+    coeffVectLabEmployGrad <- coeffVectLabEmploy
+    outMatrixLabEmployGrad <- outMatrixLabEmploy
+    for (i in 1:nrow(ENROLL_DATA)){
+      if (ENROLL_DATA$CVC_BA_DEGREE_XRND[i]<0) {
+        coeffVectLabEmployGrad[i,]= NA
+      }
+    }
+    #nameString = "LabEmployGrad"
     #outMatrixString <- paste("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/",nameString ,"-individualoutput.csv", sep = "")
     #write.csv(outMatrixLabEmploy10KGrad, outMatrixString)
     #outCoeffString <- paste("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/",nameString ,"-individualcoefficients.csv" ,sep = "")
@@ -346,7 +346,7 @@ employVectListLabEmploy10K<- LabEmployReturn10K[[4]]
     ENROLL_DATA$b0Nm<-coeffVectLabNm[,1]
     ENROLL_DATA$b0Employ<-coeffVectLabEmploy[,1]
     ENROLL_DATA$b0Employ10K<-coeffVectLabEmploy10K[,1]
-    #ENROLL_DATA$b0Employ10KGrad<-coeffVectLabEmploy10KGrad[,1]
+    ENROLL_DATA$b0EmployGrad<-coeffVectLabEmployGrad[,1]
   
   #add category variable
     ENROLL_DATA$cat <- -3
@@ -366,7 +366,8 @@ employVectListLabEmploy10K<- LabEmployReturn10K[[4]]
     coeffNm = checkPredictionAbility(ENROLL_DATA$b0Nm, "b0NmNoFill")
     coeffEmploy = checkPredictionAbility(ENROLL_DATA$b0Employ, "b0EmployNoFill")
     coeffEmploy10K = checkPredictionAbility(ENROLL_DATA$b0Employ10K, "b0EmployNoFill10K") 
-    #coeffEmploy10KGrad = checkPredictionAbility(ENROLL_DATA$b0Employ10KGrad, "b0EmployNoFill10KGrad") 
+    #coeffEmployGrad = checkPredictionAbility(ENROLL_DATA$b0EmployGrad, "b0EmployNoFillGrad") 
+      #this blows up because we do not have any -3 entries
 
 #get dataset of only relevant variables==============================================================================
   #transformed and with category and b0 information, for later use
@@ -374,9 +375,21 @@ employVectListLabEmploy10K<- LabEmployReturn10K[[4]]
   source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_getRelevantData.R")
   relDataEmploy10K = getRelevantData(outMatrixLabEmploy10K, coeffVectLabEmploy10K[1])
   write.csv(relDataEmploy10K, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/relevantOnly.csv")
+  relDataEmploy = getRelevantData(outMatrixLabEmploy, coeffVectLabEmploy[1])
+  write.csv(relDataEmploy, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/relevantOnlyEmploy.csv")
 
   #relDataEmploy10KGrad = getRelevantData(outMatrixLabEmploy10KGrad, coeffVectLabEmploy10KGrad[1])
     #note this is run with a temporary edit to getRelevantData
+
+#check if graduation predicts b0
+  relDataEmploy2= relDataEmploy[,c("graduated", "b0", "admit")]
+  gradMod = lm(b0~factor(graduated), data = relDataEmploy2)
+  summary(gradMod)
+  for (i in 1:length(admit_cats)){
+    curData = relDataEmploy2[relDataEmploy2$admit==admit_cats[i],c("b0", "graduated")]
+    curGradMod = lm(b0~factor(graduated), data = curData)
+    print(summary(curGradMod))
+  }
 
 #investigate getting stronger predictor using best strategy and other variables==========================
   #best strategy is NmEmploy10K
@@ -440,7 +453,7 @@ employVectListLabEmploy10K<- LabEmployReturn10K[[4]]
 
   #redo with two categories=========================================================================================
     #categories are best school you got into or not
-      #create indicator for whether beast school was attended
+      #create indicator for whether best school was attended
         relDataEmploy10K$bestSchool = NA
         for (i in 1:nrow(relDataEmploy10K)){
           if(relDataEmploy10K$attend[i]==-10){
@@ -454,8 +467,8 @@ employVectListLabEmploy10K<- LabEmployReturn10K[[4]]
         }
   
       #run checkPredictionAbility using this indicator
-        #source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_checkPredictionAbility2Cat.R")
-        #coeff2CatEmploy10K = checkPredictionAbility2Cat(relDataEmploy10K)
+        source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_checkPredictionAbility2Cat.R")
+        coeff2CatEmploy10K = checkPredictionAbility2Cat(relDataEmploy10K)
 
       #create indicator for whether beast school was attended
       #relDataEmploy10KGrad$bestSchool = NA
@@ -473,6 +486,23 @@ employVectListLabEmploy10K<- LabEmployReturn10K[[4]]
       #run checkPredictionAbility using this indicator
         #source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_checkPredictionAbility2CatGrad.R")
         #coeff2CatEmploy10KGrad = checkPredictionAbility2Cat(relDataEmploy10KGrad)
+
+      #create indicator for whether best school was attended
+      relDataEmploy$bestSchool = NA
+      for (i in 1:nrow(relDataEmploy)){
+        if(relDataEmploy$attend[i]==-10){
+          relDataEmploy$bestSchool[i] = -10
+        }
+        else if (relDataEmploy$attend[i]==relDataEmploy$admit[i]){
+          relDataEmploy$bestSchool[i] = 1
+        } else{
+          relDataEmploy$bestSchool[i] = 0
+        }
+      }
+      
+      #run checkPredictionAbility using this indicator
+      source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_checkPredictionAbility2Cat.R")
+      coeff2CatEmploy = checkPredictionAbility2Cat(relDataEmploy)
 
 #pull mean-based standard errors================================================================
   admit_cats <- c(1, 2, 3, 4, 5)

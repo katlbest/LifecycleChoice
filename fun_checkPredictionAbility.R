@@ -10,7 +10,7 @@ checkPredictionAbility<- function(b0Name, nameString){
     
   #7 values for admission/attendance should not be included, and associated cateogires should be discarded
     levels(inputDataset$cat) <- c(levels(inputDataset$cat),-3)
-    inputDataset[inputDataset$attend == 7,]$cat <- -3
+    inputDataset[inputDataset$attend == 7,]$cat <- -3 #fix this for gradonly
     inputDataset[inputDataset$admit == 7,]$cat <- -3
     inputDataset[inputDataset$admit == 7,]$admit <- -3
     inputDataset[inputDataset$attend == -3,]$attend <- -10
