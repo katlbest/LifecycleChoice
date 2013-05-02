@@ -296,6 +296,14 @@ ageVectListLabEmploy10K<-LabEmployReturn10K[[2]]
 enrollVectListLabEmploy10K<-LabEmployReturn10K[[3]]
 employVectListLabEmploy10K<- LabEmployReturn10K[[4]]
 
+#createLabEmploy10K vector starting at age 21
+source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_from21.R")
+  Income21 <-from21(incomeVectListLabEmploy10K, ageVectListLabEmploy10K, enrollVectListLabEmploy10K, employVectListLabEmploy10K)
+  incomeVectList21 <-Income21[[1]]
+  ageVectList21 <-Income21[[2]]
+  enrollVectList21 <-Income21[[3]]
+  employVectList21 <- Income21[[4]]
+
 #Project======================================================================================
   #inputs
     tau =27.8818
@@ -321,6 +329,9 @@ employVectListLabEmploy10K<- LabEmployReturn10K[[4]]
       outListLabEmploy10K <- projectIncomes(ageVectListLabEmploy10K, incomeVectListLabEmploy10K, enrollVectListLabEmploy10K, "Employ10K")
         coeffVectLabEmploy10K<- outListLabEmploy10K[[1]]
         outMatrixLabEmploy10K<- outListLabEmploy10K[[2]]
+      outList21 <- projectIncomes(ageVectList21, incomeVectList21, enrollVectList21, "Employ21")
+        coeffVect21<- outList21[[1]]
+        outMatrix21<- outList21[[2]]
 
   #create additional dataset which is equivalent to outMatrixLabEmploy but tih a college completion restriction
     coeffVectLabEmployGrad <- coeffVectLabEmploy
@@ -347,6 +358,7 @@ employVectListLabEmploy10K<- LabEmployReturn10K[[4]]
     ENROLL_DATA$b0Employ<-coeffVectLabEmploy[,1]
     ENROLL_DATA$b0Employ10K<-coeffVectLabEmploy10K[,1]
     ENROLL_DATA$b0EmployGrad<-coeffVectLabEmployGrad[,1]
+    ENROLL_DATA$b021<-coeffVect21[,1]
   
   #add category variable
     ENROLL_DATA$cat <- -3
@@ -366,6 +378,7 @@ employVectListLabEmploy10K<- LabEmployReturn10K[[4]]
     coeffNm = checkPredictionAbility(ENROLL_DATA$b0Nm, "b0NmNoFill")
     coeffEmploy = checkPredictionAbility(ENROLL_DATA$b0Employ, "b0EmployNoFill")
     coeffEmploy10K = checkPredictionAbility(ENROLL_DATA$b0Employ10K, "b0EmployNoFill10K") 
+    coeff21 = checkPredictionAbility(ENROLL_DATA$b021, "b021") 
     #coeffEmployGrad = checkPredictionAbility(ENROLL_DATA$b0EmployGrad, "b0EmployNoFillGrad") 
       #this blows up because we do not have any -3 entries
 
@@ -377,6 +390,7 @@ employVectListLabEmploy10K<- LabEmployReturn10K[[4]]
   write.csv(relDataEmploy10K, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/relevantOnly.csv")
   relDataEmploy = getRelevantData(outMatrixLabEmploy, coeffVectLabEmploy[1])
   write.csv(relDataEmploy, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/relevantOnlyEmploy.csv")
+  relData21 = getRelevantData(outMatrix21, coeffVect21[[1]])
 
   #relDataEmploy10KGrad = getRelevantData(outMatrixLabEmploy10KGrad, coeffVectLabEmploy10KGrad[1])
     #note this is run with a temporary edit to getRelevantData
@@ -487,6 +501,25 @@ employVectListLabEmploy10K<- LabEmployReturn10K[[4]]
         #source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_checkPredictionAbility2CatGrad.R")
         #coeff2CatEmploy10KGrad = checkPredictionAbility2Cat(relDataEmploy10KGrad)
 
+
+      #categories are best school you got into or not
+      #create indicator for whether best school was attended
+      relData21$bestSchool = NA
+      for (i in 1:nrow(relData21)){
+        if(relData21$attend[i]==-10){
+          relData21$bestSchool[i] = -10
+        }
+        else if (relData21$attend[i]==relData21$admit[i]){
+          relData21$bestSchool[i] = 1
+        } else{
+          relData21$bestSchool[i] = 0
+        }
+      }
+      
+      #run checkPredictionAbility using this indicator
+      source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_checkPredictionAbility2Cat.R")
+      coeff21 = checkPredictionAbility2Cat(relData21)
+
       #create indicator for whether best school was attended
       relDataEmploy$bestSchool = NA
       for (i in 1:nrow(relDataEmploy)){
@@ -547,16 +580,32 @@ employVectListLabEmploy10K<- LabEmployReturn10K[[4]]
     source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_checkPredictionAbilityAttendOnly.R")
     coeffAttendOnlyEmploy = checkPredictionAbilityAttendOnly(relDataEmploy)
 
+  #create indicator for whether a school was attended
+  relData21$attendInd = NA
+  for (i in 1:nrow(relData21)){
+    if(relData21$attend[i]==-10){
+      relData21$attendInd[i] = 0
+    } else{
+      relData21$attendInd[i] = 1
+    }
+  }
+  
+  #run checkPredictionAbility using this indicator
+  source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_checkPredictionAbilityAttendOnly.R")
+  coeffAttendOnly21 = checkPredictionAbilityAttendOnly(relData21)
+
 
 #check for difference between attendance categories=========================================================================================
   #create indicator for whether school was attended
     relDataEmploy10KAtts = relDataEmploy10K[relDataEmploy10K$attendInd == 1,] #attenders only
     relDataEmployAtts = relDataEmploy[relDataEmploy$attendInd == 1,] #attenders only
+    relData21Atts = relData21[relData21$attendInd==1,]
     
   #run checkPredictionAbility using this indicator
   source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_checkPredictionAbilityAttendCats.R")
   coeffAttendCatsEmploy10K = checkPredictionAbilityAttendCats(relDataEmploy10KAtts)
   coeffAttendCatsEmploy = checkPredictionAbilityAttendCats(relDataEmployAtts)
+  coeffAttendOnly21 = checkPredictionAbilityAttendCats(relData21Atts)
 
   #run checkPredictionAbility where non-best school is aggregated
   source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_checkPredictionAbilityAttend2Cats.R")
