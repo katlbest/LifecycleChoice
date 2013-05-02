@@ -504,6 +504,65 @@ employVectListLabEmploy10K<- LabEmployReturn10K[[4]]
       source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_checkPredictionAbility2Cat.R")
       coeff2CatEmploy = checkPredictionAbility2Cat(relDataEmploy)
 
+#check only if attending matters=========================================================================================
+  #create indicator for whether best school was attended
+  relDataEmploy10K$attendInd = NA
+  for (i in 1:nrow(relDataEmploy10K)){
+    if(relDataEmploy10K$attend[i]==-10){
+      relDataEmploy10K$attendInd[i] = 0
+    } else{
+      relDataEmploy10K$attendInd[i] = 1
+    }
+  }
+  
+  #run checkPredictionAbility using this indicator
+  source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_checkPredictionAbilityAttendOnly.R")
+  coeffAttendOnlyEmploy10K = checkPredictionAbilityAttendOnly(relDataEmploy10K)
+
+  #create indicator for whether best school was attended
+  relDataEmploy$attendInd = NA
+  for (i in 1:nrow(relDataEmploy)){
+    if(relDataEmploy$attend[i]==-10){
+      relDataEmploy$attendInd[i] = 0
+    } else{
+      relDataEmploy$attendInd[i] = 1
+    }
+  }
+  
+  #run checkPredictionAbility using this indicator
+  source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_checkPredictionAbilityAttendOnly.R")
+  coeffAttendOnlyEmploy = checkPredictionAbilityAttendOnly(relDataEmploy)
+
+  #create indicator for whether a school was attended
+    relDataEmploy$attendInd = NA
+    for (i in 1:nrow(relDataEmploy)){
+      if(relDataEmploy$attend[i]==-10){
+        relDataEmploy$attendInd[i] = 0
+      } else{
+        relDataEmploy$attendInd[i] = 1
+      }
+    }
+  
+  #run checkPredictionAbility using this indicator
+    source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_checkPredictionAbilityAttendOnly.R")
+    coeffAttendOnlyEmploy = checkPredictionAbilityAttendOnly(relDataEmploy)
+
+
+#check for difference between attendance categories=========================================================================================
+  #create indicator for whether school was attended
+    relDataEmploy10KAtts = relDataEmploy10K[relDataEmploy10K$attendInd == 1,] #attenders only
+    relDataEmployAtts = relDataEmploy[relDataEmploy$attendInd == 1,] #attenders only
+    
+  #run checkPredictionAbility using this indicator
+  source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_checkPredictionAbilityAttendCats.R")
+  coeffAttendCatsEmploy10K = checkPredictionAbilityAttendCats(relDataEmploy10KAtts)
+  coeffAttendCatsEmploy = checkPredictionAbilityAttendCats(relDataEmployAtts)
+
+  #run checkPredictionAbility where non-best school is aggregated
+  source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_checkPredictionAbilityAttend2Cats.R")
+  coeffAttend2CatsEmploy10K = checkPredictionAbilityAttend2Cats(relDataEmploy10KAtts)
+  coeffAttend2CatsEmploy = checkPredictionAbilityAttend2Cats(relDataEmployAtts)
+
 #pull mean-based standard errors================================================================
   admit_cats <- c(1, 2, 3, 4, 5)
   outData = data.frame(matrix(ncol = 5, nrow = 0))
