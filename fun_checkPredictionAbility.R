@@ -30,6 +30,19 @@ checkPredictionAbility<- function(b0Name, nameString){
     fileName = paste(myDir, nameString, "Attend.pdf",sep ="")
     qplot(factor(attend), b0, data = na.exclude(inputDataset), notch= TRUE, geom = "boxplot", position = "dodge")+theme_bw()+ labs(title =paste("By best attended, ", nameString, sep=""))
     ggsave(file = fileName)
+    print("ANOVA by attend")
+    fit = aov(b0~factor(attend), data = na.exclude(inputDataset))
+    print(summary(fit))
+    inputDataset2 = na.exclude(inputDataset)
+    myTest = pairwise.t.test(inputDataset2$b0, factor(inputDataset2$attend), p.adj= "bonf")
+    print(myTest)
+    
+    print("ANOVA by admit")
+    fit = aov(b0~factor(admit), data = na.exclude(inputDataset))
+    print(summary(fit))
+    myTest = pairwise.t.test(inputDataset2$b0, factor(inputDataset2$admit), p.adj= "bonf")
+    print(myTest)
+    
  
   #regress
     CatMod <- lm(b0~ factor(cat), data=na.exclude(inputDataset))
