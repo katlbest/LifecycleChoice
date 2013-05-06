@@ -35,6 +35,7 @@ PROJECTING INDIVIDUAL INCOMES
 21. fun_compareAdmitAttend compares admission and attendance as drivers of b0. Inlcudes creating a truly interval-based scale and investigating correlations. 
 22. fun_fillIncomePredictors.R adds major, geography, grades, and college completion to datase.
 23. fun_from21.R grabs data starting only at age 22. 
+24. fun_checkPredictionAbilityInterval.R checks whether we get better results in terms of prediciton ability when using the interval adjusted scales or admission/attendance and when we use errors from the admit~attend or attend~admit regression
 
 
 1979 DATA

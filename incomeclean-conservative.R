@@ -435,8 +435,13 @@ source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulati
         ggsave(file = "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/Curve fitting/Plots/AdmitPlot.pdf")
 
   #check the importance of admission versus attendance
-source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_compareAdmitAttend.R")
-    compareAdmitAttend(relDataEmploy10K)
+    source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_compareAdmitAttend.R")
+    intDataEmploy10K = compareAdmitAttend(relDataEmploy10K) #returns interval data
+
+#check for differences in salary by admission/attendance using interval/erros===============================
+  source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_checkPredictionAbilityInterval.R")
+  source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/multiplot.R")
+  checkPredictionAbilityInterval(intDataEmploy10K, "employ10K")
 
 #check if graduation predicts b0==========================================================================
   relDataEmploy2= relDataEmploy[,c("graduated", "b0", "admit")]
