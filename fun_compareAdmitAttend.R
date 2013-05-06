@@ -36,4 +36,6 @@ compareAdmitAttend<- function(inData){
         print(summary(myModAdmitError))
         testDat = data.frame(admitError = inData$admitError, attend2 = inData$attend2)
         cor(testDat)
+      
+      return(inData)
 }
