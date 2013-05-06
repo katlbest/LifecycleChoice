@@ -27,15 +27,16 @@ PROJECTING INDIVIDUAL INCOMES
 13. fun_getRevelevantData.R: Creates a dataset that includes only those individuals for who we have acceptable parameter estiamtes. Includes their parameter, category, admit, attend, and income. This file is up to date. 
 14. fun_lookupCategory.R: Lookup for categorical income variables. Translates category number to mean value for that category using the appropriate scale. Called from fun_getTotal.R. This file is up to date. 
 15. fun_TenKMin.R: Remove any income value below $10,000. This file is up to date. 
-16. fun_incomeDiffPlot.R: attempts creation of a plot revealing income differences
-17. fun_checkPredictionAbility2Cat.R checks prediction ability when comparing only the difference between attending the best school you got into and all other
-18. fun_checkPredictionAbilityAttendCats.R checks prediction ability based on whether school was attended or some other school (multiple categories)
-19. fun_checkPredictionAbilityAttendOnly.R checks prediction ability based only whether attending school at all matters
-20. fun_checkPredictionAbilityAttend2Cats.R checks prediction ability based on whether school was attended or not (same as checkPredictionAbilityAttendCats but all non-best schools are aggregated leading to 2 categories)
-21. fun_compareAdmitAttend compares admission and attendance as drivers of b0. Inlcudes creating a truly interval-based scale and investigating correlations. 
-22. fun_fillIncomePredictors.R adds major, geography, grades, and college completion to datase.
-23. fun_from21.R grabs data starting only at age 22. 
-24. fun_checkPredictionAbilityInterval.R checks whether we get better results in terms of prediciton ability when using the interval adjusted scales or admission/attendance and when we use errors from the admit~attend or attend~admit regression
+16. fun_incomeDiffPlot.R: attempts creation of a plot revealing income differences. This file is out of date. 
+17. fun_checkPredictionAbility2Cat.R checks prediction ability when comparing only the difference between attending the best school you got into and all other. This file is up to date.
+18. fun_checkPredictionAbilityAttendCats.R checks prediction ability based on whether school was attended or some other school (multiple categories). This file is up to date.
+19. fun_checkPredictionAbilityAttendOnly.R checks prediction ability based only whether attending school at all matters. This file is up to date.
+20. fun_checkPredictionAbilityAttend2Cats.R checks prediction ability based on whether school was attended or not (same as checkPredictionAbilityAttendCats but all non-best schools are aggregated leading to 2 categories). This file is up to date.
+21. fun_compareAdmitAttend compares admission and attendance as drivers of b0. Inlcudes creating a truly interval-based scale and investigating correlations. This file is up to date.
+22. fun_fillIncomePredictors.R adds major, geography, grades, and college completion to datase. This file is up to date.
+23. fun_from21.R grabs data starting only at age 22. This file is up to date.
+24. fun_checkPredictionAbilityInterval.R checks whether we get better results in terms of prediciton ability when using the interval adjusted scales or admission/attendance and when we use errors from the admit~attend or attend~admit regression. This file is up to date.
+25. fun_checkPredictionAbilityIntervalErrors.R checks whether the ERROR in the second variable predicts attendance once adjusting for either attendance or admission. This gives the same results as 24 since the error is obviously a linear combinaiton of admitted and attended. This file is out of date. 
 
 
 1979 DATA

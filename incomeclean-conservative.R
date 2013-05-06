@@ -440,8 +440,10 @@ source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulati
 
 #check for differences in salary by admission/attendance using interval/erros===============================
   source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_checkPredictionAbilityInterval.R")
-  source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/multiplot.R")
+  source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_checkPredictionAbilityIntervalErrors.R")
+  #source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/multiplot.R")
   checkPredictionAbilityInterval(intDataEmploy10K, "employ10K")
+  #checkPredictionAbilityIntervalErrors(intDataEmploy10K, "employ10K")
 
 #check if graduation predicts b0==========================================================================
   relDataEmploy2= relDataEmploy[,c("graduated", "b0", "admit")]
