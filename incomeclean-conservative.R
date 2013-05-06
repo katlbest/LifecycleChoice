@@ -11,6 +11,9 @@
 #libraries ====================================================================
   library(plyr)
   library(ggplot2)
+  #library(MASS)
+  #library(Hmisc)
+  #library(reshape2)
 
 #clear workspace ==============================================================
   rm(list = ls())
@@ -398,38 +401,43 @@ source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulati
   #relDataEmploy10KGrad = getRelevantData(outMatrixLabEmploy10KGrad, coeffVectLabEmploy10KGrad[1])
     #note this is run with a temporary edit to getRelevantData
 
-#create a bar plot that shows which categories are different
-  #currently uses bonferroni adjusted p values bsaed on employ10K
-    #attendance
-      inData = aggregate(relDataEmploy10K$b0, list(attend=factor(relDataEmploy10K$attend)), FUN=mean) 
-        point1 = -min(inData[1,2], inData[2,2])
-        point2 = -min(inData[1,2], inData[3,2])
-        point3 = -min(inData[1,2], inData[4,2])
-        point4 = -min(inData[1,2], inData[5,2])
-        point5 = -min(inData[2,2], inData[6,2])
-      bar_attend<-ggplot(data = inData ,aes(factor(attend), -x))+geom_bar(stat="identity", position = "identity", fill = "grey") + theme_bw()
-        bar_attend = bar_attend + geom_path(x=c(1,1,1,2,2,2), y= c(point1+5000,point1+10000,point1+10000,point1+10000,point1+5000,point1+5000))+ annotate("text", x = 1.5, y = point1+15000, label = "p<0.0013", size = 4)
-        bar_attend = bar_attend + geom_path(x=c(1,1,1,3,3,3), y= c(point2+5000,point2+10000,point2+10000,point2+10000,point2+5000,point2+5000))+ annotate("text", x = 2, y = point2+15000, label = "p<0.0091", size = 4)
-        bar_attend = bar_attend + geom_path(x=c(1,1,1,4,4,4), y= c(point3+5000,point3+10000,point3+10000,point3+10000,point3+5000,point3+5000))+ annotate("text", x = 2.5, y = point3+15000, label = "p<0.000038", size = 4)
-        bar_attend = bar_attend + geom_path(x=c(1,1,1,5,5,5), y= c(point4+5000,point4+10000,point4+10000,point4+10000,point4+5000,point4+5000))+ annotate("text", x = 3, y = point4+15000, label = "p<0.0023", size = 4)
-        bar_attend = bar_attend + geom_path(x=c(2,2,2,6,6,6), y= c(point5+20000,point5+25000,point5+25000,point5+25000,point5+20000,point5+20000))+ annotate("text", x = 4, y = point5+30000, label = "p<0.00443", size = 4)
-      ggsave(file = "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/Curve fitting/Plots/AttendPlot.pdf")
+  #create a bar plot that shows which categories are different
+    #currently uses bonferroni adjusted p values bsaed on employ10K
+      #attendance
+        inData = aggregate(relDataEmploy10K$b0, list(attend=factor(relDataEmploy10K$attend)), FUN=mean) 
+          point1 = -min(inData[1,2], inData[2,2])
+          point2 = -min(inData[1,2], inData[3,2])
+          point3 = -min(inData[1,2], inData[4,2])
+          point4 = -min(inData[1,2], inData[5,2])
+          point5 = -min(inData[2,2], inData[6,2])
+        bar_attend<-ggplot(data = inData ,aes(factor(attend), -x))+geom_bar(stat="identity", position = "identity", fill = "grey") + theme_bw()
+          bar_attend = bar_attend + geom_path(x=c(1,1,1,2,2,2), y= c(point1+5000,point1+10000,point1+10000,point1+10000,point1+5000,point1+5000))+ annotate("text", x = 1.5, y = point1+15000, label = "p<0.0013", size = 4)
+          bar_attend = bar_attend + geom_path(x=c(1,1,1,3,3,3), y= c(point2+5000,point2+10000,point2+10000,point2+10000,point2+5000,point2+5000))+ annotate("text", x = 2, y = point2+15000, label = "p<0.0091", size = 4)
+          bar_attend = bar_attend + geom_path(x=c(1,1,1,4,4,4), y= c(point3+5000,point3+10000,point3+10000,point3+10000,point3+5000,point3+5000))+ annotate("text", x = 2.5, y = point3+15000, label = "p<0.000038", size = 4)
+          bar_attend = bar_attend + geom_path(x=c(1,1,1,5,5,5), y= c(point4+5000,point4+10000,point4+10000,point4+10000,point4+5000,point4+5000))+ annotate("text", x = 3, y = point4+15000, label = "p<0.0023", size = 4)
+          bar_attend = bar_attend + geom_path(x=c(2,2,2,6,6,6), y= c(point5+20000,point5+25000,point5+25000,point5+25000,point5+20000,point5+20000))+ annotate("text", x = 4, y = point5+30000, label = "p<0.00443", size = 4)
+        ggsave(file = "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/Curve fitting/Plots/AttendPlot.pdf")
+  
+      #admission
+        inData = aggregate(relDataEmploy10K$b0, list(admit=factor(relDataEmploy10K$admit)), FUN=mean) 
+          point1 = -min(inData[1,2], inData[4,2])
+          point2 = -min(inData[1,2], inData[5,2])
+          point3 = -min(inData[2,2], inData[4,2])
+          point4 = -min(inData[2,2], inData[5,2])
+        bar_admit<-ggplot(data = inData ,aes(factor(admit), -x))+geom_bar(stat="identity", position = "identity", fill = "grey") + theme_bw()
+        bar_admit = bar_admit + geom_path(x=c(1,1,1,4,4), y= c(point1+5000,point1+10000,point1+10000,point1+10000,point1+5000))+ annotate("text", x = 2.5, y = point1+15000, label = "p<0.0013", size = 4)
+        point2 = point1+15000
+        bar_admit = bar_admit + geom_path(x=c(1,1,1,5,5), y= c(point2+5000,point2+10000,point2+10000,point2+10000,point2+5000))+ annotate("text", x = 3, y = point2+15000, label = "p<0.0091", size = 4)
+        point3 = point2+15000
+        bar_admit = bar_admit + geom_path(x=c(2,2,2,4,4), y= c(point3+5000,point3+10000,point3+10000,point3+10000,point3+5000))+ annotate("text", x = 3, y = point3+15000, label = "p<0.000038", size = 4)
+        point4 = point3+15000
+        bar_admit = bar_admit + geom_path(x=c(2,2,2,5,5), y= c(point4+5000,point4+10000,point4+10000,point4+10000,point4+5000))+ annotate("text", x = 4, y = point4+15000, label = "p<0.0023", size = 4)
+        ggsave(file = "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/Curve fitting/Plots/AdmitPlot.pdf")
 
-    #admission
-      inData = aggregate(relDataEmploy10K$b0, list(admit=factor(relDataEmploy10K$admit)), FUN=mean) 
-        point1 = -min(inData[1,2], inData[4,2])
-        point2 = -min(inData[1,2], inData[5,2])
-        point3 = -min(inData[2,2], inData[4,2])
-        point4 = -min(inData[2,2], inData[5,2])
-      bar_admit<-ggplot(data = inData ,aes(factor(admit), -x))+geom_bar(stat="identity", position = "identity", fill = "grey") + theme_bw()
-      bar_admit = bar_admit + geom_path(x=c(1,1,1,4,4), y= c(point1+5000,point1+10000,point1+10000,point1+10000,point1+5000))+ annotate("text", x = 2.5, y = point1+15000, label = "p<0.0013", size = 4)
-      point2 = point1+15000
-      bar_admit = bar_admit + geom_path(x=c(1,1,1,5,5), y= c(point2+5000,point2+10000,point2+10000,point2+10000,point2+5000))+ annotate("text", x = 3, y = point2+15000, label = "p<0.0091", size = 4)
-      point3 = point2+15000
-      bar_admit = bar_admit + geom_path(x=c(2,2,2,4,4), y= c(point3+5000,point3+10000,point3+10000,point3+10000,point3+5000))+ annotate("text", x = 3, y = point3+15000, label = "p<0.000038", size = 4)
-      point4 = point3+15000
-      bar_admit = bar_admit + geom_path(x=c(2,2,2,5,5), y= c(point4+5000,point4+10000,point4+10000,point4+10000,point4+5000))+ annotate("text", x = 4, y = point4+15000, label = "p<0.0023", size = 4)
-      ggsave(file = "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/Curve fitting/Plots/AdmitPlot.pdf")
+  #check the importance of admission versus attendance
+source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_compareAdmitAttend.R")
+    compareAdmitAttend(relDataEmploy10K)
+
 #check if graduation predicts b0==========================================================================
   relDataEmploy2= relDataEmploy[,c("graduated", "b0", "admit")]
   gradMod = lm(b0~factor(graduated), data = relDataEmploy2)
