@@ -733,11 +733,24 @@ source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulati
   stDevLabEmployFilled = stErListLabEmployFilled[[1]]
   nLabEmployFilled = stErListLabEmployFilled[[2]]
   stErLabEmployFilled = stDevLabEmployFilled/(sqrt(nLabEmployFilled))
-  stErListLabEmploy10K = getStErrorReals(outMatrixLabEmploy10K, coeffVectLabEmploy10K[1])
-  stDevLabEmploy10K = stErListLabEmploy10K[[1]]
-  nLabEmploy10K = stErListLabEmploy10K[[2]]
-  stErLabEmploy10K = stDevLabEmploy10K/(sqrt(nLabEmploy10K))
+  stErListLabEmploy10KFilled = getStErrorReals(outMatrixLabEmploy10K, coeffVectLabEmploy10K[1])
+  stDevLabEmploy10KFilled = stErListLabEmploy10K[[1]]
+  nLabEmploy10KFilled = stErListLabEmploy10KFilled[[2]]
+  stErLabEmploy10KFilled = stDevLabEmploy10KFilled/(sqrt(nLabEmploy10KFilled))
   
   outDat = data.frame(stErLabNmFilled, stErLabEmployFilled, stErLabNm, stErLabEmploy, stErLabEmploy10K, stDevLabNmFilled, stDevLabEmployFilled, stDevLabNm, stDevLabEmploy, stDevLabEmploy10K,nLabNmFilled, nLabEmployFilled, nLabNm, nLabEmploy, nLabEmploy10K)
   write.csv(outDat, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/stErOutReals.csv")
   save.image(file="wsterr.RData")
+
+#get standard error by admission category ====================================================
+  source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_getStErrorbyAdmit.R")
+  stDevLabEmploy10K = getStErrorbyAdmit(outMatrixLabEmploy10K, coeffVectLabEmploy10K[1])
+stDevLabEmploy10K = stErListLabEmploy10K[[1]]
+nLabEmploy10K = stErListLabEmploy10K[[2]]
+stErLabEmploy10K = stDevLabEmploy10K/(sqrt(nLabEmploy10K))
+
+#save this workspace for later loading and save output to file
+save.image(file="wsterr.RData")
+outDat = data.frame(stErLabNmFilled, stErLabEmployFilled, stErLabNm, stErLabEmploy, stErLabEmploy10K, stDevLabNmFilled, stDevLabEmployFilled, stDevLabNm, stDevLabEmploy, stDevLabEmploy10K,nLabNmFilled, nLabEmployFilled, nLabNm, nLabEmploy, nLabEmploy10K)
+write.csv(outDat, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/stErOut.csv")
+
