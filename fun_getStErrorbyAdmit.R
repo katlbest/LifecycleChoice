@@ -37,5 +37,37 @@ getStErrorbyAdmit<- function(inData, inb0){
         lookupData[i,84]=mean(na.exclude(curData[,c("b0")]))
         }
       }
-      return(lookupData)
+      #return(lookupData)
+    
+  #get standard errors for each person
+    ENROLL_DATA$mseAll= NA
+    ENROLL_DATA$mseReal= NA
+    ENROLL_DATA$mseb0 = NA
+    for (i in 1:nrow(ENROLL_DATA)){
+      if (inb0[i] != -3){
+        if (inb0[i] >= -500000 & inb0[i] <= -100){ #in range
+          if (ENROLL_DATA$BestAd5b[i] != 7 & ENROLL_DATA$BestAtt5b[i] != 7){ #no type 7 schools
+            index = match(ENROLL_DATA$BestAd5b[i], catList)
+            avgSalaries = as.vector(lookupData[index, 2:83])
+            indSalaries = inData[,i]
+            indErr = c()
+            for (j in 1:8){
+              if(!(is.na(avgSalaries[j])) & !(is.na(indSalaries[j]))){
+                indErr[length(indErr)+1]= (avgSalaries[j]-indSalaries[j])^2
+              }
+            }
+            ENROLL_DATA$mseReal[i] = sum(indErr)
+            #for (j in 9:82){
+            #  if(!(is.na(avgSalaries[i]) & !(is.na(indSalaries[i]))){
+            #    indErr[length(indErr)+1]= (avgSalaries[i]-indSalaries[i])^2
+            #  }
+            #}
+            #ENROLL_DATA$mseAll= 
+            #ENROLL_DATA$mseReal= NA
+            ENROLL_DATA$mseb0[i] = (inb0[i]-lookupData[index, 84])^2
+          }
+        }
+      }
+    }
+    return(ENROLL_DATA)
 }
