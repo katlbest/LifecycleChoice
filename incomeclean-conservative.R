@@ -744,13 +744,9 @@ source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulati
 
 #get standard error by admission category ====================================================
   source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_getStErrorbyAdmit.R")
-  stDevLabEmploy10K = getStErrorbyAdmit(outMatrixLabEmploy10K, coeffVectLabEmploy10K[1])
-stDevLabEmploy10K = stErListLabEmploy10K[[1]]
-nLabEmploy10K = stErListLabEmploy10K[[2]]
-stErLabEmploy10K = stDevLabEmploy10K/(sqrt(nLabEmploy10K))
+    stErrDataLabEmploy10K = getStErrorbyAdmit(outMatrixLabEmploy10K, coeffVectLabEmploy10K[1])
 
-#save this workspace for later loading and save output to file
-save.image(file="wsterr.RData")
-outDat = data.frame(stErLabNmFilled, stErLabEmployFilled, stErLabNm, stErLabEmploy, stErLabEmploy10K, stDevLabNmFilled, stDevLabEmployFilled, stDevLabNm, stDevLabEmploy, stDevLabEmploy10K,nLabNmFilled, nLabEmployFilled, nLabNm, nLabEmploy, nLabEmploy10K)
-write.csv(outDat, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/stErOut.csv")
-
+  #check if attendance holds predictive power on standard errors
+    source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_checkStErrPrediction.R")
+    fitLabEmploy10K = checkStErrPrediction(stErrDataLabEmploy10K)
+    

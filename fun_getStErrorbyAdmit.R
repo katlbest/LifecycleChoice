@@ -56,18 +56,19 @@ getStErrorbyAdmit<- function(inData, inb0){
                 indErr[length(indErr)+1]= (avgSalaries[j]-indSalaries[j])^2
               }
             }
-            ENROLL_DATA$mseReal[i] = sum(indErr)
-            #for (j in 9:82){
-            #  if(!(is.na(avgSalaries[i]) & !(is.na(indSalaries[i]))){
-            #    indErr[length(indErr)+1]= (avgSalaries[i]-indSalaries[i])^2
-            #  }
-            #}
-            #ENROLL_DATA$mseAll= 
-            #ENROLL_DATA$mseReal= NA
+            ENROLL_DATA$mseReal[i] = sum(indErr)/length(indErr)
+            for (j in 9:82){
+              if(!(is.na(avgSalaries[j])) & !(is.na(indSalaries[j]))){
+                indErr[length(indErr)+1]= (avgSalaries[j]-indSalaries[j])^2
+              }
+            }
+            ENROLL_DATA$mseAll[i] = sum(indErr)/length(indErr)
             ENROLL_DATA$mseb0[i] = (inb0[i]-lookupData[index, 84])^2
           }
         }
       }
     }
+    ENROLL_DATA$b0 =inb0
+    ENROLL_DATA[ENROLL_DATA$b0==-3,]$b0 = NA
     return(ENROLL_DATA)
 }
