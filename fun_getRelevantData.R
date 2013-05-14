@@ -8,6 +8,7 @@ getRelevantData<- function(inData, inb0){
   transData$admit = ENROLL_DATA$BestAd5b
   transData$attend = ENROLL_DATA$BestAtt5b
   transData$graduated = NA
+  transData$PUBID_1997 = ENROLL_DATA$PUBID_1997
   transData[ENROLL_DATA$CVC_BA_DEGREE_XRND<0,]$graduated = 0
   transData[ENROLL_DATA$CVC_BA_DEGREE_XRND>=0,]$graduated = 1
   inb0[is.na(inb0)]=-3
