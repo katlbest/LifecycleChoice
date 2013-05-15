@@ -31,8 +31,9 @@
     CHOICE_DATA$STUDENT_RELIGION = -3
     CHOICE_DATA[MANIP_DATA$WHAT_CURR_RELIGIOUS_PREFERENCE_1997 >=0,]$STUDENT_RELIGION = MANIP_DATA[MANIP_DATA$WHAT_CURR_RELIGIOUS_PREFERENCE_1997 >=0,]$WHAT_CURR_RELIGIOUS_PREFERENCE_1997
     CHOICE_DATA[MANIP_DATA$WHAT_CURR_RELIGIOUS_PREFERENCE_1997 < 0,]$STUDENT_RELIGION = MANIP_DATA[MANIP_DATA$WHAT_CURR_RELIGIOUS_PREFERENCE_1997 < 0,]$R_CURR_REL_PREF_2005
-  #dad's highest education
+  #parent's highest education
     CHOICE_DATA$DAD_ED = MANIP_DATA$CV_HGC_RES_DAD_1997
+    CHOICE_DATA$MOM_ED = MANIP_DATA$CV_HGC_RES_MOM_1997
   #yearly variables
     CHOICE_DATA$HH_SIZE = -3
     CHOICE_DATA$HH_INCOME = -3
@@ -46,7 +47,7 @@
           if(MANIP_DATA[i, hhSizeVar]>0){
             CHOICE_DATA$HH_SIZE[i]= MANIP_DATA[i, hhSizeVar]
           } else{
-            CHOICE_DATA$HH_SIZE[i]= fillMiss(hhSizeVar, i)
+            CHOICE_DATA$HH_SIZE[i]= fillMiss(hhSizeVar, i, TRUE)
           }
         }
       #household income
@@ -55,7 +56,7 @@
           if(MANIP_DATA[i, hhIncomeVar]>0){
             CHOICE_DATA$HH_INCOME[i]= MANIP_DATA[i, hhIncomeVar]
           } else{
-            CHOICE_DATA$HH_INCOME[i]= fillMiss(hhIncomeVar, i)
+            CHOICE_DATA$HH_INCOME[i]= fillMiss(hhIncomeVar, i, TRUE)
           }
         }
       #urban rural
@@ -64,7 +65,7 @@
           if(MANIP_DATA[i, urbanRuralVar]>0){
             CHOICE_DATA$URBAN_RURAL[i]= MANIP_DATA[i, urbanRuralVar]
           } else{
-            CHOICE_DATA$URBAN_RURAL[i]= fillMiss(urbanRuralVar, i)
+            CHOICE_DATA$URBAN_RURAL[i]= fillMiss(urbanRuralVar, i, TRUE)
           }
         }
       #high school type
@@ -73,7 +74,7 @@
           if(MANIP_DATA[i,schoolTypeVar]>0){
             CHOICE_DATA$SCHOOL_TYPE[i]= MANIP_DATA[i, schoolTypeVar]
           }else{
-            CHOICE_DATA$SCHOOL_TYPE[i]= fillMiss(schoolTypeVar, i)
+            CHOICE_DATA$SCHOOL_TYPE[i]= fillMiss(schoolTypeVar, i, FALSE)
           }
         }       
     }
