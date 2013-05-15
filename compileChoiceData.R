@@ -38,11 +38,15 @@
     CHOICE_DATA$HH_INCOME = -3
     CHOICE_DATA$URBAN_RURAL = -3
     CHOICE_DATA$SCHOOL_TYPE = -3
+    source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_fillMiss.R")
     for (i in 1:nrow(MANIP_DATA)){
       #household size
         hhSizeVar = paste("CV_HH_SIZE_", toString(CHOICE_DATA$CHOICE_YEAR[i]), sep = "")
         if(hhSizeVar %in% colnames(MANIP_DATA)){
-          CHOICE_DATA$HH_SIZE[i]= MANIP_DATA[i, hhSizeVar]
+          if(MANIP_DATA[i, hhSizeVar]>0){
+            CHOICE_DATA$HH_SIZE[i]= MANIP_DATA[i, hhSizeVar]
+          }
+          CHOICE_DATA$HH_SIZE[i]= fillMiss(hhSizeVar, i)
         }
       #household income
         hhIncomeVar = paste("CV_INCOME_GROSS_YR_", toString(CHOICE_DATA$CHOICE_YEAR[i]), sep = "")
