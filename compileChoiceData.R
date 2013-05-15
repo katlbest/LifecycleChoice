@@ -45,25 +45,38 @@
         if(hhSizeVar %in% colnames(MANIP_DATA)){
           if(MANIP_DATA[i, hhSizeVar]>0){
             CHOICE_DATA$HH_SIZE[i]= MANIP_DATA[i, hhSizeVar]
+          } else{
+            CHOICE_DATA$HH_SIZE[i]= fillMiss(hhSizeVar, i)
           }
-          CHOICE_DATA$HH_SIZE[i]= fillMiss(hhSizeVar, i)
         }
       #household income
         hhIncomeVar = paste("CV_INCOME_GROSS_YR_", toString(CHOICE_DATA$CHOICE_YEAR[i]), sep = "")
         if(hhIncomeVar %in% colnames(MANIP_DATA)){
-          CHOICE_DATA$HH_INCOME[i]= MANIP_DATA[i, hhIncomeVar]
+          if(MANIP_DATA[i, hhIncomeVar]>0){
+            CHOICE_DATA$HH_INCOME[i]= MANIP_DATA[i, hhIncomeVar]
+          } else{
+            CHOICE_DATA$HH_INCOME[i]= fillMiss(hhIncomeVar, i)
+          }
         }
       #urban rural
         urbanRuralVar = paste("CV_URBAN_RURAL_", toString(CHOICE_DATA$CHOICE_YEAR[i]), sep = "")
         if(urbanRuralVar %in% colnames(MANIP_DATA)){
-          CHOICE_DATA$URBAN_RURAL[i]= MANIP_DATA[i, urbanRuralVar]
+          if(MANIP_DATA[i, urbanRuralVar]>0){
+            CHOICE_DATA$URBAN_RURAL[i]= MANIP_DATA[i, urbanRuralVar]
+          } else{
+            CHOICE_DATA$URBAN_RURAL[i]= fillMiss(urbanRuralVar, i)
+          }
         }
       #high school type
         schoolTypeVar = paste("NEWSCH_TYPE_.ROS_ITEM._L1_", toString(CHOICE_DATA$CHOICE_YEAR[i]), sep = "")
         if(schoolTypeVar %in% colnames(MANIP_DATA)){
-          CHOICE_DATA$SCHOOL_TYPE[i]= MANIP_DATA[i, schoolTypeVar]
+          if(MANIP_DATA[i,schoolTypeVar]>0){
+            CHOICE_DATA$SCHOOL_TYPE[i]= MANIP_DATA[i, schoolTypeVar]
+          }else{
+            CHOICE_DATA$SCHOOL_TYPE[i]= fillMiss(schoolTypeVar, i)
+          }
         }       
-    } #TBD write function that fills data and updates with missing
+    }
   
 
 

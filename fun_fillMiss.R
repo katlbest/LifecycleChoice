@@ -14,7 +14,7 @@ fillMiss<- function(var, index){
     j = colIndex+1
     while (j <= length(varList) & output < 0){
       output =  MANIP_DATA[index, varList[j]]
-      j = j-1
+      j = j+1
   }
   return(output)
 }
