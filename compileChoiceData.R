@@ -79,8 +79,25 @@
         }       
     }
 
-#CREATE CHOICE FILE WITH EACH SCHOOL ON A LINE
-  LONG_DATA = read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Choice model inputs/inputs.csv")
-  
+#CREATE CHOICE FILE WITH EACH SCHOOL ON A LINE=======================================================
+  LONG_DATA = read.table("D:/studentadmitdata.txt", header = TRUE)
+  LONG_DATA = merge(x = LONG_DATA, y = CHOICE_DATA, by = "PUBID_1997", all.x = TRUE)
+  LONG_DATA = LONG_DATA[!(is.na(LONG_DATA$MAJOR)),]
+  #sanity check to make sure we have correct counts
+    sum(LONG_DATA$AttendedIndicator) #400 attenders, which is correct
+  #read financial data
+    FIN_DATA = read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Choice model inputs/finaid.csv")
+    REL_IDS = data.frame(PUBID_1997 = CHOICE_DATA$PUBID_1997)
+    FIN_DATA = merge(x = REL_IDS, y = FIN_DATA, by = "PUBID_1997", all.x = TRUE)
+    SECRET_DATA = read.csv("D:/MERGED_DATA_REDUCED.csv")
+    str1 = "PREV_COL_APP_ID"
+    str2 = "YCOC-050P"
+    str3 = "GEO_69"
+    varList= colnames(SECRET_DATA)[grep(str1, colnames(SECRET_DATA))] 
+    varList= c(varList, colnames(SECRET_DATA)[grep(str2, colnames(SECRET_DATA))])
+    varList= c(varList, colnames(SECRET_DATA)[grep(str3, colnames(SECRET_DATA))] )
+    SECRET_DATA = SECRET_DATA[,c("PUBID_1997",varList)]
+    FIN_DATA = merge(x=FIN_DATA, y = SECRET_DATA, by = "PUBID_1997", all.x = TRUE)
+
 
 
