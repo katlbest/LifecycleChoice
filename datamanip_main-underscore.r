@@ -91,6 +91,8 @@ write.csv(MERGED_DATA, file = "D:/MERGED_DATA_REDUCED_ATTENDANCE.csv") #write th
   MERGED_DATA$COLLEGES_APPLYALL_VECTOR <- "" #vector of applied schools including outside of term limit
   MERGED_DATA$COLLEGES_ADMIT_VECTOR <- "" #vector of admitted schools
   MERGED_DATA$COLLEGES_TERM_VECTOR <- "" #vector of term admitted
+  MERGED_DATA$COLLEGES_APPLYYEAR_VECTOR <- "" #stores years of every applied school
+  MERGED_DATA$COLLEGES_APPLYROSTER_VECTOR <- "" #stores roster number of every applied school
   #create comma-separated list of applied, applied within term limits, and admitted
   year_vect = c('_2004','_2005','_2006','_2007','_2008','_2009','_2010')
   school_vect = c('_01','_02','_03','_04','_05','_06','_07','_08','_09','_10')
@@ -112,6 +114,8 @@ write.csv(MERGED_DATA, file = "D:/MERGED_DATA_REDUCED_ATTENDANCE.csv") #write th
           if (eval(parse(text =curstr))[k] > 0){    #check for existence of application ID
             curTerm = ((eval(parse(text =curstr2))[k] +1) %/% 4) +1997
             MERGED_DATA$COLLEGES_APPLYALL_VECTOR[k]= paste(MERGED_DATA$COLLEGES_APPLYALL_VECTOR[k], eval(parse(text =curstr))[k], ",", sep = "")
+            MERGED_DATA$COLLEGES_ADMITYEAR_VECTOR <- paste(MERGED_DATA$COLLEGES_ADMITYEAR_VECTOR[k], year_vect[j], ",", sep = "")
+            MERGED_DATA$COLLEGES_ADMITROSTER_VECTOR <- paste(MERGED_DATA$COLLEGES_ADMITROSTER_VECTOR[k], year_vect[i], ",", sep = "")
             MERGED_DATA$COLLEGES_TERM_VECTOR[k]= paste(MERGED_DATA$COLLEGES_TERM_VECTOR[k], toString(curTerm), ",", sep = "")
             if (eval(parse(text =curstr3))[k] == 1){ #admitted
               # print("yes")
@@ -139,6 +143,9 @@ write.csv(MERGED_DATA, file = "D:/MERGED_DATA_REDUCED_ATTENDANCE.csv") #write th
   MERGED_DATA$COLLEGES_APPLYALL_VECTOR2 <- "" #vector of applied schools including outside of term limit
   MERGED_DATA$COLLEGES_ADMIT_VECTOR2 <- "" #vector of admitted schools
   MERGED_DATA$COLLEGES_TERM_VECTOR2 <- "" #vector of admitted schools
+  MERGED_DATA$COLLEGES_ADMITYEAR_VECTOR2 <-""
+  MERGED_DATA$COLLEGES_ADMITSCHOOL_VECTOR2 <- ""
+  MERGED_DATA$COLLEGES_ADMITLOOP_VECTOR2 <- ""
   #create comma-separated list of applied, applied within term limits, and admitted--remove term restriction, correct vectors are APPLYALL2 and ADMIT2
   year_vect = c('_2004','_2005','_2006','_2007','_2008','_2009','_2010')
   school_vect = c('_01','_02','_03','_04','_05','_06','_07','_08','_09','_10')
@@ -160,6 +167,9 @@ write.csv(MERGED_DATA, file = "D:/MERGED_DATA_REDUCED_ATTENDANCE.csv") #write th
         if (eval(parse(text =curstr))[m] > 0){    #check for existence of application ID
           curTerm = ((eval(parse(text =curstr2))[m] +1) %/% 4) +1997
           MERGED_DATA$COLLEGES_APPLYALL_VECTOR2[m]= paste(MERGED_DATA$COLLEGES_APPLYALL_VECTOR2[m], eval(parse(text =curstr))[m], ",", sep = "")
+          MERGED_DATA$COLLEGES_ADMITSCHOOL_VECTOR2 <- paste(MERGED_DATA$COLLEGES_ADMITSCHOOL_VECTOR2[m], school_vect[i], ",", sep = "")
+          MERGED_DATA$COLLEGES_ADMITLOOP_VECTOR2 <- paste(MERGED_DATA$COLLEGES_ADMITLOOP_VECTOR2[m], loop_vect[k], ",", sep = "")
+          MERGED_DATA$COLLEGES_ADMITYEAR_VECTOR2 <- paste(MERGED_DATA$COLLEGES_ADMITYEAR_VECTOR2[m],"_2003", ",", sep = "")
           MERGED_DATA$COLLEGES_TERM_VECTOR2[m]= paste(MERGED_DATA$COLLEGES_TERM_VECTOR2[m], toString(curTerm), ",", sep = "")
           if (eval(parse(text =curstr3))[m] == 1){ #admitted
             MERGED_DATA$COLLEGES_ADMIT_VECTOR2[m]= paste(MERGED_DATA$COLLEGES_ADMIT_VECTOR2[m], "1", ",", sep = "")
@@ -197,6 +207,9 @@ write.csv(MERGED_DATA, file = "D:/MERGED_DATA_REDUCED_ATTENDANCE.csv") #write th
             if (eval(parse(text =curstr))[m] > 0){    #check for existence of application ID
               curTerm = ((eval(parse(text =curstr2))[m] +1) %/% 4) +1997
               MERGED_DATA$COLLEGES_APPLYALL_VECTOR2[m]= paste(MERGED_DATA$COLLEGES_APPLYALL_VECTOR2[m], eval(parse(text =curstr))[m], ",", sep = "")
+              MERGED_DATA$COLLEGES_ADMITSCHOOL_VECTOR2 <- paste(MERGED_DATA$COLLEGES_ADMITSCHOOL_VECTOR2[m], school_vect[i], ",", sep = "")
+              MERGED_DATA$COLLEGES_ADMITLOOP_VECTOR2 <- paste(MERGED_DATA$COLLEGES_ADMITLOOP_VECTOR2[m], loop_vect[k], ",", sep = "")
+              MERGED_DATA$COLLEGES_ADMITYEAR_VECTOR2 <- paste(MERGED_DATA$COLLEGES_ADMITYEAR_VECTOR2[m],year_vect[j], ",", sep = "")
               MERGED_DATA$COLLEGES_TERM_VECTOR2[m]= paste(MERGED_DATA$COLLEGES_TERM_VECTOR2[m], toString(curTerm), ",", sep = "")
               if (eval(parse(text =curstr3))[m] == 1){ #admitted
                 MERGED_DATA$COLLEGES_ADMIT_VECTOR2[m]= paste(MERGED_DATA$COLLEGES_ADMIT_VECTOR2[m], "1", ",", sep = "")

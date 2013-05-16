@@ -366,6 +366,8 @@ def setupIndividualData():
 	lines = vectorList.readlines()
 	outstr= "PUBID_1997" + "\t" + "Best Attended"+ "\t" +"Best Admitted"+ "\t" + "Attended control" + "\t" + "New Collegegoer Flag" + "\t" + "Old Collegegoer Flag" + "\n"
 	open("C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/studentdata2.txt","wb").write(outstr)
+	outstr2 = "PUBID_1997"+ "\t" +"AdmittedList"+ "\t" +"Attended" + "\n"
+	open("D:/studentadmitdata.txt","wb").write(outstr2)
 	for line in lines[1:]:
 	#once we do the cleanup everyone in this file should be an applier, so we wont have to do checks for length zero
 	#for line in vectorList:
@@ -406,7 +408,7 @@ def setupIndividualData():
 			admitLookup[COLLEGE_SCHOOLID] = 1
 
 		#check for missing admissions information
-		#count number of peopl emissing all information
+		#count number of people missing all information
 		minim = 0 #holder for lower admission info level
 		if len(admitLookup) > 0: #you applied to some schools (or attended a school)
 			applierFlag = 1 #set applier flag accordingly
@@ -471,6 +473,12 @@ def setupIndividualData():
 			else:
 				outstr= str(curStudentData)  +  "\t" + str(attenderFlag) + "\t" + str(COLLEGEGOER_FLAG)+ "\n"
 				open("C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/studentdata2.txt","a").write(outstr)
+				admitString = ""
+				for i in admitLookup:
+					if admitLookup[i]==1:
+						admitString = admitString + str(i) + ","
+				outstr2 = str(PUBID_1997)+ "\t" + admitString +"\t" + str(COLLEGE_SCHOOLID) +"\n"
+				open("D:/studentadmitdata.txt","a").write(outstr2)
 	vectorList.close()
 	print "Total number of applicants to 4-year IPEDS universities: " + str(applierCount)
 	print "Total number of applicants for whom all admission data is missing: " + str(missingAllAdmitCount)
