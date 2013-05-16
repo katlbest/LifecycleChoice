@@ -399,7 +399,7 @@ write.csv(MISSING_ATTENDED_UNRESTRICTED_CHECK, file = "D:/missing_attended_unres
 #delete those with no application data===============================================================================
 COMPILED_DATA_APPSONLY <- COMPILED_DATA[COMPILED_DATA$APPLYER ==1,]
 dim(COMPILED_DATA_APPSONLY)
-write.csv(COMPILED_DATA_APPSONLY, file = "D:/COMPILED_DATA_APPLYER.csv")
+write.csv(COMPILED_DATA_APPSONLY, file = "D:/COMPILED_DATA_APPLYER-withrosterinfo.csv")
 
 #create applier-only output file for python college lookup==========================================================
   COMPILED_DATA_APPSONLY$COMPILED_APPLY[i] <-toString(COMPILED_DATA_APPSONLY$COMPILED_APPLY[i])

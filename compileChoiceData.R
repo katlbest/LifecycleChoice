@@ -5,7 +5,7 @@
   library(plyr)
   #library(ggplot2)
   #library(MASS)
-  #library(Hmisc)
+  #li brary(Hmisc)
   #library(reshape2)
 
 #clear workspace ==============================================================
@@ -78,6 +78,9 @@
           }
         }       
     }
+
+#CREATE CHOICE FILE WITH EACH SCHOOL ON A LINE
+  LONG_DATA = read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Choice model inputs/inputs.csv")
   
 
 
