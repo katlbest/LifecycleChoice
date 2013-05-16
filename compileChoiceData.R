@@ -101,11 +101,13 @@
     FIN_DATA = merge(x=FIN_DATA, y = SECRET_DATA, by = "PUBID_1997", all.x = TRUE)
 
   #loop through long data and fill financial aid information for each school
-    LONG_DATA$loop = NA
-    LONG_DATA$school = NA
-    LONG_DATA$year = NA
-    LONG_DATA$geoschool = NA
-    LONG_DATA$geoyear = NA
+    #LONG_DATA$loop = NA
+    #LONG_DATA$school = NA
+    #LONG_DATA$year = NA
+    #LONG_DATA$geoschool = NA
+    #LONG_DATA$geoyear = NA
+    LONG_DATA$SCHOOLAID= NA
+    LONG_DATA$INDEPAID = NA
     for (i in 1: nrow(LONG_DATA)){
       strList = NA
       curData = FIN_DATA[FIN_DATA$PUBID_1997 == LONG_DATA$PUBID_1997[i],]
@@ -117,9 +119,13 @@
             strList = strsplit(varString, "_", fixed = TRUE)
             strList = strList[[1]]
             strList = strList[strList != "000001"]
-            LONG_DATA$loop[i]= strList[[3]]
-            LONG_DATA$school[i] = strList[4]
-            LONG_DATA$year[i] = strList[5]
+            #LONG_DATA$loop[i]= strList[3]
+            #LONG_DATA$school[i] = strList[4]
+            #LONG_DATA$year[i] = strList[5]
+            schoolAidStr = paste("YCOC_055B_", strList[3], "_", strList[4], "_", strList[5], sep= "")
+            otherAidStr = paste("YCOC_022_", strList[3], "_", strList[5],sep = "")
+            LONG_DATA$SCHOOLAID[i] = curData[1,schoolAidStr]
+            LONG_DATA$INDEPAID[i] = curData[1,otherAidStr]
           }
         }
       #if not found, search for GEO69
