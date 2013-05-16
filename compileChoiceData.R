@@ -90,14 +90,52 @@
     REL_IDS = data.frame(PUBID_1997 = CHOICE_DATA$PUBID_1997)
     FIN_DATA = merge(x = REL_IDS, y = FIN_DATA, by = "PUBID_1997", all.x = TRUE)
     SECRET_DATA = read.csv("D:/MERGED_DATA_REDUCED.csv")
-    str1 = "PREV_COL_APP_ID"
-    str2 = "YCOC-050P"
-    str3 = "GEO_69"
-    varList= colnames(SECRET_DATA)[grep(str1, colnames(SECRET_DATA))] 
-    varList= c(varList, colnames(SECRET_DATA)[grep(str2, colnames(SECRET_DATA))])
-    varList= c(varList, colnames(SECRET_DATA)[grep(str3, colnames(SECRET_DATA))] )
+    strPREVCOL = "PREV_COL_APP_ID"
+    strYCOC = "YCOC_050P"
+    strGEO = "GEO69"
+    varListPREVCOL= colnames(SECRET_DATA)[grep(strPREVCOL, colnames(SECRET_DATA))] 
+    varListYCOC= colnames(SECRET_DATA)[grep(strYCOC, colnames(SECRET_DATA))]
+    varListGEO= colnames(SECRET_DATA)[grep(strGEO, colnames(SECRET_DATA))] 
+    varList = c(varListPREVCOL, varListYCOC, varListGEO)
     SECRET_DATA = SECRET_DATA[,c("PUBID_1997",varList)]
     FIN_DATA = merge(x=FIN_DATA, y = SECRET_DATA, by = "PUBID_1997", all.x = TRUE)
+
+  #loop through long data and fill financial aid information for each school
+    LONG_DATA$loop = NA
+    LONG_DATA$school = NA
+    LONG_DATA$year = NA
+    LONG_DATA$geoschool = NA
+    LONG_DATA$geoyear = NA
+    for (i in 1: nrow(LONG_DATA)){
+      strList = NA
+      curData = FIN_DATA[FIN_DATA$PUBID_1997 == LONG_DATA$PUBID_1997[i],]
+      curSchool = LONG_DATA$AdmittedSchool[i]
+      #search for YCOC
+        for (j in 1:length(varListYCOC)){
+          if (curData[1,varListYCOC[j]]==curSchool){
+            varString = varListYCOC[j]
+            strList = strsplit(varString, "_", fixed = TRUE)
+            strList = strList[[1]]
+            strList = strList[strList != "000001"]
+            LONG_DATA$loop[i]= strList[[3]]
+            LONG_DATA$school[i] = strList[4]
+            LONG_DATA$year[i] = strList[5]
+          }
+        }
+      #if not found, search for GEO69
+        if (is.na(strList)){
+          for (j in 1:length(varListGEO)){
+            if (curData[1,varListGEO[j]]==curSchool){
+              varString = varListGEO[j]
+              strList = strsplit(varString, "_", fixed = TRUE)
+              strList = strList[[1]]
+              LONG_DATA$geoschool[i] = strList[2] #there is a problem here where 1997 has no school number, but it does not occur so is not handled
+              LONG_DATA$geoyear[i] = strList[3]
+            }
+          }
+        }
+    }
+write.csv(LONG_DATA[,c("loop","school","year","geoschool", "geoyear")], "D:/test.csv")
 
 
 

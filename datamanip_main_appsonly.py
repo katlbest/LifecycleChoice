@@ -41,24 +41,24 @@ def main():
 	collegeListSetup()
 
 	#try to fill in missing colleges using multiple years of IPEDS files and the OPEIDS crosswalk; populatecolelgedatalookup with data that comes from this file
-#	IPEDScheck(2004)
-#	IPEDScheck(2006)
-#	IPEDScheck(2005)
-#	IPEDScheck(2003)
-#	IPEDScheck(2002)
-#	IPEDScheck(2001)
-#	IPEDScheck(2011)
-#	BarronsSetup() #add barron's selectivity to infor we have about schools
+	IPEDScheck(2004)
+	IPEDScheck(2006)
+	IPEDScheck(2005)
+	IPEDScheck(2003)
+	IPEDScheck(2002)
+	IPEDScheck(2001)
+	IPEDScheck(2011)
+	BarronsSetup() #add barron's selectivity to infor we have about schools
 	
 	#try to replace schools using FICE codes where possible
-#	FICEcrosswalkSetup() #set up lookup that returns an IPEDS ID for a FICE number
-#	FICEcheck() #do replacement where applicable
+	FICEcrosswalkSetup() #set up lookup that returns an IPEDS ID for a FICE number
+	FICEcheck() #do replacement where applicable
 
 	#print college lists for future use
-#	printCollegeList()	
+	printCollegeList()	
 
 	#delete colleges from found list that do not indicate having 4-year data
-#	deleteNonCollege()
+	deleteNonCollege()
 
 	#pull data needed to fill int missing selectivity (and possibly other data in the future)
 	#we only need this for the selectivity regression, so do not run every time
@@ -76,13 +76,13 @@ def main():
 	#checkMissings()
 
 	#set up lookup for estimated selectivities
-#	setupSelectivityEst()
+	setupSelectivityEst()
 
 	#populate accepted and admitted set for each individual (must be correct school type)
-#	setupIndividualData()
+	setupIndividualData()
 
 	#get financial aid variables that are specific to student
-	populateFinAidVars()
+	#populateFinAidVars()
 
 #function definitions==============================================================================================
 def collegeListSetup(): #extract list of colleges people have attended
@@ -494,18 +494,18 @@ def setupIndividualData():
 	print "Total number of attenders without a max selectivity: " + str(noSelectCounter)
 	print "Total number of non-attendee applicants without a max selectivity: " + str(noSelectCounter2)
 
-def populateFinAidVars():
-	vectorList = open('D:/studentadmitdata.txt', 'r')
-	lines = vectorList.readlines()
-	for line in lines[1:]:
-	#once we do the cleanup everyone in this file should be an applier, so we wont have to do checks for length zero
-	#for line in vectorList:
-		#read in variables and set up relevant tables
-		varList = line.split('\t')
-		finAidDat = {} #stores financial aid information for this school
-		PUBID_1997 = int(varList[0])
-		CURSCHOOL = int(varList[1])
-		ATTENDIND = int(varList[2])
+#def populateFinAidVars():
+#	vectorList = open('D:/studentadmitdata.txt', 'r')
+#	lines = vectorList.readlines()
+#	for line in lines[1:]:
+#	#once we do the cleanup everyone in this file should be an applier, so we wont have to do checks for length zero
+#	#for line in vectorList:
+#		#read in variables and set up relevant tables
+#		varList = line.split('\t')
+#		finAidDat = {} #stores financial aid information for this school
+#		PUBID_1997 = int(varList[0])
+#		CURSCHOOL = int(varList[1])
+#		ATTENDIND = int(varList[2])
 if __name__ == '__main__':
 	main()
 
