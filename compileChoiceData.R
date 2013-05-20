@@ -90,7 +90,7 @@
           }
         } 
     }
-    save.image(file = "D:/compileChoiceData.RData") #cannot save to D drive right now
+    #save.image(file = "D:/compileChoiceData.RData") #cannot save to D drive right now
 
 #CREATE CHOICE FILE WITH EACH SCHOOL/STUDENT COMBO ON A LINE=======================================================
   LONG_DATA = read.table("D:/studentadmitdata.txt", header = TRUE)
@@ -116,6 +116,7 @@
   #loop through long data and fill financial aid information for each school
     LONG_DATA$SCHOOLAID= -6
     LONG_DATA$INDEPAID = -6
+    LONG_DATA$ATTENDEDAID = -6
     for (i in 1: nrow(LONG_DATA)){
       strList = NA
       curData = FIN_DATA[FIN_DATA$PUBID_1997 == LONG_DATA$PUBID_1997[i],]
@@ -147,19 +148,50 @@
           }
         }
       #if not found, search for GEO69, since this means the school is an attended school which was not found in the admitted list
-        if (is.na(strList[1])){ 
+        #if (is.na(strList[1])){  #condition based on whether you found var in YCOC
+        if (LONG_DATA$SCHOOLAID[i]<0){#condition on whether you found fin aid data above
           for (j in 1:length(varListGEO)){
             if (curData[1,varListGEO[j]]==curSchool){
               varString = varListGEO[j]
               strList = strsplit(varString, "_", fixed = TRUE)
               strList = strList[[1]]
+              grantStr = "YSCH_25400"
+              grantVarList = colnames(curData)[grep(grantStr, colnames(curData))]
+              grantStr = paste(strList[2], strList[3], sep = "_")
+              grantVarList= grantVarList[grep(grantStr, grantVarList)]
+              for (k in 1:length(grantVarList)){
+                if (curData[1,grantVarList[k]]>=0){
+                  LONG_DATA$ATTENDEDAID[i] = max(LONG_DATA$ATTENDEDAID[i], 0)+curData[1,grantVarList[k]]
+                }
+              }
+              loanStr = "YSCH_25600"
+              loanVarList = colnames(curData)[grep(loanStr, colnames(curData))]
+              loanStr = paste(strList[2], strList[3], sep = "_")
+              loanVarList= loanVarList[grep(loanStr, loanVarList)]
+              for (k in 1:length(loanVarList)){
+                if (curData[1,loanVarList[k]]>=0){
+                  LONG_DATA$ATTENDEDAID[i] = max(LONG_DATA$ATTENDEDAID[i], 0)+curData[1,loanVarList[k]]
+                }
+              }
+              otherStr = "YSCH_26400"
+              otherVarList = colnames(curData)[grep(otherStr, colnames(curData))]
+              otherStr = paste(strList[2], strList[3], sep = "_")
+              otherVarList= otherVarList[grep(otherStr, otherVarList)]
+              if (length(otherVarList >0)){
+                for (k in 1:length(otherVarList)){
+                  if (curData[1,otherVarList[k]]>=0){
+                    LONG_DATA$ATTENDEDAID[i] = max(LONG_DATA$ATTENDEDAID[i], 0)+curData[1,otherVarList[k]]  
+                  }
+                }
+              }
               LONG_DATA$geoschool[i] = strList[2] #there is a problem here where 1997 has no school number, but it does not occur so is not handled
               LONG_DATA$geoyear[i] = strList[3]
             }
           }
         }
     }
-write.csv(LONG_DATA[,c("geoschool", "geoyear","SCHOOLAID","INDEPAID")], "D:/test.csv")
+write.csv(LONG_DATA[,c("geoschool", "geoyear","SCHOOLAID","INDEPAID", "ATTENDEDAID")], "D:/test.csv")
+
 
 
 
