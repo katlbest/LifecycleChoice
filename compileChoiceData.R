@@ -117,7 +117,12 @@
     LONG_DATA$SCHOOLAID= -6
     LONG_DATA$INDEPAID = -6
     LONG_DATA$ATTENDEDAID = -6
+    LONG_DATA$ATTENDEDAIDMISS = 0
+    LONG_DATA$loop= NA
+    LONG_DATA$school =NA
+    LONG_DATA$year = NA
     for (i in 1: nrow(LONG_DATA)){
+      varString = ""
       strList = NA
       curData = FIN_DATA[FIN_DATA$PUBID_1997 == LONG_DATA$PUBID_1997[i],]
       curSchool = LONG_DATA$AdmittedSchool[i]
@@ -128,6 +133,9 @@
             strList = strsplit(varString, "_", fixed = TRUE)
             strList = strList[[1]]
             strList = strList[strList != "000001"]
+            LONG_DATA$loop[i]= strList[3]
+            LONG_DATA$school[i] = strList[4]
+            LONG_DATA$year[i] = strList[5]
             schoolAidStr= paste("YCOC_055B_", strList[3], "_", strList[4], sep= "")  
             #get variables that have this string in them
               varList055B= colnames(curData)[grep(schoolAidStr, colnames(curData))]
@@ -148,8 +156,10 @@
           }
         }
       #if not found, search for GEO69, since this means the school is an attended school which was not found in the admitted list
-        #if (is.na(strList[1])){  #condition based on whether you found var in YCOC
-        if (LONG_DATA$SCHOOLAID[i]<0){#condition on whether you found fin aid data above
+        if (is.na(strList[1])){  #condition based on whether you found var in YCOC
+          #note we could also condition on whether you actually found the fin aid data on the schools in YCOC, but this would bias towards the school actually attended. also, it doensn't actually help fill in any missing data
+          #print(curData$PUBID_1997[1])
+        #if (LONG_DATA$SCHOOLAID[i] %in% c(-2, -5,-6)){#condition on whether you found fin aid data above
           for (j in 1:length(varListGEO)){
             if (curData[1,varListGEO[j]]==curSchool){
               varString = varListGEO[j]
@@ -162,6 +172,8 @@
               for (k in 1:length(grantVarList)){
                 if (curData[1,grantVarList[k]]>=0){
                   LONG_DATA$ATTENDEDAID[i] = max(LONG_DATA$ATTENDEDAID[i], 0)+curData[1,grantVarList[k]]
+                } else if (curData[1,grantVarList[k]] %in% c(-1,-2,-5)){
+                  LONG_DATA$ATTENDEDAIDMISS[i] = 1
                 }
               }
               loanStr = "YSCH_25600"
@@ -171,6 +183,8 @@
               for (k in 1:length(loanVarList)){
                 if (curData[1,loanVarList[k]]>=0){
                   LONG_DATA$ATTENDEDAID[i] = max(LONG_DATA$ATTENDEDAID[i], 0)+curData[1,loanVarList[k]]
+                } else if (curData[1,loanVarList[k]] %in% c(-1,-2,-5)){
+                  LONG_DATA$ATTENDEDAIDMISS[i] = 1
                 }
               }
               otherStr = "YSCH_26400"
@@ -181,6 +195,8 @@
                 for (k in 1:length(otherVarList)){
                   if (curData[1,otherVarList[k]]>=0){
                     LONG_DATA$ATTENDEDAID[i] = max(LONG_DATA$ATTENDEDAID[i], 0)+curData[1,otherVarList[k]]  
+                  } else if (curData[1,otherVarList[k]] %in% c(-1,-2,-5)){
+                    LONG_DATA$ATTENDEDAIDMISS[i] = 1
                   }
                 }
               }
@@ -190,7 +206,7 @@
           }
         }
     }
-write.csv(LONG_DATA[,c("geoschool", "geoyear","SCHOOLAID","INDEPAID", "ATTENDEDAID")], "D:/test.csv")
+write.csv(LONG_DATA[,c("PUBID_1997", "loop", "school", "year","geoschool", "geoyear","SCHOOLAID","INDEPAID", "ATTENDEDAID", "ATTENDEDAIDMISS")], "D:/test.csv")
 
 
 
