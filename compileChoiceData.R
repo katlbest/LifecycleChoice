@@ -114,19 +114,20 @@
     FIN_DATA = merge(x=FIN_DATA, y = SECRET_DATA, by = "PUBID_1997", all.x = TRUE)
 
   #loop through long data and fill financial aid information for each school
-    LONG_DATA$SCHOOLAID= -6
-    LONG_DATA$INDEPAID = -6
-    LONG_DATA$ATTENDEDAID = -6
-    LONG_DATA$ATTENDEDAIDMISS = 0
-    LONG_DATA$loop= NA
-    LONG_DATA$school =NA
-    LONG_DATA$year = NA
-    LONG_DATA$MAXTERM = 0
-    for (i in 1: nrow(LONG_DATA)){
+    TEMP_LONG_DATA = LONG_DATA
+    TEMP_LONG_DATA$SCHOOLAID= -6
+    TEMP_LONG_DATA$INDEPAID = -6
+    TEMP_LONG_DATA$ATTENDEDAID = -6
+    TEMP_LONG_DATA$ATTENDEDAIDMISS = 0
+    TEMP_LONG_DATA$loop= NA
+    TEMP_LONG_DATA$school =NA
+    TEMP_LONG_DATA$year = NA
+    TEMP_LONG_DATA$MAXTERM = 0
+    for (i in 1: nrow(TEMP_LONG_DATA)){
       varString = ""
       strList = NA
-      curData = FIN_DATA[FIN_DATA$PUBID_1997 == LONG_DATA$PUBID_1997[i],]
-      curSchool = LONG_DATA$AdmittedSchool[i]
+      curData = FIN_DATA[FIN_DATA$PUBID_1997 == TEMP_LONG_DATA$PUBID_1997[i],]
+      curSchool = TEMP_LONG_DATA$AdmittedSchool[i]
       #search for YCOC
         for (j in 1:length(varListYCOC)){
           if (curData[1,varListYCOC[j]]==curSchool){
@@ -134,15 +135,15 @@
             strList = strsplit(varString, "_", fixed = TRUE)
             strList = strList[[1]]
             strList = strList[strList != "000001"]
-            LONG_DATA$loop[i]= strList[3]
-            LONG_DATA$school[i] = strList[4]
-            LONG_DATA$year[i] = strList[5]
+            TEMP_LONG_DATA$loop[i]= strList[3]
+            TEMP_LONG_DATA$school[i] = strList[4]
+            TEMP_LONG_DATA$year[i] = strList[5]
             schoolAidStr= paste("YCOC_055B_", strList[3], "_", strList[4], sep= "")  
             #get variables that have this string in them
               varList055B= colnames(curData)[grep(schoolAidStr, colnames(curData))]
               k = 1
-              while (k <= length(varList055B) & LONG_DATA$SCHOOLAID[i]<0){
-                LONG_DATA$SCHOOLAID[i] = max(curData[1,varList055B[k]], LONG_DATA$SCHOOLAID[i]) #if we already have a -4, we don't want to replace it with a -5 so we can know that we had a valid skip
+              while (k <= length(varList055B) & TEMP_LONG_DATA$SCHOOLAID[i]<0){
+                TEMP_LONG_DATA$SCHOOLAID[i] = max(curData[1,varList055B[k]], TEMP_LONG_DATA$SCHOOLAID[i]) #if we already have a -4, we don't want to replace it with a -5 so we can know that we had a valid skip
                 k = k+1
               }
             #get variables that have other aid string
@@ -150,8 +151,8 @@
               #question asks only about the first year of college
               varList022= colnames(curData)[grep(otherAidStr, colnames(curData))]
               k = 1
-              while (k <= length(varList022) & LONG_DATA$INDEPAID[i]<0){
-                LONG_DATA$INDEPAID[i] = max(curData[1,varList022[k]], LONG_DATA$INDEPAID[i]) #if we already have a -4, we don't want to replace it with a -5 so we can know that we had a valid skip
+              while (k <= length(varList022) & TEMP_LONG_DATA$INDEPAID[i]<0){
+                TEMP_LONG_DATA$INDEPAID[i] = max(curData[1,varList022[k]], TEMP_LONG_DATA$INDEPAID[i]) #if we already have a -4, we don't want to replace it with a -5 so we can know that we had a valid skip
                 k = k+1
               }
           }
@@ -160,7 +161,7 @@
         if (is.na(strList[1])){  #condition based on whether you found var in YCOC
           #note we could also condition on whether you actually found the fin aid data on the schools in YCOC, but this would bias towards the school actually attended. also, it doensn't actually help fill in any missing data
           #print(curData$PUBID_1997[1])
-        #if (LONG_DATA$SCHOOLAID[i] %in% c(-2, -5,-6)){#condition on whether you found fin aid data above
+        #if (TEMP_LONG_DATA$SCHOOLAID[i] %in% c(-2, -5,-6)){#condition on whether you found fin aid data above
           for (j in 1:length(varListGEO)){
             if (curData[1,varListGEO[j]]==curSchool){
               varString = varListGEO[j]
@@ -181,16 +182,16 @@
               } else{
                 maxTerm = 2 #since all the found ones have semesters, we assume missing do too
               }
-              LONG_DATA$MAXTERM[i] = maxTerm
+              TEMP_LONG_DATA$MAXTERM[i] = maxTerm
               grantStr = "YSCH_25400"
               grantVarList = colnames(curData)[grep(grantStr, colnames(curData))]
               grantStr = paste(strList[2], strList[3], sep = "_")
               grantVarList= grantVarList[grep(grantStr, grantVarList)]
-              for (k in 1:(min(maxTerm, length(otherVarList)))){
+              for (k in 1:(min(maxTerm, length(grantVarList)))){
                 if (curData[1,grantVarList[k]]>=0){
-                  LONG_DATA$ATTENDEDAID[i] = max(LONG_DATA$ATTENDEDAID[i], 0)+curData[1,grantVarList[k]]
+                  TEMP_LONG_DATA$ATTENDEDAID[i] = max(TEMP_LONG_DATA$ATTENDEDAID[i], 0)+curData[1,grantVarList[k]]
                 } else if (curData[1,grantVarList[k]] %in% c(-1,-2,-5)){
-                  LONG_DATA$ATTENDEDAIDMISS[i] = 1
+                  TEMP_LONG_DATA$ATTENDEDAIDMISS[i] = 1
                 }
               }
               loanStr = "YSCH_25600"
@@ -199,9 +200,9 @@
               loanVarList= loanVarList[grep(loanStr, loanVarList)]
               for (k in 1:(min(maxTerm, length(loanVarList)))){
                 if (curData[1,loanVarList[k]]>=0){
-                  LONG_DATA$ATTENDEDAID[i] = max(LONG_DATA$ATTENDEDAID[i], 0)+curData[1,loanVarList[k]]
+                  TEMP_LONG_DATA$ATTENDEDAID[i] = max(TEMP_LONG_DATA$ATTENDEDAID[i], 0)+curData[1,loanVarList[k]]
                 } else if (curData[1,loanVarList[k]] %in% c(-1,-2,-5)){
-                  LONG_DATA$ATTENDEDAIDMISS[i] = 1
+                  TEMP_LONG_DATA$ATTENDEDAIDMISS[i] = 1
                 }
               }
               otherStr = "YSCH_26400"
@@ -211,19 +212,26 @@
               if (length(otherVarList >0)){
                 for (k in 1:(min(maxTerm, length(otherVarList)))){
                   if (curData[1,otherVarList[k]]>=0){
-                    LONG_DATA$ATTENDEDAID[i] = max(LONG_DATA$ATTENDEDAID[i], 0)+curData[1,otherVarList[k]]  
+                    TEMP_LONG_DATA$ATTENDEDAID[i] = max(TEMP_LONG_DATA$ATTENDEDAID[i], 0)+curData[1,otherVarList[k]]  
                   } else if (curData[1,otherVarList[k]] %in% c(-1,-2,-5)){
-                    LONG_DATA$ATTENDEDAIDMISS[i] = 1
+                    TEMP_LONG_DATA$ATTENDEDAIDMISS[i] = 1
                   }
                 }
               }
-              LONG_DATA$geoschool[i] = strList[2] #there is a problem here where 1997 has no school number, but it does not occur so is not handled
-              LONG_DATA$geoyear[i] = strList[3]
+              TEMP_LONG_DATA$geoschool[i] = strList[2] #there is a problem here where 1997 has no school number, but it does not occur so is not handled
+              TEMP_LONG_DATA$geoyear[i] = strList[3]
             }
           }
         }
     }
-write.csv(LONG_DATA[,c("PUBID_1997", "loop", "school", "year","geoschool", "geoyear","SCHOOLAID","INDEPAID", "ATTENDEDAID", "ATTENDEDAIDMISS", "MAXTERM")], "D:/test.csv")
+      
+    #combine financial aid estimates
+      for (i in 1:nrow(LONG_DATA)){
+        LONG_DATA$SCHOOL_AID[i] = max(TEMP_LONG_DATA$SCHOOLAID[i], TEMP_LONG_DATA$ATTENDEDAID[i])
+      }
+      LONG_DATA$SHARED_AID = TEMP_LONG_DATA$INDEPAID
+      write.csv(TEMP_LONG_DATA[,c("PUBID_1997", "loop", "school", "year","geoschool", "geoyear","SCHOOLAID","INDEPAID", "ATTENDEDAID", "ATTENDEDAIDMISS", "MAXTERM")], "D:/test.csv")
+      write.csv(LONG_DATA, "D:/test2.csv")
 
 
 
