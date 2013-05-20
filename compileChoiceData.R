@@ -121,6 +121,7 @@
     LONG_DATA$loop= NA
     LONG_DATA$school =NA
     LONG_DATA$year = NA
+    LONG_DATA$MAXTERM = 0
     for (i in 1: nrow(LONG_DATA)){
       varString = ""
       strList = NA
@@ -165,11 +166,27 @@
               varString = varListGEO[j]
               strList = strsplit(varString, "_", fixed = TRUE)
               strList = strList[[1]]
+              termStr = paste("YSCH_26980_", strList[2], "_", strList[3], sep = "")
+              if (termStr %in% colnames(curData)){
+                myMax = curData[1, termStr]
+                if (myMax == 1){
+                  maxTerm = 2
+                }else if (myMax == 2){
+                  maxTerm = 4
+                } else if (myMax == 3){
+                  maxTerm = 3
+                } else{
+                  maxTerm = 2
+                }
+              } else{
+                maxTerm = 2 #since all the found ones have semesters, we assume missing do too
+              }
+              LONG_DATA$MAXTERM[i] = maxTerm
               grantStr = "YSCH_25400"
               grantVarList = colnames(curData)[grep(grantStr, colnames(curData))]
               grantStr = paste(strList[2], strList[3], sep = "_")
               grantVarList= grantVarList[grep(grantStr, grantVarList)]
-              for (k in 1:length(grantVarList)){
+              for (k in 1:(min(maxTerm, length(otherVarList)))){
                 if (curData[1,grantVarList[k]]>=0){
                   LONG_DATA$ATTENDEDAID[i] = max(LONG_DATA$ATTENDEDAID[i], 0)+curData[1,grantVarList[k]]
                 } else if (curData[1,grantVarList[k]] %in% c(-1,-2,-5)){
@@ -180,7 +197,7 @@
               loanVarList = colnames(curData)[grep(loanStr, colnames(curData))]
               loanStr = paste(strList[2], strList[3], sep = "_")
               loanVarList= loanVarList[grep(loanStr, loanVarList)]
-              for (k in 1:length(loanVarList)){
+              for (k in 1:(min(maxTerm, length(loanVarList)))){
                 if (curData[1,loanVarList[k]]>=0){
                   LONG_DATA$ATTENDEDAID[i] = max(LONG_DATA$ATTENDEDAID[i], 0)+curData[1,loanVarList[k]]
                 } else if (curData[1,loanVarList[k]] %in% c(-1,-2,-5)){
@@ -192,7 +209,7 @@
               otherStr = paste(strList[2], strList[3], sep = "_")
               otherVarList= otherVarList[grep(otherStr, otherVarList)]
               if (length(otherVarList >0)){
-                for (k in 1:length(otherVarList)){
+                for (k in 1:(min(maxTerm, length(otherVarList)))){
                   if (curData[1,otherVarList[k]]>=0){
                     LONG_DATA$ATTENDEDAID[i] = max(LONG_DATA$ATTENDEDAID[i], 0)+curData[1,otherVarList[k]]  
                   } else if (curData[1,otherVarList[k]] %in% c(-1,-2,-5)){
@@ -206,7 +223,7 @@
           }
         }
     }
-write.csv(LONG_DATA[,c("PUBID_1997", "loop", "school", "year","geoschool", "geoyear","SCHOOLAID","INDEPAID", "ATTENDEDAID", "ATTENDEDAIDMISS")], "D:/test.csv")
+write.csv(LONG_DATA[,c("PUBID_1997", "loop", "school", "year","geoschool", "geoyear","SCHOOLAID","INDEPAID", "ATTENDEDAID", "ATTENDEDAIDMISS", "MAXTERM")], "D:/test.csv")
 
 
 
