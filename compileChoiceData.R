@@ -90,6 +90,7 @@
           }
         } 
     }
+    save.image(file = "D:/compileChoiceData.RData") #cannot save to D drive right now
 
 #CREATE CHOICE FILE WITH EACH SCHOOL/STUDENT COMBO ON A LINE=======================================================
   LONG_DATA = read.table("D:/studentadmitdata.txt", header = TRUE)
@@ -113,11 +114,6 @@
     FIN_DATA = merge(x=FIN_DATA, y = SECRET_DATA, by = "PUBID_1997", all.x = TRUE)
 
   #loop through long data and fill financial aid information for each school
-    #LONG_DATA$loop = NA
-    #LONG_DATA$school = NA
-    #LONG_DATA$year = NA
-    #LONG_DATA$geoschool = NA
-    #LONG_DATA$geoyear = NA
     LONG_DATA$SCHOOLAID= NA
     LONG_DATA$INDEPAID = NA
     for (i in 1: nrow(LONG_DATA)){
@@ -131,24 +127,23 @@
             strList = strsplit(varString, "_", fixed = TRUE)
             strList = strList[[1]]
             strList = strList[strList != "000001"]
-            #LONG_DATA$loop[i]= strList[3]
-            #LONG_DATA$school[i] = strList[4]
-            #LONG_DATA$year[i] = strList[5]
             if(strList[5]=="2003"){
               schoolAidStr = paste("YCOC_055B_", strList[3], "_", strList[4], "_2004", sep= "")  
             }
             else{
               schoolAidStr = paste("YCOC_055B_", strList[3], "_", strList[4], "_", strList[5], sep= "")  
             }
-            otherAidStr = paste("YCOC_022_01_", strList[5],sep = "") #no loop number here since this is only asked once (it is not school specific)
+            otherAidStr = paste("YCOC_022_01_", strList[5],sep = "") #no school or loop number here since this is only asked once (it is not school specific)
             if (schoolAidStr %in% colnames(curData)){
               LONG_DATA$SCHOOLAID[i] = curData[1,schoolAidStr]
+              #else we must check other years, since schools are only ID'd by loop and school, not year
             }
             LONG_DATA$INDEPAID[i] = curData[1,otherAidStr]
+            #we may have to check other years
           }
         }
-      #if not found, search for GEO69
-        if (is.na(strList)){
+      #if not found, search for GEO69, since this means the school is an attended school which was not found in the admitted list
+        if (is.na(strList[1])){ 
           for (j in 1:length(varListGEO)){
             if (curData[1,varListGEO[j]]==curSchool){
               varString = varListGEO[j]
