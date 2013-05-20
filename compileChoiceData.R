@@ -114,8 +114,8 @@
     FIN_DATA = merge(x=FIN_DATA, y = SECRET_DATA, by = "PUBID_1997", all.x = TRUE)
 
   #loop through long data and fill financial aid information for each school
-    LONG_DATA$SCHOOLAID= -3
-    LONG_DATA$INDEPAID = -3
+    LONG_DATA$SCHOOLAID= -6
+    LONG_DATA$INDEPAID = -6
     for (i in 1: nrow(LONG_DATA)){
       strList = NA
       curData = FIN_DATA[FIN_DATA$PUBID_1997 == LONG_DATA$PUBID_1997[i],]
@@ -144,12 +144,6 @@
                 LONG_DATA$INDEPAID[i] = max(curData[1,varList022[k]], LONG_DATA$INDEPAID[i]) #if we already have a -4, we don't want to replace it with a -5 so we can know that we had a valid skip
                 k = k+1
               }
-            #if (schoolAidStr %in% colnames(curData)){
-            #  LONG_DATA$SCHOOLAID[i] = curData[1,schoolAidStr]
-            #  #else we must check other years, since schools are only ID'd by loop and school, not year
-            #}
-            #LONG_DATA$INDEPAID[i] = curData[1,otherAidStr]
-            #we may have to check other years
           }
         }
       #if not found, search for GEO69, since this means the school is an attended school which was not found in the admitted list
