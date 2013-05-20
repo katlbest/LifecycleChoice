@@ -16,6 +16,8 @@
     CHOICE_DATA = read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Choice model inputs/inputs.csv")
   #data on individuals directly from BLS
     BLS_DATA = read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Choice model inputs/blsvarsforchoice.csv")
+  #state residency data
+    RES_DATA = read.csv("D:/StateOfRes.csv")
   #data already compiled from other parts of the code
     MERGE_DATA = read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Choice model inputs/mergedata.csv")
     CHOICE_DATA = merge(x = CHOICE_DATA, y = MERGE_DATA, by = "PUBID_1997", all.x = TRUE)
@@ -26,7 +28,7 @@
   #pull relevant from BLS
     MANIP_DATA = merge(x = MANIP_DATA, y = BLS_DATA, by = "PUBID_1997", all.x = TRUE)
 
-#populate CHOICE_DATA from BLS data
+#populate CHOICE_DATA from BLS data and RES data
   #religious preference
     CHOICE_DATA$STUDENT_RELIGION = -3
     CHOICE_DATA[MANIP_DATA$WHAT_CURR_RELIGIOUS_PREFERENCE_1997 >=0,]$STUDENT_RELIGION = MANIP_DATA[MANIP_DATA$WHAT_CURR_RELIGIOUS_PREFERENCE_1997 >=0,]$WHAT_CURR_RELIGIOUS_PREFERENCE_1997
@@ -39,6 +41,7 @@
     CHOICE_DATA$HH_INCOME = -3
     CHOICE_DATA$URBAN_RURAL = -3
     CHOICE_DATA$SCHOOL_TYPE = -3
+    CHOICE_DATA$RES_STATE = -3
     source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_fillMiss.R")
     for (i in 1:nrow(MANIP_DATA)){
       #household size
@@ -47,7 +50,7 @@
           if(MANIP_DATA[i, hhSizeVar]>0){
             CHOICE_DATA$HH_SIZE[i]= MANIP_DATA[i, hhSizeVar]
           } else{
-            CHOICE_DATA$HH_SIZE[i]= fillMiss(hhSizeVar, i, TRUE)
+            CHOICE_DATA$HH_SIZE[i]= fillMiss(hhSizeVar, i, TRUE, "CHOICE")
           }
         }
       #household income
@@ -56,7 +59,7 @@
           if(MANIP_DATA[i, hhIncomeVar]>0){
             CHOICE_DATA$HH_INCOME[i]= MANIP_DATA[i, hhIncomeVar]
           } else{
-            CHOICE_DATA$HH_INCOME[i]= fillMiss(hhIncomeVar, i, TRUE)
+            CHOICE_DATA$HH_INCOME[i]= fillMiss(hhIncomeVar, i, TRUE, "CHOICE")
           }
         }
       #urban rural
@@ -65,7 +68,7 @@
           if(MANIP_DATA[i, urbanRuralVar]>0){
             CHOICE_DATA$URBAN_RURAL[i]= MANIP_DATA[i, urbanRuralVar]
           } else{
-            CHOICE_DATA$URBAN_RURAL[i]= fillMiss(urbanRuralVar, i, TRUE)
+            CHOICE_DATA$URBAN_RURAL[i]= fillMiss(urbanRuralVar, i, TRUE, "CHOICE")
           }
         }
       #high school type
@@ -74,12 +77,21 @@
           if(MANIP_DATA[i,schoolTypeVar]>0){
             CHOICE_DATA$SCHOOL_TYPE[i]= MANIP_DATA[i, schoolTypeVar]
           }else{
-            CHOICE_DATA$SCHOOL_TYPE[i]= fillMiss(schoolTypeVar, i, FALSE)
+            CHOICE_DATA$SCHOOL_TYPE[i]= fillMiss(schoolTypeVar, i, FALSE, "CHOICE")
           }
         }       
+      #state of residence in SCHOOL ATTENDANCE YEAR!
+        resStateVar = paste("GEO02_", toString(CHOICE_DATA$COLLEGEID_YEAR2[i]), sep = "")
+        if(resStateVar %in% colnames(RES_DATA)){
+          if(RES_DATA[i,resStateVar]>0){
+            CHOICE_DATA$RES_STATE[i]= RES_DATA[i, resStateVar]
+          }else{
+            CHOICE_DATA$RES_STATE[i]= fillMiss(resStateVar, i, TRUE, "START")
+          }
+        } 
     }
 
-#CREATE CHOICE FILE WITH EACH SCHOOL ON A LINE=======================================================
+#CREATE CHOICE FILE WITH EACH SCHOOL/STUDENT COMBO ON A LINE=======================================================
   LONG_DATA = read.table("D:/studentadmitdata.txt", header = TRUE)
   LONG_DATA = merge(x = LONG_DATA, y = CHOICE_DATA, by = "PUBID_1997", all.x = TRUE)
   LONG_DATA = LONG_DATA[!(is.na(LONG_DATA$MAJOR)),]
@@ -122,9 +134,16 @@
             #LONG_DATA$loop[i]= strList[3]
             #LONG_DATA$school[i] = strList[4]
             #LONG_DATA$year[i] = strList[5]
-            schoolAidStr = paste("YCOC_055B_", strList[3], "_", strList[4], "_", strList[5], sep= "")
-            otherAidStr = paste("YCOC_022_", strList[3], "_", strList[5],sep = "")
-            LONG_DATA$SCHOOLAID[i] = curData[1,schoolAidStr]
+            if(strList[5]=="2003"){
+              schoolAidStr = paste("YCOC_055B_", strList[3], "_", strList[4], "_2004", sep= "")  
+            }
+            else{
+              schoolAidStr = paste("YCOC_055B_", strList[3], "_", strList[4], "_", strList[5], sep= "")  
+            }
+            otherAidStr = paste("YCOC_022_01_", strList[5],sep = "") #no loop number here since this is only asked once (it is not school specific)
+            if (schoolAidStr %in% colnames(curData)){
+              LONG_DATA$SCHOOLAID[i] = curData[1,schoolAidStr]
+            }
             LONG_DATA$INDEPAID[i] = curData[1,otherAidStr]
           }
         }
@@ -141,7 +160,7 @@
           }
         }
     }
-write.csv(LONG_DATA[,c("loop","school","year","geoschool", "geoyear")], "D:/test.csv")
+write.csv(LONG_DATA[,c("geoschool", "geoyear","SCHOOLAID","INDEPAID")], "D:/test.csv")
 
 
 
