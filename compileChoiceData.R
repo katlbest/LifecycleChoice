@@ -140,15 +140,15 @@
               #question asks only about the first year of college
               varList022= colnames(curData)[grep(otherAidStr, colnames(curData))]
               k = 1
-              while (k <= length(varList022) & LONG_DATA$OTHERAID[i]<0){
-                LONG_DATA$OTHERAID[i] = max(curData[1,varList022[k]], LONG_DATA$OTHERAID[i]) #if we already have a -4, we don't want to replace it with a -5 so we can know that we had a valid skip
+              while (k <= length(varList022) & LONG_DATA$INDEPAID[i]<0){
+                LONG_DATA$INDEPAID[i] = max(curData[1,varList022[k]], LONG_DATA$INDEPAID[i]) #if we already have a -4, we don't want to replace it with a -5 so we can know that we had a valid skip
                 k = k+1
               }
             #if (schoolAidStr %in% colnames(curData)){
             #  LONG_DATA$SCHOOLAID[i] = curData[1,schoolAidStr]
             #  #else we must check other years, since schools are only ID'd by loop and school, not year
             #}
-            LONG_DATA$INDEPAID[i] = curData[1,otherAidStr]
+            #LONG_DATA$INDEPAID[i] = curData[1,otherAidStr]
             #we may have to check other years
           }
         }
