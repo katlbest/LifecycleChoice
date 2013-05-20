@@ -114,8 +114,8 @@
     FIN_DATA = merge(x=FIN_DATA, y = SECRET_DATA, by = "PUBID_1997", all.x = TRUE)
 
   #loop through long data and fill financial aid information for each school
-    LONG_DATA$SCHOOLAID= NA
-    LONG_DATA$INDEPAID = NA
+    LONG_DATA$SCHOOLAID= -3
+    LONG_DATA$INDEPAID = -3
     for (i in 1: nrow(LONG_DATA)){
       strList = NA
       curData = FIN_DATA[FIN_DATA$PUBID_1997 == LONG_DATA$PUBID_1997[i],]
@@ -127,17 +127,27 @@
             strList = strsplit(varString, "_", fixed = TRUE)
             strList = strList[[1]]
             strList = strList[strList != "000001"]
-            if(strList[5]=="2003"){
-              schoolAidStr = paste("YCOC_055B_", strList[3], "_", strList[4], "_2004", sep= "")  
-            }
-            else{
-              schoolAidStr = paste("YCOC_055B_", strList[3], "_", strList[4], "_", strList[5], sep= "")  
-            }
-            otherAidStr = paste("YCOC_022_01_", strList[5],sep = "") #no school or loop number here since this is only asked once (it is not school specific)
-            if (schoolAidStr %in% colnames(curData)){
-              LONG_DATA$SCHOOLAID[i] = curData[1,schoolAidStr]
-              #else we must check other years, since schools are only ID'd by loop and school, not year
-            }
+            schoolAidStr= paste("YCOC_055B_", strList[3], "_", strList[4], sep= "")  
+            #get variables that have this string in them
+              varList055B= colnames(curData)[grep(schoolAidStr, colnames(curData))]
+              k = 1
+              while (k <= length(varList055B) & LONG_DATA$SCHOOLAID[i]<0){
+                LONG_DATA$SCHOOLAID[i] = max(curData[1,varList055B[k]], LONG_DATA$SCHOOLAID[i]) #if we already have a -4, we don't want to replace it with a -5 so we can know that we had a valid skip
+                k = k+1
+              }
+            #get variables that have other aid string
+              otherAidStr = paste("YCOC_022_01_",sep = "") #no school or loop number here since this is only asked once (it is not school specific)
+              #question asks only about the first year of college
+              varList022= colnames(curData)[grep(otherAidStr, colnames(curData))]
+              k = 1
+              while (k <= length(varList022) & LONG_DATA$OTHERAID[i]<0){
+                LONG_DATA$OTHERAID[i] = max(curData[1,varList022[k]], LONG_DATA$OTHERAID[i]) #if we already have a -4, we don't want to replace it with a -5 so we can know that we had a valid skip
+                k = k+1
+              }
+            #if (schoolAidStr %in% colnames(curData)){
+            #  LONG_DATA$SCHOOLAID[i] = curData[1,schoolAidStr]
+            #  #else we must check other years, since schools are only ID'd by loop and school, not year
+            #}
             LONG_DATA$INDEPAID[i] = curData[1,otherAidStr]
             #we may have to check other years
           }
