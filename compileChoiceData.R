@@ -131,6 +131,13 @@
       curData = FIN_DATA[FIN_DATA$PUBID_1997 == TEMP_LONG_DATA$PUBID_1997[i],]
       curSchool = TEMP_LONG_DATA$AdmittedSchool[i]
       #search for YCOC
+      #for (j in 1:length(varListYCOC)){
+      #  if (curData[1,varListYCOC[j]]==curSchool){
+      #    print(curData[1,"PUBID_1997"])
+      #    print(varListYCOC[j])
+      #    print(j)
+      #  }
+      #}
         for (j in 1:length(varListYCOC)){
           if (curData[1,varListYCOC[j]]==curSchool){
             varString = varListYCOC[j]
