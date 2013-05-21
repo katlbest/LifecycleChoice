@@ -112,6 +112,8 @@
     varList = c(varListPREVCOL, varListYCOC, varListGEO)
     SECRET_DATA = SECRET_DATA[,c("PUBID_1997",varList)]
     FIN_DATA = merge(x=FIN_DATA, y = SECRET_DATA, by = "PUBID_1997", all.x = TRUE)
+    FIN_IND = read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Choice model inputs/finaidind.csv")
+    FIN_DATA = merge(x=FIN_DATA, y = FIN_IND, by = "PUBID_1997", all.x = TRUE)
 
   #loop through long data and fill financial aid information for each school
     TEMP_LONG_DATA = LONG_DATA
@@ -138,9 +140,14 @@
             TEMP_LONG_DATA$loop[i]= strList[3]
             TEMP_LONG_DATA$school[i] = strList[4]
             TEMP_LONG_DATA$year[i] = strList[5]
+            schoolAidInd =paste("YCOC_055_", strList[3], "_", strList[4], sep= "")  
             schoolAidStr= paste("YCOC_055B_", strList[3], "_", strList[4], sep= "")  
             #get variables that have this string in them
+              varList055= colnames(curData)[grep(schoolAidStr, colnames(curData))]
               varList055B= colnames(curData)[grep(schoolAidStr, colnames(curData))]
+            if (length(varList055)-length(varList055B) != 0){
+              print(length(varList055)-length(varList055B))
+            }
               k = 1
               while (k <= length(varList055B) & TEMP_LONG_DATA$SCHOOLAID[i]<0){
                 TEMP_LONG_DATA$SCHOOLAID[i] = max(curData[1,varList055B[k]], TEMP_LONG_DATA$SCHOOLAID[i]) #if we already have a -4, we don't want to replace it with a -5 so we can know that we had a valid skip
