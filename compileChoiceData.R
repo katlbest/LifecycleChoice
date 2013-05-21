@@ -131,13 +131,13 @@
       curData = FIN_DATA[FIN_DATA$PUBID_1997 == TEMP_LONG_DATA$PUBID_1997[i],]
       curSchool = TEMP_LONG_DATA$AdmittedSchool[i]
       #search for YCOC
-      #for (j in 1:length(varListYCOC)){
-      #  if (curData[1,varListYCOC[j]]==curSchool){
-      #    print(curData[1,"PUBID_1997"])
-      #    print(varListYCOC[j])
-      #    print(j)
-      #  }
-      #}
+      for (j in 1:length(varListYCOC)){
+        if (curData[1,varListYCOC[j]]==curSchool){
+          print(curData[1,"PUBID_1997"])
+          print(varListYCOC[j])
+          print(j)
+        }
+      }
         for (j in 1:length(varListYCOC)){
           if (curData[1,varListYCOC[j]]==curSchool){
             varString = varListYCOC[j]
@@ -151,15 +151,22 @@
             schoolAidStr= paste("YCOC_055B_", strList[3], "_", strList[4], sep= "")  
             #get variables that have this string in them
               varList055= colnames(curData)[grep(schoolAidInd, colnames(curData))]
-              varList055B= colnames(curData)[grep(schoolAidStr, colnames(curData))]
+              varList055B = rep(NA, length(varList055))
+              varList055B = substr(varList055, 9, 20)
+              varList055B = paste("YCOC_055B", varList055B, sep = "")
             #extract aid amount
               k=1
-              while (k <= length(varList055B) & TEMP_LONG_DATA$SCHOOLAID[i]<0){
+              while (k <= length(varList055) & TEMP_LONG_DATA$SCHOOLAID[i]<0){
                 curInd= curData[1, varList055[k]]
                 if (curInd==0){ #no aid received from this school
                   TEMP_LONG_DATA$SCHOOLAID[i] = 0
                 } else if (curInd == 1){
-                  TEMP_LONG_DATA$SCHOOLAID[i] = max(curData[1,varList055B[k]], TEMP_LONG_DATA$SCHOOLAID[i]) #if we already have a -4, we don't want to replace it with a -5 so we can know that we had a valid skip
+                  if (varList055B[k] %in% colnames(curData)){
+                    TEMP_LONG_DATA$SCHOOLAID[i] = max(curData[1,varList055B[k]], TEMP_LONG_DATA$SCHOOLAID[i]) #if we already have a -4, we don't want to replace it with a -5 so we can know that we had a valid skip
+                  }
+                  else {
+                    TEMP_LONG_DATA$SCHOOLAID[i] = max(TEMP_LONG_DATA$SCHOOLAID[i] , -7)
+                  }
                 }
                 k = k+1
               }
