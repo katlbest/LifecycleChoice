@@ -119,6 +119,7 @@
 
   #loop through long data and fill financial aid information for each school
     source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_checkDLI.R")
+    source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_getAid.R")
     TEMP_LONG_DATA = LONG_DATA
     TEMP_LONG_DATA$SCHOOLAID= -6
     TEMP_LONG_DATA$INDEPAID = -6
@@ -129,8 +130,7 @@
     TEMP_LONG_DATA$year = NA
     TEMP_LONG_DATA$MAXTERM = 0
     for (i in 1: nrow(TEMP_LONG_DATA)){
-      varString = ""
-      strList = NA
+      no055Match = 0
       curData = FIN_DATA[FIN_DATA$PUBID_1997 == TEMP_LONG_DATA$PUBID_1997[i],]
       curSchool = TEMP_LONG_DATA$AdmittedSchool[i]
       varListMATCH = c()
@@ -139,47 +139,13 @@
           varListMATCH[length(varListMATCH)+1]= varListYCOC[j]
         }
       }
-      for (j in 1:length(varListMATCH)){}
-        if (curData[1,varListYCOC[j]]==curSchool){
-          varString = varListYCOC[j]
-          strList = strsplit(varString, "_", fixed = TRUE)
-          strList = strList[[1]]
-          strList = strList[strList != "000001"]
-          TEMP_LONG_DATA$loop[i]= strList[3]
-          TEMP_LONG_DATA$school[i] = strList[4]
-          TEMP_LONG_DATA$year[i] = strList[5]
-          schoolAidInd =paste("YCOC_055_", strList[3], "_", strList[4], "_", strList[5], sep= "")  
-          schoolAidStr= paste("YCOC_055B_", strList[3], "_", strList[4], "_", strList[5], sep= "")  
-          #extract aid amount
-            if (schoolAidInd %in% colnames(curData)){ #indicator variable found
-              curInd= curData[1, schoolAidInd]
-                if (curInd==0){ #no aid received from this school
-                  TEMP_LONG_DATA$SCHOOLAID[i] = 0
-                } else if (curInd == 1){ #aid offer received
-                  if (schoolAidStr %in% colnames(curData)){ #aid offer amount received
-                    TEMP_LONG_DATA$SCHOOLAID[i] =curData[1,schoolAidStr] #TBD update for categoricsl
-                  } else{ #no amount present, look in DLI variables
-                      checkDLI(strList[4], strList[5])
-                    }
-                } else if(curInd == 2){
-                    #TBD things with DLI
-                    TEMP_LONG_DATA$SCHOOLAID[i] = -7
-                }
-            } else{ #there was no aid indicator variable for this loop-> 1 instance
-              TEMP_LONG_DATA$SCHOOLAID[i] = -8 
-            }
-        }
-        #get variables that have school-independent aid
-          otherAidStr = paste("YCOC_022_01_",sep = "") #no school or loop number here since this is only asked once (it is not school specific)
-          varList022= colnames(curData)[grep(otherAidStr, colnames(curData))]
-          k = 1
-          while (k <= length(varList022) & TEMP_LONG_DATA$INDEPAID[i]<0){
-            TEMP_LONG_DATA$INDEPAID[i] = max(curData[1,varList022[k]], TEMP_LONG_DATA$INDEPAID[i]) #if we already have a -4, we don't want to replace it with a -5 so we can know that we had a valid skip
-            k = k+1
-          }
+      if (length(varListMATCH>0)){
+        getAid(varListMATCH, 1)
+      } else{
+        no055Match = 1
       }
     }
-      
+
     #combine financial aid estimates
       for (i in 1:nrow(LONG_DATA)){
         LONG_DATA$SCHOOL_AID[i] = max(TEMP_LONG_DATA$SCHOOLAID[i], TEMP_LONG_DATA$ATTENDEDAID[i])
