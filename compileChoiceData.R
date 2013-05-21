@@ -152,6 +152,7 @@
       }
       LONG_DATA$SHARED_AID = TEMP_LONG_DATA$INDEPAID
       write.csv(TEMP_LONG_DATA[,c("PUBID_1997", "loop", "school", "year","geoschool", "geoyear","SCHOOLAID","INDEPAID", "ATTENDEDAID", "ATTENDEDAIDMISS", "MAXTERM")], "D:/test.csv")
+      write.csv(TEMP_LONG_DATA[,c("PUBID_1997", "loop", "school", "year","SCHOOLAID")], "D:/test3.csv")
       write.csv(LONG_DATA, "D:/test2.csv")
 
 
