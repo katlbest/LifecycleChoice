@@ -118,6 +118,7 @@
     FIN_DATA = merge(x=FIN_DATA, y = YCOC_DLI, by = "PUBID_1997", all.x = TRUE)
 
   #loop through long data and fill financial aid information for each school
+    source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_checkDLI.R")
     TEMP_LONG_DATA = LONG_DATA
     TEMP_LONG_DATA$SCHOOLAID= -6
     TEMP_LONG_DATA$INDEPAID = -6
@@ -144,20 +145,22 @@
           schoolAidInd =paste("YCOC_055_", strList[3], "_", strList[4], "_", strList[5], sep= "")  
           schoolAidStr= paste("YCOC_055B_", strList[3], "_", strList[4], "_", strList[5], sep= "")  
           #extract aid amount
-            if (schoolAidInd %in% colnames(curData)){
+            if (schoolAidInd %in% colnames(curData)){ #indicator variable found
               curInd= curData[1, schoolAidInd]
                 if (curInd==0){ #no aid received from this school
                   TEMP_LONG_DATA$SCHOOLAID[i] = 0
-                } else if (curInd == 1){
-                  if (schoolAidStr %in% colnames(curData)){
+                } else if (curInd == 1){ #aid offer received
+                  if (schoolAidStr %in% colnames(curData)){ #aid offer amount received
                     TEMP_LONG_DATA$SCHOOLAID[i] =curData[1,schoolAidStr] #TBD update for categoricsl
-                  } #-6 now means that you are here, e.g. there is no corresponding B variable
+                  } else{ #no amount present, look in DLI variables
+                      checkDLI(strList[4], strList[5])
+                    }
                 } else if(curInd == 2){
                     #TBD things with DLI
                     TEMP_LONG_DATA$SCHOOLAID[i] = -7
                 }
-            } else{
-              TEMP_LONG_DATA$SCHOOLAID[i] = -8
+            } else{ #there was no aid indicator variable for this loop-> 1 instance
+              TEMP_LONG_DATA$SCHOOLAID[i] = -8 
             }
         }
         #get variables that have school-independent aid
