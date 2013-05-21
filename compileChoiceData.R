@@ -130,57 +130,44 @@
       strList = NA
       curData = FIN_DATA[FIN_DATA$PUBID_1997 == TEMP_LONG_DATA$PUBID_1997[i],]
       curSchool = TEMP_LONG_DATA$AdmittedSchool[i]
-      #search for YCOC
       for (j in 1:length(varListYCOC)){
         if (curData[1,varListYCOC[j]]==curSchool){
-          print(curData[1,"PUBID_1997"])
-          print(varListYCOC[j])
-          print(j)
-        }
-      }
-        for (j in 1:length(varListYCOC)){
-          if (curData[1,varListYCOC[j]]==curSchool){
-            varString = varListYCOC[j]
-            strList = strsplit(varString, "_", fixed = TRUE)
-            strList = strList[[1]]
-            strList = strList[strList != "000001"]
-            TEMP_LONG_DATA$loop[i]= strList[3]
-            TEMP_LONG_DATA$school[i] = strList[4]
-            TEMP_LONG_DATA$year[i] = strList[5]
-            schoolAidInd =paste("YCOC_055_", strList[3], "_", strList[4], sep= "")  
-            schoolAidStr= paste("YCOC_055B_", strList[3], "_", strList[4], sep= "")  
-            #get variables that have this string in them
-              varList055= colnames(curData)[grep(schoolAidInd, colnames(curData))]
-              varList055B = rep(NA, length(varList055))
-              varList055B = substr(varList055, 9, 20)
-              varList055B = paste("YCOC_055B", varList055B, sep = "")
-            #extract aid amount
-              k=1
-              while (k <= length(varList055) & TEMP_LONG_DATA$SCHOOLAID[i]<0){
-                curInd= curData[1, varList055[k]]
+          varString = varListYCOC[j]
+          strList = strsplit(varString, "_", fixed = TRUE)
+          strList = strList[[1]]
+          strList = strList[strList != "000001"]
+          TEMP_LONG_DATA$loop[i]= strList[3]
+          TEMP_LONG_DATA$school[i] = strList[4]
+          TEMP_LONG_DATA$year[i] = strList[5]
+          schoolAidInd =paste("YCOC_055_", strList[3], "_", strList[4], "_", strList[5], sep= "")  
+          schoolAidStr= paste("YCOC_055B_", strList[3], "_", strList[4], "_", strList[5], sep= "")  
+          #extract aid amount
+            if (schoolAidInd %in% colnames(curData)){
+              curInd= curData[1, schoolAidInd]
                 if (curInd==0){ #no aid received from this school
                   TEMP_LONG_DATA$SCHOOLAID[i] = 0
                 } else if (curInd == 1){
-                  if (varList055B[k] %in% colnames(curData)){
-                    TEMP_LONG_DATA$SCHOOLAID[i] = max(curData[1,varList055B[k]], TEMP_LONG_DATA$SCHOOLAID[i]) #if we already have a -4, we don't want to replace it with a -5 so we can know that we had a valid skip
-                  }
-                  else {
-                    TEMP_LONG_DATA$SCHOOLAID[i] = max(TEMP_LONG_DATA$SCHOOLAID[i] , -7)
-                  }
+                  if (schoolAidStr %in% colnames(curData)){
+                    TEMP_LONG_DATA$SCHOOLAID[i] =curData[1,schoolAidStr] #TBD update for categoricsl
+                  } #-6 now means that you are here, e.g. there is no corresponding B variable
+                } else if(curInd == 2){
+                    #TBD things with DLI
+                    TEMP_LONG_DATA$SCHOOLAID[i] = -7
                 }
-                k = k+1
-              }
-            #get variables that have school-independent aid
-              otherAidStr = paste("YCOC_022_01_",sep = "") #no school or loop number here since this is only asked once (it is not school specific)
-              #question asks only about the first year of college
-              varList022= colnames(curData)[grep(otherAidStr, colnames(curData))]
-              k = 1
-              while (k <= length(varList022) & TEMP_LONG_DATA$INDEPAID[i]<0){
-                TEMP_LONG_DATA$INDEPAID[i] = max(curData[1,varList022[k]], TEMP_LONG_DATA$INDEPAID[i]) #if we already have a -4, we don't want to replace it with a -5 so we can know that we had a valid skip
-                k = k+1
-              }
-          }
+            } else{
+              TEMP_LONG_DATA$SCHOOLAID[i] = -8
+            }
         }
+        #get variables that have school-independent aid
+          otherAidStr = paste("YCOC_022_01_",sep = "") #no school or loop number here since this is only asked once (it is not school specific)
+          varList022= colnames(curData)[grep(otherAidStr, colnames(curData))]
+          k = 1
+          while (k <= length(varList022) & TEMP_LONG_DATA$INDEPAID[i]<0){
+            TEMP_LONG_DATA$INDEPAID[i] = max(curData[1,varList022[k]], TEMP_LONG_DATA$INDEPAID[i]) #if we already have a -4, we don't want to replace it with a -5 so we can know that we had a valid skip
+            k = k+1
+          }
+      }
+      
       #if not found, search for GEO69, since this means the school is an attended school which was not found in the admitted list
         if (is.na(strList[1])){  #condition based on whether you found var in YCOC
           #note we could also condition on whether you actually found the fin aid data on the schools in YCOC, but this would bias towards the school actually attended. also, it doensn't actually help fill in any missing data
