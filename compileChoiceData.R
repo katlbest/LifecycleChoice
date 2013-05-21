@@ -143,17 +143,20 @@
             schoolAidInd =paste("YCOC_055_", strList[3], "_", strList[4], sep= "")  
             schoolAidStr= paste("YCOC_055B_", strList[3], "_", strList[4], sep= "")  
             #get variables that have this string in them
-              varList055= colnames(curData)[grep(schoolAidStr, colnames(curData))]
+              varList055= colnames(curData)[grep(schoolAidInd, colnames(curData))]
               varList055B= colnames(curData)[grep(schoolAidStr, colnames(curData))]
-            if (length(varList055)-length(varList055B) != 0){
-              print(length(varList055)-length(varList055B))
-            }
-              k = 1
+            #extract aid amount
+              k=1
               while (k <= length(varList055B) & TEMP_LONG_DATA$SCHOOLAID[i]<0){
-                TEMP_LONG_DATA$SCHOOLAID[i] = max(curData[1,varList055B[k]], TEMP_LONG_DATA$SCHOOLAID[i]) #if we already have a -4, we don't want to replace it with a -5 so we can know that we had a valid skip
+                curInd= curData[1, varList055[k]]
+                if (curInd==0){ #no aid received from this school
+                  TEMP_LONG_DATA$SCHOOLAID[i] = 0
+                } else if (curInd == 1){
+                  TEMP_LONG_DATA$SCHOOLAID[i] = max(curData[1,varList055B[k]], TEMP_LONG_DATA$SCHOOLAID[i]) #if we already have a -4, we don't want to replace it with a -5 so we can know that we had a valid skip
+                }
                 k = k+1
               }
-            #get variables that have other aid string
+            #get variables that have school-independent aid
               otherAidStr = paste("YCOC_022_01_",sep = "") #no school or loop number here since this is only asked once (it is not school specific)
               #question asks only about the first year of college
               varList022= colnames(curData)[grep(otherAidStr, colnames(curData))]
