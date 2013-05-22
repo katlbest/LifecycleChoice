@@ -5,7 +5,7 @@
   library(plyr)
   #library(ggplot2)
   #library(MASS)
-  #li brary(Hmisc)
+  #library(Hmisc)
   #library(reshape2)
 
 #clear workspace ==============================================================
@@ -120,29 +120,80 @@
   #loop through long data and fill financial aid information for each school
     source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_checkDLI.R")
     source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_getAid.R")
+    source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_getAidDLI.R")
+    source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_getAidYSCH.R")
     TEMP_LONG_DATA = LONG_DATA
     TEMP_LONG_DATA$SCHOOLAID= -6
     TEMP_LONG_DATA$INDEPAID = -6
     TEMP_LONG_DATA$ATTENDEDAID = -6
     TEMP_LONG_DATA$ATTENDEDAIDMISS = 0
-    TEMP_LONG_DATA$loop= NA
-    TEMP_LONG_DATA$school =NA
-    TEMP_LONG_DATA$year = NA
     TEMP_LONG_DATA$MAXTERM = 0
-    for (i in 1: nrow(TEMP_LONG_DATA)){
-      no055Match = 0
+
+    #get aid from YCOC-055 variables (main)
+      aidList055 = list()
+      for (i in 1: nrow(TEMP_LONG_DATA)){
+        curData = FIN_DATA[FIN_DATA$PUBID_1997 == TEMP_LONG_DATA$PUBID_1997[i],]
+        curSchool = TEMP_LONG_DATA$AdmittedSchool[i]
+        varListMATCH = c()
+        for (j in 1:length(varListYCOC)){ #look for current school index in all YCOC variables, beginning with earliest
+          if (curData[1,varListYCOC[j]]==curSchool){
+            varListMATCH[length(varListMATCH)+1]= varListYCOC[j]
+          }
+        }
+        if (length(varListMATCH>0)){
+          aidList055[[i]] = getAid(varListMATCH)
+        } else{
+          aidList055[[i]]= -3
+        }
+      }
+
+    #get aid from DLI variables (date of last interview), this only yields one result for i = 973, pubid = 6412
+      #build varListDLI
+        varListDLI= colnames(SECRET_DATA)[grep("PREV_COL_APP", colnames(SECRET_DATA))]
+      aidListDLI = list()
+      for (i in 1: nrow(TEMP_LONG_DATA)){
+        curData = FIN_DATA[FIN_DATA$PUBID_1997 == TEMP_LONG_DATA$PUBID_1997[i],]
+        curSchool = TEMP_LONG_DATA$AdmittedSchool[i]
+        varListMATCH = c()
+        for (j in 1:length(varListDLI)){ 
+          if (curData[1,varListDLI[j]]==curSchool){
+            varListMATCH[length(varListMATCH)+1]= varListDLI[j]
+          }
+        }
+        if (length(varListMATCH>0)){
+          aidListDLI[[i]] = getAidDLI(varListMATCH)
+        } else{
+          aidListDLI[[i]]= -3
+        }
+      }
+
+    #get school-independent aid
+      otherAidStr = paste("YCOC_022_01_",sep = "")
+      varList022= colnames(FIN_DATA)[grep(otherAidStr, colnames(FIN_DATA))]
+      aidListALLSCHOOL = list()
+      for (i in 1:nrow(TEMP_LONG_DATA)){
+        aidListALLSCHOOL[[i]]= rep(NA, length(varList022))
+        curData = FIN_DATA[FIN_DATA$PUBID_1997 == TEMP_LONG_DATA$PUBID_1997[i],]
+        for (k in 1:length(varList022)){
+          aidListALLSCHOOL[[i]][k] = curData[1,varList022[k]]
+        }
+      }
+
+    #get aid data from YSCH for attended schools
+    aidListYSCH = list()
+    for (i in 1:nrow(TEMP_LONG_DATA)){
       curData = FIN_DATA[FIN_DATA$PUBID_1997 == TEMP_LONG_DATA$PUBID_1997[i],]
       curSchool = TEMP_LONG_DATA$AdmittedSchool[i]
       varListMATCH = c()
-      for (j in 1:length(varListYCOC)){ #look for current school index in all YCOC variables, beginning with earliest
-        if (curData[1,varListYCOC[j]]==curSchool){
-          varListMATCH[length(varListMATCH)+1]= varListYCOC[j]
+      for (j in 1:length(varListGEO)){
+        if (curData[1,varListGEO[j]]==curSchool){
+          varListMATCH[length(varListMATCH)+1]= varListGEO[j]
         }
       }
       if (length(varListMATCH>0)){
-        getAid(varListMATCH, 1)
+        aidListYSCH[[i]] = getAidYSCH(varListMATCH)
       } else{
-        no055Match = 1
+        aidListYSCH[[i]]= -3
       }
     }
 
