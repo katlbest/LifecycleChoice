@@ -8,6 +8,7 @@ getAidDLI<- function(varList){
     strList = strList[[1]]
     schoolAidInd =paste("YCOC_DLI_040_", strList[5], "_", strList[6], sep= "")  
     schoolAidStr= paste("YCOC_DLI_047_", strList[5], "_", strList[6], sep= "")  
+    changedMindInd= paste("YCOC_DLI_045_", strList[5], "_", strList[6], sep= "") 
     #extract aid amount
     if (schoolAidInd %in% colnames(curData)){ #indicator variable found-
       curInd= curData[1, schoolAidInd]
@@ -33,7 +34,17 @@ getAidDLI<- function(varList){
         print(i)
         outList[k] = -8 #no aid decision received yet
       }
-      else { #curind was a negative value
+      
+      else if(curInd == -4 & strList[6]=="2004"){ #then we may be in a mind changing situation
+        if (curData[1,changedMindInd]==2){
+          outList[k]=0 #no aid received after all
+        } 
+        else{
+          outList[k] = curData[1, schoolAidInd]*100 #keep track of missingness indicator like below
+        }
+      }
+      
+      else { #curind was another negative value
         outList[k] = curData[1, schoolAidInd]*100 #to be able to distinguish these missing inficators from value missing indicators
       }
     }

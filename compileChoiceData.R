@@ -130,7 +130,7 @@
         curSchool = LONG_DATA$AdmittedSchool[i]
         varListMATCH = c()
         for (j in 1:length(varListYCOC)){ #look for current school index in all YCOC variables, beginning with earliest
-          if (curData[1,varListYCOC[j]]==curSchool){
+          if (curData[1,varListYCOC[j]]==curSchool | curData[1,varListYCOC[j]]*100==curSchool| curData[1,varListYCOC[j]]==curSchool*100){
             varListMATCH[length(varListMATCH)+1]= varListYCOC[j]
           }
         }
@@ -150,7 +150,7 @@
         curSchool = LONG_DATA$AdmittedSchool[i]
         varListMATCH = c()
         for (j in 1:length(varListDLI)){ 
-          if (curData[1,varListDLI[j]]==curSchool){
+          if (curData[1,varListDLI[j]]==curSchool| curData[1,varListDLI[j]]*100==curSchool | curData[1,varListDLI[j]]==curSchool* 100){
             varListMATCH[length(varListMATCH)+1]= varListDLI[j]
           }
         }
@@ -180,7 +180,7 @@
       curSchool = LONG_DATA$AdmittedSchool[i]
       varListMATCH = c()
       for (j in 1:length(varListGEO)){
-        if (curData[1,varListGEO[j]]==curSchool){
+        if (curData[1,varListGEO[j]]==curSchool | curData[1,varListGEO[j]]*100==curSchool | curData[1,varListGEO[j]]==curSchool*100){
           varListMATCH[length(varListMATCH)+1]= varListGEO[j]
         }
       }
