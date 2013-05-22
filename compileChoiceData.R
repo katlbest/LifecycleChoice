@@ -192,14 +192,50 @@
     }
 
     #combine financial aid estimates
+      YCOCEst = rep(-3, nrow(LONG_DATA))
+      #aggregate YCOC data
       for (i in 1:nrow(LONG_DATA)){
-        LONG_DATA$SCHOOL_AID[i] = max(LONG_DATA$SCHOOLAID[i], LONG_DATA$ATTENDEDAID[i])
+        YCOCEst[i] = max(aidList055[[i]])
+        if (YCOCEst[i]<0){
+          #check DLI data and replace if better
+          DLIEst = max(aidListDLI[[i]])
+          if (DLIEst>=0){
+            YCOCEst[i]=DLIEst
+          }
+        }
       }
-      LONG_DATA$SHARED_AID = LONG_DATA$INDEPAID
-      write.csv(LONG_DATA[,c("PUBID_1997", "loop", "school", "year","geoschool", "geoyear","SCHOOLAID","INDEPAID", "ATTENDEDAID", "ATTENDEDAIDMISS", "MAXTERM")], "D:/test.csv")
-      write.csv(LONG_DATA[,c("PUBID_1997", "loop", "school", "year","SCHOOLAID")], "D:/test3.csv")
-      write.csv(LONG_DATA, "D:/test2.csv")
 
+    #get best estimate of YSCH data
+      YSCHEst = rep(-3, nrow(LONG_DATA))
+      #aggregate YSCH data
+        for (i in 1:nrow(LONG_DATA)){
+          YSCHEst[i] = max(aidListYSCH[[i]])
+        }
 
+    #fill in with YSCH where there was no data in YCOC
+      count = 0
+      for (i in 1:nrow(LONG_DATA)){
+        if (YCOCEst[i]==-3 & YSCHEst[i] >= 0){
+          count = count+1
+          YCOCEst[i] = YSCHEst[i]
+        }
+      }
 
+#test other improvements =========================================================
+  #count others we could fill--could fill 157 with attended data!
+    count = 0
+    for (i in 1:nrow(LONG_DATA)){
+      if (YCOCEst[i]<0 & YSCHEst[i] >= 0){
+        count = count+1
+      }
+    }
+
+  #check accuracy of aid data
+    diffList = rep(NA, nrow(LONG_DATA))
+    for (i in 1:nrow(LONG_DATA)){
+      if (YSCHEst[i]>= 0 & YCOCEst[i]>= 0){
+        diffList[i] = YSCHEst[i]-YCOCEst[i]
+      }
+    }
+    mean(na.exclude(diffList))
 
