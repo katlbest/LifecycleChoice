@@ -8,55 +8,54 @@ getAidDLI<- function(varList){
     strList = strList[[1]]
     schoolAidInd =paste("YCOC_DLI_040_", strList[5], "_", strList[6], sep= "")  
     schoolAidStr= paste("YCOC_DLI_047_", strList[5], "_", strList[6], sep= "")  
-    changedMindInd= paste("YCOC_DLI_045_", strList[5], "_", strList[6], sep= "") 
-    #extract aid amount
-    if (schoolAidInd %in% colnames(curData)){ #indicator variable found-
-      curInd= curData[1, schoolAidInd]
-      if (curInd==0){ #no aid received from this school
-        print("ind0")
-        print(i)
-        outList[k] = 0
+    changedMindInd= paste("YCOC_DLI_045_", strList[5], "_", strList[6], sep= "")
+    
+    #check to make sure we haven't got a changed mind situation
+    changed = 0
+    if(strList[6]=="2004") { #we should check for the 2 entry in changed mind indicator
+      if (curData[1,changedMindInd]==2){
+        outList[k]=0 #no aid received after all
+        changed = 1
       } 
-      
-      else if (curInd == 1){ #aid offer received
-        print("ind1")
-        print(i)
-        if (schoolAidStr %in% colnames(curData)){ #aid offer variable exists
-          outList[k] = curData[1,schoolAidStr]
-        } 
-        else {
-          outList[k] = -7 #B variable (amount) not found
-        }
-      }
-      
-      else if(curInd == 2){
-        print("ind2")
-        print(i)
-        outList[k] = -8 #no aid decision received yet
-      }
-      
-      else if(curInd == -4 & strList[6]=="2004"){ #then we may be in a mind changing situation
-        if (curData[1,changedMindInd]==2){
-          outList[k]=0 #no aid received after all
-        } 
-        else{
-          outList[k] = curData[1, schoolAidInd]*100 #keep track of missingness indicator like below
-        }
-      }
-      else { #curind was another negative value
-        outList[k] = curData[1, schoolAidInd]*100 #to be able to distinguish these missing inficators from value missing indicators
-      }
+      else if (curData[1,changedMindInd]==-2){
+        outList[k]=-2 #person cannot remember their aid amount
+        changed = 1
+      } 
     }
-    else{ #no indicator found
-      if(strList[6]=="2004") { #we should check for the 2 entry in changed mind indicator
-        if (curData[1,changedMindInd]==2){
-          outList[k]=0 #no aid received after all
+    
+    #extract aid amount
+    if (changed ==0){
+      if (schoolAidInd %in% colnames(curData)){ #indicator variable found-
+        curInd= curData[1, schoolAidInd]
+        if (curInd==0){ #no aid received from this school
+          print("ind0")
+          print(i)
+          outList[k] = 0
         } 
-        else{
-          outList[k] = -9 #no indicator found and missin
+        
+        else if (curInd == 1){ #aid offer received
+          print("ind1")
+          print(i)
+          if (schoolAidStr %in% colnames(curData)){ #aid offer variable exists
+            outList[k] = curData[1,schoolAidStr]
+          } 
+          else {
+            outList[k] = -7 #B variable (amount) not found
+          }
         }
-      } 
-      else{
+        
+        else if(curInd == 2){
+          #print("ind2")
+          #print(i)
+          outList[k] = -8 #no aid decision received yet
+        }
+        
+        else { #curind was another negative value
+          outList[k] = curData[1, schoolAidInd]*100 #to be able to distinguish these missing inficators from value missing indicators
+        }
+      }
+      
+      else{ #no indicator found
         outList[k] = -9 #no indicator found and missing
       }
     }

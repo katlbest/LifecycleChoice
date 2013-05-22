@@ -145,6 +145,7 @@
       #build varListDLI
         varListDLI= colnames(SECRET_DATA)[grep("PREV_COL_APP", colnames(SECRET_DATA))]
       aidListDLI = list()
+      matchList = rep(NA, nrow(LONG_DATA))
       for (i in 1: nrow(LONG_DATA)){
         curData = FIN_DATA[FIN_DATA$PUBID_1997 == LONG_DATA$PUBID_1997[i],]
         curSchool = LONG_DATA$AdmittedSchool[i]
@@ -156,8 +157,10 @@
         }
         if (length(varListMATCH>0)){
           aidListDLI[[i]] = getAidDLI(varListMATCH)
+          matchList[i] = 1
         } else{
           aidListDLI[[i]]= -3
+          matchList[i] = 0
         }
       }
 
@@ -215,7 +218,7 @@
     #fill in all possible data using YSCH (attended school) data, since this is the best estimate we have
       count = 0
       for (i in 1:nrow(LONG_DATA)){
-        if (YCOCEst[i]<0 & YSCHEst[i] >= 0){
+        if (YCOCEst[i]<0 & YSCHEst[i] >= 0){ #we may want to do this only where YCOCEst == -3 implying that school was never included in applied list
           count = count+1
           YCOCEst[i] = YSCHEst[i]
         }
@@ -223,7 +226,7 @@
 
 #test other improvements =========================================================
 
-  #check accuracy of aid data
+  #check accuracy of aid data for attended schools
     diffList = rep(NA, nrow(LONG_DATA))
     for (i in 1:nrow(LONG_DATA)){
       if (YSCHEst[i]>= 0 & YCOCEst[i]>= 0){
@@ -232,3 +235,5 @@
     }
     mean(na.exclude(diffList))
 
+
+  #check whether missing 2003 schools appear in the PREV roster
