@@ -202,9 +202,7 @@
         if (YCOCEst[i]<0){
           #check DLI data and replace if better
           DLIEst = max(aidListDLI[[i]])
-          if (DLIEst>=0){
-            YCOCEst[i]=DLIEst
-          }
+          YCOCEst[i]=max(YCOCEst[i], DLIEst) #less negative missing values are more informative
         }
       }
 
