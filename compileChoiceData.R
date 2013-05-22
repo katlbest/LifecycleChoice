@@ -212,23 +212,16 @@
           YSCHEst[i] = max(aidListYSCH[[i]])
         }
 
-    #fill in with YSCH where there was no data in YCOC
+    #fill in all possible data using YSCH (attended school) data, since this is the best estimate we have
       count = 0
       for (i in 1:nrow(LONG_DATA)){
-        if (YCOCEst[i]==-3 & YSCHEst[i] >= 0){
+        if (YCOCEst[i]<0 & YSCHEst[i] >= 0){
           count = count+1
           YCOCEst[i] = YSCHEst[i]
         }
       }
 
 #test other improvements =========================================================
-  #count others we could fill--could fill 157 with attended data!
-    count = 0
-    for (i in 1:nrow(LONG_DATA)){
-      if (YCOCEst[i]<0 & YSCHEst[i] >= 0){
-        count = count+1
-      }
-    }
 
   #check accuracy of aid data
     diffList = rep(NA, nrow(LONG_DATA))

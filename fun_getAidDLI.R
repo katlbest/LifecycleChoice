@@ -43,13 +43,22 @@ getAidDLI<- function(varList){
           outList[k] = curData[1, schoolAidInd]*100 #keep track of missingness indicator like below
         }
       }
-      
       else { #curind was another negative value
         outList[k] = curData[1, schoolAidInd]*100 #to be able to distinguish these missing inficators from value missing indicators
       }
     }
-    else{
-      outList[k] = -9 #no indicator found
+    else{ #no indicator found
+      if(strList[6]=="2004") { #we should check for the 2 entry in changed mind indicator
+        if (curData[1,changedMindInd]==2){
+          outList[k]=0 #no aid received after all
+        } 
+        else{
+          outList[k] = -9 #no indicator found and missin
+        }
+      } 
+      else{
+        outList[k] = -9 #no indicator found and missing
+      }
     }
   }
   return(outList)
