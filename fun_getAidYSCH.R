@@ -32,6 +32,31 @@ getAidYSCH<- function(varList){
           outList[k] =  max(outList[k], 0)+curData[1,grantVarList[j]]
         }
       }
+    
+    #get loan amount
+      loanStr = "YSCH_25600"
+      loanVarList = colnames(curData)[grep(loanStr, colnames(curData))]
+      loanStr = paste(strList[2], strList[3], sep = "_")
+      loanVarList= loanVarList[grep(loanStr, loanVarList)]
+      for (j in 1:(min(maxTerm, length(loanVarList)))){
+        if (curData[1,loanVarList[j]]>=0){
+          outList[k] =  max(outList[k], 0)+curData[1,loanVarList[j]]
+        }
+      }
+    
+    #get other amount
+      otherStr = "YSCH_26400"
+      otherVarList = colnames(curData)[grep(otherStr, colnames(curData))]
+      otherStr = paste(strList[2], strList[3], sep = "_")
+      otherVarList= otherVarList[grep(otherStr, otherVarList)]
+      if (length(otherVarList >0)){
+        for (j in 1:(min(maxTerm, length(otherVarList)))){
+          if (curData[1,otherVarList[j]]>=0){
+            outList[k] =  max(outList[k], 0)+curData[1,otherVarList[j]]
+          } 
+        }
+      }
+    
   }
   return(outList)
 }

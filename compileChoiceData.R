@@ -122,18 +122,12 @@
     source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_getAid.R")
     source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_getAidDLI.R")
     source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_getAidYSCH.R")
-    TEMP_LONG_DATA = LONG_DATA
-    TEMP_LONG_DATA$SCHOOLAID= -6
-    TEMP_LONG_DATA$INDEPAID = -6
-    TEMP_LONG_DATA$ATTENDEDAID = -6
-    TEMP_LONG_DATA$ATTENDEDAIDMISS = 0
-    TEMP_LONG_DATA$MAXTERM = 0
 
     #get aid from YCOC-055 variables (main)
       aidList055 = list()
-      for (i in 1: nrow(TEMP_LONG_DATA)){
-        curData = FIN_DATA[FIN_DATA$PUBID_1997 == TEMP_LONG_DATA$PUBID_1997[i],]
-        curSchool = TEMP_LONG_DATA$AdmittedSchool[i]
+      for (i in 1: nrow(LONG_DATA)){
+        curData = FIN_DATA[FIN_DATA$PUBID_1997 == LONG_DATA$PUBID_1997[i],]
+        curSchool = LONG_DATA$AdmittedSchool[i]
         varListMATCH = c()
         for (j in 1:length(varListYCOC)){ #look for current school index in all YCOC variables, beginning with earliest
           if (curData[1,varListYCOC[j]]==curSchool){
@@ -151,9 +145,9 @@
       #build varListDLI
         varListDLI= colnames(SECRET_DATA)[grep("PREV_COL_APP", colnames(SECRET_DATA))]
       aidListDLI = list()
-      for (i in 1: nrow(TEMP_LONG_DATA)){
-        curData = FIN_DATA[FIN_DATA$PUBID_1997 == TEMP_LONG_DATA$PUBID_1997[i],]
-        curSchool = TEMP_LONG_DATA$AdmittedSchool[i]
+      for (i in 1: nrow(LONG_DATA)){
+        curData = FIN_DATA[FIN_DATA$PUBID_1997 == LONG_DATA$PUBID_1997[i],]
+        curSchool = LONG_DATA$AdmittedSchool[i]
         varListMATCH = c()
         for (j in 1:length(varListDLI)){ 
           if (curData[1,varListDLI[j]]==curSchool){
@@ -171,9 +165,9 @@
       otherAidStr = paste("YCOC_022_01_",sep = "")
       varList022= colnames(FIN_DATA)[grep(otherAidStr, colnames(FIN_DATA))]
       aidListALLSCHOOL = list()
-      for (i in 1:nrow(TEMP_LONG_DATA)){
+      for (i in 1:nrow(LONG_DATA)){
         aidListALLSCHOOL[[i]]= rep(NA, length(varList022))
-        curData = FIN_DATA[FIN_DATA$PUBID_1997 == TEMP_LONG_DATA$PUBID_1997[i],]
+        curData = FIN_DATA[FIN_DATA$PUBID_1997 == LONG_DATA$PUBID_1997[i],]
         for (k in 1:length(varList022)){
           aidListALLSCHOOL[[i]][k] = curData[1,varList022[k]]
         }
@@ -181,9 +175,9 @@
 
     #get aid data from YSCH for attended schools
     aidListYSCH = list()
-    for (i in 1:nrow(TEMP_LONG_DATA)){
-      curData = FIN_DATA[FIN_DATA$PUBID_1997 == TEMP_LONG_DATA$PUBID_1997[i],]
-      curSchool = TEMP_LONG_DATA$AdmittedSchool[i]
+    for (i in 1:nrow(LONG_DATA)){
+      curData = FIN_DATA[FIN_DATA$PUBID_1997 == LONG_DATA$PUBID_1997[i],]
+      curSchool = LONG_DATA$AdmittedSchool[i]
       varListMATCH = c()
       for (j in 1:length(varListGEO)){
         if (curData[1,varListGEO[j]]==curSchool){
@@ -199,11 +193,11 @@
 
     #combine financial aid estimates
       for (i in 1:nrow(LONG_DATA)){
-        LONG_DATA$SCHOOL_AID[i] = max(TEMP_LONG_DATA$SCHOOLAID[i], TEMP_LONG_DATA$ATTENDEDAID[i])
+        LONG_DATA$SCHOOL_AID[i] = max(LONG_DATA$SCHOOLAID[i], LONG_DATA$ATTENDEDAID[i])
       }
-      LONG_DATA$SHARED_AID = TEMP_LONG_DATA$INDEPAID
-      write.csv(TEMP_LONG_DATA[,c("PUBID_1997", "loop", "school", "year","geoschool", "geoyear","SCHOOLAID","INDEPAID", "ATTENDEDAID", "ATTENDEDAIDMISS", "MAXTERM")], "D:/test.csv")
-      write.csv(TEMP_LONG_DATA[,c("PUBID_1997", "loop", "school", "year","SCHOOLAID")], "D:/test3.csv")
+      LONG_DATA$SHARED_AID = LONG_DATA$INDEPAID
+      write.csv(LONG_DATA[,c("PUBID_1997", "loop", "school", "year","geoschool", "geoyear","SCHOOLAID","INDEPAID", "ATTENDEDAID", "ATTENDEDAIDMISS", "MAXTERM")], "D:/test.csv")
+      write.csv(LONG_DATA[,c("PUBID_1997", "loop", "school", "year","SCHOOLAID")], "D:/test3.csv")
       write.csv(LONG_DATA, "D:/test2.csv")
 
 
