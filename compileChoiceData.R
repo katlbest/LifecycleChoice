@@ -143,7 +143,7 @@
 
     #get aid from DLI variables (date of last interview), this only yields one result for i = 973, pubid = 6412
       #build varListDLI
-        varListDLI= colnames(SECRET_DATA)[grep("PREV_COL_APP", colnames(SECRET_DATA))]
+      varListDLI= colnames(SECRET_DATA)[grep("PREV_COL_APP", colnames(SECRET_DATA))]
       aidListDLI = list()
       matchList = rep(NA, nrow(LONG_DATA))
       for (i in 1: nrow(LONG_DATA)){
