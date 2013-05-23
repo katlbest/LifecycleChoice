@@ -196,13 +196,15 @@
 
     #combine financial aid estimates
       YCOCEst = rep(-3, nrow(LONG_DATA))
+      TOTEst = rep(-3, nrow(LONG_DATA))
       #aggregate YCOC data
       for (i in 1:nrow(LONG_DATA)){
         YCOCEst[i] = max(aidList055[[i]])
+        TOTEst[i] = YCOCEst[i]
         if (YCOCEst[i]<0){
           #check DLI data and replace if better
           DLIEst = max(aidListDLI[[i]])
-          YCOCEst[i]=max(YCOCEst[i], DLIEst) #less negative missing values are more informative
+          TOTEst[i]=max(YCOCEst[i], DLIEst) #less negative missing values are more informative
         }
       }
 
@@ -216,11 +218,24 @@
     #fill in all possible data using YSCH (attended school) data, since this is the best estimate we have
       count = 0
       for (i in 1:nrow(LONG_DATA)){
-        if (YCOCEst[i]<0 & YSCHEst[i] >= 0){ #we may want to do this only where YCOCEst == -3 implying that school was never included in applied list
+        if (TOTEst[i]<0 & YSCHEst[i] >= 0){ #we may want to do this only where YCOCEst == -3 implying that school was never included in applied list
           count = count+1
-          YCOCEst[i] = YSCHEst[i]
+          TOTEst[i] = YSCHEst[i]
         }
       }
+
+    #update people in weird categories
+    for (i in 1:nrow(LONG_DATA)){
+      if (TOTEst[i]==-4 & YCOCEst[i]==-200){ #these are 2003 people who said they did not know if they got aid in initial interview, then were ineligible for followup, coded to dont know
+        TOTEst[i] = -200 #don't know about their aid when asked IF THEY GOT ANY
+      }
+      if (TOTEst[i]==-3 & YCOCEst[i]==-200){ #these are 2003 people who said they did not know if they got aid in initial interview, then their school did not appear in the DLI variables
+        TOTEst[i] = -200 #don't know about their aid when asked IF THEY GOT ANY
+      }
+      if (TOTEst[i]== -3 & YCOCEst[i]==-200){#one person who was not eligible for aid
+        TOTEst[i]= 0
+      }
+    }
 
 #test other improvements =========================================================
 

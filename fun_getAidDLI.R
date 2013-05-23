@@ -9,33 +9,48 @@ getAidDLI<- function(varList){
     schoolAidInd =paste("YCOC_DLI_040_", strList[5], "_", strList[6], sep= "")  
     schoolAidStr= paste("YCOC_DLI_047_", strList[5], "_", strList[6], sep= "")  
     changedMindInd= paste("YCOC_DLI_045_", strList[5], "_", strList[6], sep= "")
+    pendingDecisionInd = paste("YCOC_DLI_030_", strList[5], "_", strList[6], sep = "")
+    pendingAmountInd = paste("YCOC_DLI_043_", strList[5], "_", strList[6], sep = "")
     
-    #check to make sure we haven't got a changed mind situation
-    changed = 0
-    if(strList[6]=="2004") { #we should check for the 2 entry in changed mind indicator
+    #treat 2004 cases differently
+    if(strList[6]=="2004") {
+      curChangeInd = curData[1,changedMindInd]
+      curPendDecisionInd = curData[1,pendingDecisionInd]
+      curPendAmountInd = curData[1,pendingAmountInd]
+      if (curPendDecisionInd==0){ #no pending decision, so no aid received
+        outList[k]=0
+      } else if(curPendAmountInd==0){ #no amount pending, so no aid received
+        outList[k]=0
+      }
       if (curData[1,changedMindInd]==2){
-        outList[k]=0 #no aid received after all
-        changed = 1
+        outList[k]=0 #no aid received even though so indicated last time
       } 
       else if (curData[1,changedMindInd]==-2){
         outList[k]=-2 #person cannot remember their aid amount
-        changed = 1
-      } 
+      }
+      else {
+        if (schoolAidStr %in% colnames(curData)){ #aid offer variable exists
+          outList[k] = curData[1,schoolAidStr]
+        } 
+        else {
+          outList[k] = -7 #B variable (amount) not found
+        }
+      }
     }
     
-    #extract aid amount
-    if (changed ==0){
+    #extract aid amount for non-2004 people
+    else {
       if (schoolAidInd %in% colnames(curData)){ #indicator variable found-
         curInd= curData[1, schoolAidInd]
         if (curInd==0){ #no aid received from this school
-          print("ind0")
-          print(i)
+          #print("ind0")
+          #print(i)
           outList[k] = 0
         } 
         
         else if (curInd == 1){ #aid offer received
-          print("ind1")
-          print(i)
+          #print("ind1")
+          #print(i)
           if (schoolAidStr %in% colnames(curData)){ #aid offer variable exists
             outList[k] = curData[1,schoolAidStr]
           } 
