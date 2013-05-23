@@ -237,6 +237,8 @@
       }
     }
 
+  LONG_DATA$FINAIDEST = TOTEst
+
 #test other improvements =========================================================
 
   #check accuracy of aid data for attended schools
