@@ -224,6 +224,15 @@
         }
       }
 
+    #estimate all school aid
+      ALLSCHOOLEst = rep(-3, nrow(LONG_DATA))
+      for (i in 1:nrow(LONG_DATA)){
+        ALLSCHOOLEst[i] = max(aidListALLSCHOOL[[i]])
+      }
+      #set -4's to zero since they mean not eligible for all school aid
+        #-2 indicates don't know
+        ALLSCHOOLEst[ALLSCHOOLEst==-4]=0
+      
     #update people in weird categories
     for (i in 1:nrow(LONG_DATA)){
       if (TOTEst[i]==-4 & YCOCEst[i]==-200){ #these are 2003 people who said they did not know if they got aid in initial interview, then were ineligible for followup, coded to dont know
@@ -238,6 +247,7 @@
     }
 
   LONG_DATA$FINAIDEST = TOTEst
+  LONG_DATA$AIDALLSCHOOL = ALLSCHOOLEst
   write.csv(LONG_DATA, "D:/longdata.csv")
 
 #test other improvements =========================================================
