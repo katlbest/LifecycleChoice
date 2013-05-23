@@ -238,6 +238,7 @@
     }
 
   LONG_DATA$FINAIDEST = TOTEst
+  write.csv(LONG_DATA, "D:/longdata.csv")
 
 #test other improvements =========================================================
 
