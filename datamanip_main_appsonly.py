@@ -17,8 +17,8 @@ studentLookup = {} #Lookup table for personal information by PUBID_1997
 
 #define classes========================================================================================
 class CollegeData: #class storing college data
-	def __init__(self, colName, bachFlag, control, selectivity, sat25, sat75, admitperc, carnegie, tuivary):
-		self.colName, self.bachFlag, self.control, self.selectivity, self.sat25, self.sat75, self.admitperc, self.carnegie, self.tuivary = colName, bachFlag, control, selectivity, sat25, sat75, admitperc, carnegie, tuivary
+	def __init__(self, colName, bachFlag, control, selectivity, sat25, sat75, admitperc, carnegie, tuivary, relaffil, ft_ug, ft_gd, xenrlftm, xenrlftw, confno1):
+		self.colName, self.bachFlag, self.control, self.selectivity, self.sat25, self.sat75, self.admitperc, self.carnegie, self.tuivary, self.relaffil, self.ft_ug, self.ft_gd, self.xenrlftm, self.xenrlftw, self.confno1 = colName, bachFlag, control, selectivity, sat25, sat75, admitperc, carnegie, tuivary, relaffil, ft_ug, ft_gd, xenrlftm, xenrlftw, confno1
 
 	def __str__(self):
 		return str(self.colName) + "\t" + str(self.bachFlag) + "\t" + str(self.control) +  "\t" + str(self.selectivity)
@@ -62,12 +62,12 @@ def main():
 
 	#pull data needed to fill int missing selectivity (and possibly other data in the future)
 	#we only need this for the selectivity regression, so do not run every time
-	populateCollegeData(2004)
-	populateCollegeData(2006)
-	populateCollegeData(2005)
-	populateCollegeData(2003)
-	populateCollegeData(2002)
-	populateCollegeData(2001)
+	#populateCollegeData(2004)
+	#populateCollegeData(2006)
+	#populateCollegeData(2005)
+	#populateCollegeData(2003)
+	#populateCollegeData(2002)
+	#populateCollegeData(2001)
 	populateCollegeData(2011)
 	#writeMissingSelect()
 
@@ -84,8 +84,8 @@ def main():
 	#get financial aid variables that are specific to student
 	#populateFinAidVars()
 
-	#print college data
-	printCollegeData()
+	#save college data
+	saveCollegeData()
 
 #function definitions==============================================================================================
 def collegeListSetup(): #extract list of colleges people have attended
@@ -136,6 +136,12 @@ def IPEDScheck(myYear): #look up colleges in the list in myYear's ipeds list and
 		curSat75 = -3
 		curAdmitperc = -3
 		curTuivary = -3
+		curRelaffil= -3
+		curFt_ug= -3
+		curFt_gd= -3
+		curXenrlftm= -3
+		curXenrlftw= -3
+		curConfno1= -3
 		if myYear < 2005:
 			curCarnegie = varList[36]
 		elif myYear <2007:
@@ -144,7 +150,7 @@ def IPEDScheck(myYear): #look up colleges in the list in myYear's ipeds list and
 			curCarnegie = -3
 		if unitID not in collegeDataLookup: #update current known IPED IDs#
 			curSelectivity = -3  #we haven't done this yet
-			curColData = CollegeData(colName, curBachFlag, curControl, curSelectivity, curSat25, curSat75, curAdmitperc, curCarnegie, curTuivary)
+			curColData = CollegeData(colName, curBachFlag, curControl, curSelectivity, curSat25, curSat75, curAdmitperc, curCarnegie, curTuivary, curRelaffil, curFt_ug, curFt_gd, curXenrlftm, curXenrlftw, curConfno1)
 			collegeDataLookup[unitID] = curColData
 		if (opeid not in OPEIDcrosswalkLookup): #update OPEID crosswalk
 			OPEIDcrosswalkLookup[opeid]= unitID
@@ -551,16 +557,18 @@ def setupIndividualData():
 	print "Total number of attenders without a max selectivity: " + str(noSelectCounter)
 	print "Total number of non-attendee applicants without a max selectivity: " + str(noSelectCounter2)
 
-def printCollegeData():
-	headerstr = "test"
+def saveCollegeData():
+	global collegeList
+	global collegeDataLookup
+	headerstr = "collegeID" + "\t"+ "control"+"\t"+ "selectivity" + "\t"+ "tuivaryIndicator" +  "\t" + "religAffiliation" + "\t" +"fulltime_UG" + "\t" + "fulltime_GRAD" + "\t" + "male_enrolled" + "\t" + "female_enrolled" + "\t" + "conference_no" +"\n"
 	open("C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/collegedataoutput.txt","wb").write(headerstr)
 	for i in collegeList:
 		if i in collegeDataLookup:
 			curCollege = collegeDataLookup[i]
-			curOutput = str(curCollege.colName) + "\t" + str(curCollege.bachFlag) + "\t" + str(curCollege.control) +  "\t" + str(curCollege.selectivity) + "\t" + str(curCollege.tuivary)
+			curOutput = str(i) + "\t" + str(curCollege.control) +  "\t" + str(curCollege.selectivity) + "\t" + str(curCollege.tuivary) +  "\t" + str(cur.College.relaffil) + "\t" + str(cur.College.ft_ug) + "\t" + str(curCollege.ft_gd) + "\t" + str(curCollege.xenrlftm) + "\t" + str(curCollege.xenrlftw) + "\t" + str(curCollege.confno1) + "\n"
 		else:
-			outStr3 = str(i)
-	open("C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/collegedataoutput.txt","a").write(curOutput)
+			outStr3 = str(i) + "\n"
+		open("C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/collegedataoutput.txt","a").write(curOutput)
 
 #def populateFinAidVars():
 #	vectorList = open('D:/studentadmitdata.txt', 'r')
