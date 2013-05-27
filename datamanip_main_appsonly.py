@@ -17,8 +17,8 @@ studentLookup = {} #Lookup table for personal information by PUBID_1997
 
 #define classes========================================================================================
 class CollegeData: #class storing college data
-	def __init__(self, colName, bachFlag, control, selectivity, sat25, sat75, admitperc, carnegie, tuivary, relaffil, ft_ug, ft_gd, enrlftm, enrlftw, confno1):
-		self.colName, self.bachFlag, self.control, self.selectivity, self.sat25, self.sat75, self.admitperc, self.carnegie, self.tuivary, self.relaffil, self.ft_ug, self.ft_gd, self.enrlftm, self.enrlftw, self.confno1 = colName, bachFlag, control, selectivity, sat25, sat75, admitperc, carnegie, tuivary, relaffil, ft_ug, ft_gd, enrlftm, enrlftw, confno1
+	def __init__(self, colName, bachFlag, control, selectivity, sat25, sat75, admitperc, carnegie, tuivary, relaffil, ft_ug, ft_gd, enrlftm, enrlftw, confno1, state, locale):
+		self.colName, self.bachFlag, self.control, self.selectivity, self.sat25, self.sat75, self.admitperc, self.carnegie, self.tuivary, self.relaffil, self.ft_ug, self.ft_gd, self.enrlftm, self.enrlftw, self.confno1, self.state, self.locale = colName, bachFlag, control, selectivity, sat25, sat75, admitperc, carnegie, tuivary, relaffil, ft_ug, ft_gd, enrlftm, enrlftw, confno1, state, locale
 
 	def __str__(self):
 		return str(self.colName) + "\t" + str(self.bachFlag) + "\t" + str(self.control) +  "\t" + str(self.selectivity)
@@ -62,12 +62,12 @@ def main():
 
 	#pull data needed to fill int missing selectivity (and possibly other data in the future)
 	#we only need this for the selectivity regression, so do not run every time
-	#populateCollegeData(2004)
-	#populateCollegeData(2006)
-	#populateCollegeData(2005)
-	#populateCollegeData(2003)
-	#populateCollegeData(2002)
-	#populateCollegeData(2001)
+	populateCollegeData(2004)
+	populateCollegeData(2006)
+	populateCollegeData(2005)
+	populateCollegeData(2003)
+	populateCollegeData(2002)
+	populateCollegeData(2001)
 	populateCollegeData(2011)
 	#writeMissingSelect()
 
@@ -122,38 +122,64 @@ def IPEDScheck(myYear): #look up colleges in the list in myYear's ipeds list and
 	global missedCollegeList
 	global OPEIDcrosswalkLookup
 	global collegeDataLookup
+	if (myYear ==2011):
+		stringList = ['STABBR', 'LOCALE']
+	else:
+		stringList = ['stabbr', 'locale']
+	indexVector = [0]*len(stringList)
 	curIPEDS = open('C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/hd' + str(myYear) + '.txt', 'rb')
-	#update set of "known" IDs and OPEID lookup table
+	linecount = 1
 	for line in curIPEDS.readlines():
-		varList = line.split('\t')
-		unitID = varList[0]
-		colName = varList[1]
-		opeid = varList[15]
-		curBachFlag = varList[19]
-		curControl = varList[20]
-		#TBD setup read-in of these relevant variables, probabaly as separate function
-		curSat25 = -3
-		curSat75 = -3
-		curAdmitperc = -3
-		curTuivary = -3
-		curRelaffil= -3
-		curFt_ug= -3
-		curFt_gd= -3
-		curEnrlftm= -3
-		curEnrlftw= -3
-		curConfno1= -3
-		if myYear < 2005:
-			curCarnegie = varList[36]
-		elif myYear <2007:
-			curCarnegie = varList[49]
-		else:
-			curCarnegie = -3
-		if unitID not in collegeDataLookup: #update current known IPED IDs#
-			curSelectivity = -3  #we haven't done this yet
-			curColData = CollegeData(colName, curBachFlag, curControl, curSelectivity, curSat25, curSat75, curAdmitperc, curCarnegie, curTuivary, curRelaffil, curFt_ug, curFt_gd, curEnrlftm, curEnrlftw, curConfno1)
-			collegeDataLookup[unitID] = curColData
-		if (opeid not in OPEIDcrosswalkLookup): #update OPEID crosswalk
-			OPEIDcrosswalkLookup[opeid]= unitID
+		#find index for each item we want
+		if linecount ==1: #first line, so find indexes
+			linecount = linecount+1
+			varNameList = line.split('\t')
+			for i in range(0,len(varNameList)):
+				j = 0
+				while j < len(stringList):
+					if varNameList[i] == stringList[j]:
+						#print "found "+ str(j) + "," + str(myYear)
+						indexVector[j] = i
+						j = len(stringList)
+					else: 
+						j = j+1
+		else: #other lines, so get info on schools
+			varList = line.split('\t')
+			unitID = varList[0]
+			varVector = [0]*len(stringList)
+			#old variables that are done by known index
+			unitID = varList[0]
+			colName = varList[1]
+			opeid = varList[15]
+			curBachFlag = varList[19]
+			curControl = varList[20]
+			#variables in list
+			curState = varVector[0]
+			curLocale = varVector[1]
+			#variables from other files
+			curSat25 = -3
+			curSat75 = -3
+			curAdmitperc = -3
+			curTuivary = -3
+			curRelaffil= -3
+			curFt_ug= -3
+			curFt_gd= -3
+			curEnrlftm= -3
+			curEnrlftw= -3
+			curConfno1= -3
+			if myYear < 2005:
+				curCarnegie = varList[36]
+			elif myYear <2007:
+				curCarnegie = varList[49]
+			else:
+				curCarnegie = -3
+			if unitID not in collegeDataLookup: #update current known IPED IDs#
+				#TBD we are not adding data here if the school already exists but has missing information. may need to be fixed if data missingness is an issue
+				curSelectivity = -3  #we haven't done this yet
+				curColData = CollegeData(colName, curBachFlag, curControl, curSelectivity, curSat25, curSat75, curAdmitperc, curCarnegie, curTuivary, curRelaffil, curFt_ug, curFt_gd, curEnrlftm, curEnrlftw, curConfno1, curState, curLocale)
+				collegeDataLookup[unitID] = curColData
+			if (opeid not in OPEIDcrosswalkLookup): #update OPEID crosswalk
+				OPEIDcrosswalkLookup[opeid]= unitID
 	curIPEDS.close()
 	missedCollegeListCopy = list(missedCollegeList)
 	collegeListCopy = list(collegeList)
@@ -224,125 +250,75 @@ def populateCollegeData(myYear):
 	global missedCollegeList
 	global OPEIDcrosswalkLookup
 	global collegeDataLookup
+	curIPEDS = open('C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/ic' + str(myYear) + '.txt', 'rb')
+	linecount = 1
 	if myYear == 2011:
-		curIPEDS = open('C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/ic' + str(myYear) + '.txt', 'rb')
-		linecount = 1
-		if myYear == 2011:
-			stringList = ['SATMT25', 'SATMT75', 'SATVR25', 'SATVR75', 'ACTCM25', 'ACTCM75', 'ACTEN25', 'ACTEN75', 'APPLCN', 'ADMSSN', 'TUITVARY', 'RELAFFIL', 'FT_UG', 'FT_GD', 'ENRLFTM', 'ENRLFTW', 'CONFNO1']
-		else:
-			stringList = ['satmt25', 'satmt75', 'satvr25', 'satvr75', 'actcm25', 'actcm75', 'acten25', 'acten75', 'applcn', 'admssn', 'tuitvary', 'relaffil', 'ft_ug', 'ft_gd', 'enrlftm', 'enrlftw', 'confno1']
-		indexVector = [0]*len(stringList)
-		for line in curIPEDS.readlines():
-			#find index for each item we want
-			if linecount ==1:
-				linecount = linecount+1
-				varNameList = line.split('\t')
-				for i in range(0,len(varNameList)):
-					j = 0
-					while j < len(stringList):
-						if varNameList[i] == stringList[j]:
-							#print "found "+ str(j) + "," + str(myYear)
-							indexVector[j] = i
-							j = len(stringList)
-						else: 
-							j = j+1
-				#print indexVector
-			#get info on each school
-			else:
-				varList = line.split('\t')
-				unitID = varList[0]
-				varVector = [0]*len(stringList)
-				for i in range(0,len(varVector)):
-					if varList[indexVector[i]] == "" or varList[indexVector[i]] == ".":
-						varVector[i]= 0
-					else:
-						varVector[i] = int(varList[indexVector[i]])
-				curCollege = collegeDataLookup[unitID]
-				if curCollege.sat25 == -3:
-					if varVector[0] >0: #have SAT scores
-						curCollege.sat25 = varVector[0]+ varVector[2]
-					elif varVector[4] >0: #have ACT scores
-						curCollege.sat25 = 41.084*(varVector[4]+varVector[6]) +116.45
-				if curCollege.sat75 == -3:
-					if varVector[1] >0: #have SAT scores
-						curCollege.sat75 = varVector[1]+ varVector[3]
-					elif varVector[5] >0: #have ACT scores
-						curCollege.sat75 = 41.084*(varVector[5]+varVector[7]) +116.45
-					#print str(unitID)+ ","  + str(collegeDataLookup[unitID].sat75)
-				if curCollege.admitperc == -3:
-					if varVector[8]>0 and varVector[9]>0:
-						curCollege.admitperc = float(float(varVector[9])/float(varVector[8]))
-				if curCollege.tuivary == -3:
-					if varVector[10]>0:
-						curCollege.tuivary = varVector[10]
-				if curCollege.relaffil == -3:
-					if varVector[11]>-3:
-						curCollege.relaffil = varVector[11]				
-				if curCollege.ft_ug == -3:
-					if varVector[12]>0:
-						curCollege.ft_ug = varVector[12]
-				if curCollege.ft_gd == -3:
-					if varVector[13]>0:
-						curCollege.ft_gd = varVector[13]
-				if curCollege.enrlftm == -3:
-					if varVector[14]>0:
-						curCollege.enrlftm = varVector[14]
-				if curCollege.enrlftw == -3:
-					if varVector[15]>0:
-						curCollege.enrlftw = varVector[15]
-				if curCollege.confno1 == -3:
-					if varVector[16]>0:
-						curCollege.confno1 = varVector[16]
-			curIPEDS.close()
+		stringList = ['SATMT25', 'SATMT75', 'SATVR25', 'SATVR75', 'ACTCM25', 'ACTCM75', 'ACTEN25', 'ACTEN75', 'APPLCN', 'ADMSSN', 'TUITVARY', 'RELAFFIL', 'FT_UG', 'FT_GD', 'ENRLFTM', 'ENRLFTW', 'CONFNO1']
 	else:
-		curIPEDS = open('C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/ic' + str(myYear) + '.txt', 'rb')
-		linecount = 1
-		if myYear == 2011:
-			stringList = ['SATMT25', 'SATMT75', 'SATVR25', 'SATVR75', 'ACTCM25', 'ACTCM75', 'ACTEN25', 'ACTEN75', 'APPLCN', 'ADMSSN', ]
+		stringList = ['satmt25', 'satmt75', 'satvr25', 'satvr75', 'actcm25', 'actcm75', 'acten25', 'acten75', 'applcn', 'admssn', 'tuitvary', 'relaffil', 'ft_ug', 'ft_gd', 'enrlftm', 'enrlftw', 'confno1']
+	indexVector = [0]*len(stringList)
+	for line in curIPEDS.readlines():
+		#find index for each item we want
+		if linecount ==1:
+			linecount = linecount+1
+			varNameList = line.split('\t')
+			for i in range(0,len(varNameList)):
+				j = 0
+				while j < len(stringList):
+					if varNameList[i] == stringList[j]:
+						#print "found "+ str(j) + "," + str(myYear)
+						indexVector[j] = i
+						j = len(stringList)
+					else: 
+						j = j+1
+			#print indexVector
+		#get info on each school
 		else:
-			stringList = ['satmt25', 'satmt75', 'satvr25', 'satvr75', 'actcm25', 'actcm75', 'acten25', 'acten75', 'applcn', 'admssn']
-		indexVector = [0]*len(stringList)
-		for line in curIPEDS.readlines():
-			#find index for each item we want
-			if linecount ==1:
-				linecount = linecount+1
-				varNameList = line.split('\t')
-				for i in range(0,len(varNameList)):
-					j = 0
-					while j < len(stringList):
-						if varNameList[i] == stringList[j]:
-							#print "found "+ str(j) + "," + str(myYear)
-							indexVector[j] = i
-							j = len(stringList)
-						else: 
-							j = j+1
-				#print indexVector
-			#get info on each school
-			else:
-				varList = line.split('\t')
-				unitID = varList[0]
-				varVector = [0]*len(stringList)
-				for i in range(0,len(varVector)):
-					if varList[indexVector[i]] == "" or varList[indexVector[i]] == ".":
-						varVector[i]= 0
-					else:
-						varVector[i] = int(varList[indexVector[i]])
-				curCollege = collegeDataLookup[unitID]
-				if curCollege.sat25 == -3:
-					if varVector[0] >0: #have SAT scores
-						curCollege.sat25 = varVector[0]+ varVector[2]
-					elif varVector[4] >0: #have ACT scores
-						curCollege.sat25 = 41.084*(varVector[4]+varVector[6]) +116.45
-				if curCollege.sat75 == -3:
-					if varVector[1] >0: #have SAT scores
-						curCollege.sat75 = varVector[1]+ varVector[3]
-					elif varVector[5] >0: #have ACT scores
-						curCollege.sat75 = 41.084*(varVector[5]+varVector[7]) +116.45
-					#print str(unitID)+ ","  + str(collegeDataLookup[unitID].sat75)
-				if curCollege.admitperc == -3:
-					if varVector[8]>0 and varVector[9]>0:
-						curCollege.admitperc = float(float(varVector[9])/float(varVector[8]))
-			curIPEDS.close()
+			varList = line.split('\t')
+			unitID = varList[0]
+			varVector = [0]*len(stringList)
+			for i in range(0,len(varVector)):
+				if varList[indexVector[i]] == "" or varList[indexVector[i]] == ".":
+					varVector[i]= 0
+				else:
+					varVector[i] = int(varList[indexVector[i]])
+			curCollege = collegeDataLookup[unitID]
+			if curCollege.sat25 == -3:
+				if varVector[0] >0: #have SAT scores
+					curCollege.sat25 = varVector[0]+ varVector[2]
+				elif varVector[4] >0: #have ACT scores
+					curCollege.sat25 = 41.084*(varVector[4]+varVector[6]) +116.45
+			if curCollege.sat75 == -3:
+				if varVector[1] >0: #have SAT scores
+					curCollege.sat75 = varVector[1]+ varVector[3]
+				elif varVector[5] >0: #have ACT scores
+					curCollege.sat75 = 41.084*(varVector[5]+varVector[7]) +116.45
+				#print str(unitID)+ ","  + str(collegeDataLookup[unitID].sat75)
+			if curCollege.admitperc == -3:
+				if varVector[8]>0 and varVector[9]>0:
+					curCollege.admitperc = float(float(varVector[9])/float(varVector[8]))
+			if curCollege.tuivary == -3:
+				if varVector[10]>0:
+					curCollege.tuivary = varVector[10]
+			if curCollege.relaffil == -3:
+				if varVector[11]>-3:
+					curCollege.relaffil = varVector[11]				
+			if curCollege.ft_ug == -3:
+				if varVector[12]>0:
+					curCollege.ft_ug = varVector[12]
+			if curCollege.ft_gd == -3:
+				if varVector[13]>0:
+					curCollege.ft_gd = varVector[13]
+			if curCollege.enrlftm == -3:
+				if varVector[14]>0:
+					curCollege.enrlftm = varVector[14]
+			if curCollege.enrlftw == -3:
+				if varVector[15]>0:
+					curCollege.enrlftw = varVector[15]
+			if curCollege.confno1 == -3:
+				if varVector[16]>0:
+					curCollege.confno1 = varVector[16]
+		curIPEDS.close()
 
 def writeMissingSelect():
 #write to output file
@@ -578,12 +554,12 @@ def setupIndividualData():
 def saveCollegeData():
 	global collegeList
 	global collegeDataLookup
-	headerstr = "collegeID" + "\t"+ "control"+"\t"+ "selectivity" + "\t"+ "tuivaryIndicator" +  "\t" + "religAffiliation" + "\t" +"fulltime_UG" + "\t" + "fulltime_GRAD" + "\t" + "male_enrolled" + "\t" + "female_enrolled" + "\t" + "conference_no" +"\n"
+	headerstr = "collegeID" + "\t"+ "control"+"\t"+ "selectivity" + "\t"+ "tuivaryIndicator" +  "\t" + "religAffiliation" + "\t" +"fulltime_UG" + "\t" + "fulltime_GRAD" + "\t" + "male_enrolled" + "\t" + "female_enrolled" + "\t" + "conference_no" +"\t" + "state" + "\t"+"locale" +"\n"
 	open("C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/collegedataoutput.txt","wb").write(headerstr)
 	for i in collegeList:
 		if i in collegeDataLookup:
 			curCollege = collegeDataLookup[i]
-			curOutput = str(i) + "\t" + str(curCollege.control) +  "\t" + str(curCollege.selectivity) + "\t" + str(curCollege.tuivary) +  "\t" + str(curCollege.relaffil) + "\t" + str(curCollege.ft_ug) + "\t" + str(curCollege.ft_gd) + "\t" + str(curCollege.enrlftm) + "\t" + str(curCollege.enrlftw) + "\t" + str(curCollege.confno1) + "\n"
+			curOutput = str(i) + "\t" + str(curCollege.control) +  "\t" + str(curCollege.selectivity) + "\t" + str(curCollege.tuivary) +  "\t" + str(curCollege.relaffil) + "\t" + str(curCollege.ft_ug) + "\t" + str(curCollege.ft_gd) + "\t" + str(curCollege.enrlftm) + "\t" + str(curCollege.enrlftw) + "\t" + str(curCollege.confno1) + "\t" + str(curCollege.state) + "\t" + str(curCollege.locale) + "\n"
 		else:
 			outStr3 = str(i) + "\n"
 		open("C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/collegedataoutput.txt","a").write(curOutput)
