@@ -17,8 +17,8 @@ studentLookup = {} #Lookup table for personal information by PUBID_1997
 
 #define classes========================================================================================
 class CollegeData: #class storing college data
-	def __init__(self, colName, bachFlag, control, selectivity, sat25, sat75, admitperc, carnegie):
-		self.colName, self.bachFlag, self.control, self.selectivity, self.sat25, self.sat75, self.admitperc, self.carnegie = colName, bachFlag, control, selectivity, sat25, sat75, admitperc, carnegie
+	def __init__(self, colName, bachFlag, control, selectivity, sat25, sat75, admitperc, carnegie, tuivary):
+		self.colName, self.bachFlag, self.control, self.selectivity, self.sat25, self.sat75, self.admitperc, self.carnegie, self.tuivary = colName, bachFlag, control, selectivity, sat25, sat75, admitperc, carnegie, tuivary
 
 	def __str__(self):
 		return str(self.colName) + "\t" + str(self.bachFlag) + "\t" + str(self.control) +  "\t" + str(self.selectivity)
@@ -62,13 +62,13 @@ def main():
 
 	#pull data needed to fill int missing selectivity (and possibly other data in the future)
 	#we only need this for the selectivity regression, so do not run every time
-	#populateCollegeData(2004)
-	#populateCollegeData(2006)
-	#populateCollegeData(2005)
-	#populateCollegeData(2003)
-	#populateCollegeData(2002)
-	#populateCollegeData(2001)
-	#populateCollegeData(2011)
+	populateCollegeData(2004)
+	populateCollegeData(2006)
+	populateCollegeData(2005)
+	populateCollegeData(2003)
+	populateCollegeData(2002)
+	populateCollegeData(2001)
+	populateCollegeData(2011)
 	#writeMissingSelect()
 
 	#check whether there is anything different about the schools for which people have missing data
@@ -83,6 +83,9 @@ def main():
 
 	#get financial aid variables that are specific to student
 	#populateFinAidVars()
+
+	#print college data
+	printCollegeData()
 
 #function definitions==============================================================================================
 def collegeListSetup(): #extract list of colleges people have attended
@@ -132,6 +135,7 @@ def IPEDScheck(myYear): #look up colleges in the list in myYear's ipeds list and
 		curSat25 = -3
 		curSat75 = -3
 		curAdmitperc = -3
+		curTuivary = -3
 		if myYear < 2005:
 			curCarnegie = varList[36]
 		elif myYear <2007:
@@ -140,7 +144,7 @@ def IPEDScheck(myYear): #look up colleges in the list in myYear's ipeds list and
 			curCarnegie = -3
 		if unitID not in collegeDataLookup: #update current known IPED IDs#
 			curSelectivity = -3  #we haven't done this yet
-			curColData = CollegeData(colName, curBachFlag, curControl, curSelectivity, curSat25, curSat75, curAdmitperc, curCarnegie)
+			curColData = CollegeData(colName, curBachFlag, curControl, curSelectivity, curSat25, curSat75, curAdmitperc, curCarnegie, curTuivary)
 			collegeDataLookup[unitID] = curColData
 		if (opeid not in OPEIDcrosswalkLookup): #update OPEID crosswalk
 			OPEIDcrosswalkLookup[opeid]= unitID
@@ -214,54 +218,107 @@ def populateCollegeData(myYear):
 	global missedCollegeList
 	global OPEIDcrosswalkLookup
 	global collegeDataLookup
-	curIPEDS = open('C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/ic' + str(myYear) + '.txt', 'rb')
-	linecount = 1
 	if myYear == 2011:
-		stringList = ['SATMT25', 'SATMT75', 'SATVR25', 'SATVR75', 'ACTCM25', 'ACTCM75', 'ACTEN25', 'ACTEN75', 'APPLCN', 'ADMSSN']
-	else:
-		stringList = ['satmt25', 'satmt75', 'satvr25', 'satvr75', 'actcm25', 'actcm75', 'acten25', 'acten75', 'applcn', 'admssn']
-	indexVector = [0]*len(stringList)
-	for line in curIPEDS.readlines():
-		#find index for each item we want
-		if linecount ==1:
-			linecount = linecount+1
-			varNameList = line.split('\t')
-			for i in range(0,len(varNameList)):
-				j = 0
-				while j < len(stringList):
-					if varNameList[i] == stringList[j]:
-						#print "found "+ str(j) + "," + str(myYear)
-						indexVector[j] = i
-						j = len(stringList)
-					else: 
-						j = j+1
-			#print indexVector
-		#get info on each school
+		curIPEDS = open('C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/ic' + str(myYear) + '.txt', 'rb')
+		linecount = 1
+		if myYear == 2011:
+			stringList = ['SATMT25', 'SATMT75', 'SATVR25', 'SATVR75', 'ACTCM25', 'ACTCM75', 'ACTEN25', 'ACTEN75', 'APPLCN', 'ADMSSN', 'TUITVARY']
 		else:
-			varList = line.split('\t')
-			unitID = varList[0]
-			varVector = [0]*len(stringList)
-			for i in range(0,len(varVector)):
-				if varList[indexVector[i]] == "" or varList[indexVector[i]] == ".":
-					varVector[i]= 0
-				else:
-					varVector[i] = int(varList[indexVector[i]])
-			curCollege = collegeDataLookup[unitID]
-			if curCollege.sat25 == -3:
-				if varVector[0] >0: #have SAT scores
-					curCollege.sat25 = varVector[0]+ varVector[2]
-				elif varVector[4] >0: #have ACT scores
-					curCollege.sat25 = 41.084*(varVector[4]+varVector[6]) +116.45
-			if curCollege.sat75 == -3:
-				if varVector[1] >0: #have SAT scores
-					curCollege.sat75 = varVector[1]+ varVector[3]
-				elif varVector[5] >0: #have ACT scores
-					curCollege.sat75 = 41.084*(varVector[5]+varVector[7]) +116.45
-				#print str(unitID)+ ","  + str(collegeDataLookup[unitID].sat75)
-			if curCollege.admitperc == -3:
-				if varVector[8]>0 and varVector[9]>0:
-					curCollege.admitperc = float(float(varVector[9])/float(varVector[8]))
-		curIPEDS.close()
+			stringList = ['satmt25', 'satmt75', 'satvr25', 'satvr75', 'actcm25', 'actcm75', 'acten25', 'acten75', 'applcn', 'admssn']
+		indexVector = [0]*len(stringList)
+		for line in curIPEDS.readlines():
+			#find index for each item we want
+			if linecount ==1:
+				linecount = linecount+1
+				varNameList = line.split('\t')
+				for i in range(0,len(varNameList)):
+					j = 0
+					while j < len(stringList):
+						if varNameList[i] == stringList[j]:
+							#print "found "+ str(j) + "," + str(myYear)
+							indexVector[j] = i
+							j = len(stringList)
+						else: 
+							j = j+1
+				#print indexVector
+			#get info on each school
+			else:
+				varList = line.split('\t')
+				unitID = varList[0]
+				varVector = [0]*len(stringList)
+				for i in range(0,len(varVector)):
+					if varList[indexVector[i]] == "" or varList[indexVector[i]] == ".":
+						varVector[i]= 0
+					else:
+						varVector[i] = int(varList[indexVector[i]])
+				curCollege = collegeDataLookup[unitID]
+				if curCollege.sat25 == -3:
+					if varVector[0] >0: #have SAT scores
+						curCollege.sat25 = varVector[0]+ varVector[2]
+					elif varVector[4] >0: #have ACT scores
+						curCollege.sat25 = 41.084*(varVector[4]+varVector[6]) +116.45
+				if curCollege.sat75 == -3:
+					if varVector[1] >0: #have SAT scores
+						curCollege.sat75 = varVector[1]+ varVector[3]
+					elif varVector[5] >0: #have ACT scores
+						curCollege.sat75 = 41.084*(varVector[5]+varVector[7]) +116.45
+					#print str(unitID)+ ","  + str(collegeDataLookup[unitID].sat75)
+				if curCollege.admitperc == -3:
+					if varVector[8]>0 and varVector[9]>0:
+						curCollege.admitperc = float(float(varVector[9])/float(varVector[8]))
+				if curCollege.tuivary == -3:
+					if varVector[10]>0:
+						curCollege.tuivary = varVector[10]
+			curIPEDS.close()
+	else:
+		curIPEDS = open('C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/ic' + str(myYear) + '.txt', 'rb')
+		linecount = 1
+		if myYear == 2011:
+			stringList = ['SATMT25', 'SATMT75', 'SATVR25', 'SATVR75', 'ACTCM25', 'ACTCM75', 'ACTEN25', 'ACTEN75', 'APPLCN', 'ADMSSN']
+		else:
+			stringList = ['satmt25', 'satmt75', 'satvr25', 'satvr75', 'actcm25', 'actcm75', 'acten25', 'acten75', 'applcn', 'admssn']
+		indexVector = [0]*len(stringList)
+		for line in curIPEDS.readlines():
+			#find index for each item we want
+			if linecount ==1:
+				linecount = linecount+1
+				varNameList = line.split('\t')
+				for i in range(0,len(varNameList)):
+					j = 0
+					while j < len(stringList):
+						if varNameList[i] == stringList[j]:
+							#print "found "+ str(j) + "," + str(myYear)
+							indexVector[j] = i
+							j = len(stringList)
+						else: 
+							j = j+1
+				#print indexVector
+			#get info on each school
+			else:
+				varList = line.split('\t')
+				unitID = varList[0]
+				varVector = [0]*len(stringList)
+				for i in range(0,len(varVector)):
+					if varList[indexVector[i]] == "" or varList[indexVector[i]] == ".":
+						varVector[i]= 0
+					else:
+						varVector[i] = int(varList[indexVector[i]])
+				curCollege = collegeDataLookup[unitID]
+				if curCollege.sat25 == -3:
+					if varVector[0] >0: #have SAT scores
+						curCollege.sat25 = varVector[0]+ varVector[2]
+					elif varVector[4] >0: #have ACT scores
+						curCollege.sat25 = 41.084*(varVector[4]+varVector[6]) +116.45
+				if curCollege.sat75 == -3:
+					if varVector[1] >0: #have SAT scores
+						curCollege.sat75 = varVector[1]+ varVector[3]
+					elif varVector[5] >0: #have ACT scores
+						curCollege.sat75 = 41.084*(varVector[5]+varVector[7]) +116.45
+					#print str(unitID)+ ","  + str(collegeDataLookup[unitID].sat75)
+				if curCollege.admitperc == -3:
+					if varVector[8]>0 and varVector[9]>0:
+						curCollege.admitperc = float(float(varVector[9])/float(varVector[8]))
+			curIPEDS.close()
 
 def writeMissingSelect():
 #write to output file
@@ -493,6 +550,17 @@ def setupIndividualData():
 	print "Total number of attenders at 4-year IPEDS universities: " + str(attenderCount)
 	print "Total number of attenders without a max selectivity: " + str(noSelectCounter)
 	print "Total number of non-attendee applicants without a max selectivity: " + str(noSelectCounter2)
+
+def printCollegeData():
+	headerstr = "test"
+	open("C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/collegedataoutput.txt","wb").write(headerstr)
+	for i in collegeList:
+		if i in collegeDataLookup:
+			curCollege = collegeDataLookup[i]
+			curOutput = str(curCollege.colName) + "\t" + str(curCollege.bachFlag) + "\t" + str(curCollege.control) +  "\t" + str(curCollege.selectivity) + "\t" + str(curCollege.tuivary)
+		else:
+			outStr3 = str(i)
+	open("C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/collegedataoutput.txt","a").write(curOutput)
 
 #def populateFinAidVars():
 #	vectorList = open('D:/studentadmitdata.txt', 'r')
