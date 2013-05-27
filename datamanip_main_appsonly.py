@@ -62,13 +62,13 @@ def main():
 
 	#pull data needed to fill int missing selectivity (and possibly other data in the future)
 	#we only need this for the selectivity regression, so do not run every time
-	populateCollegeData(2004)
-	populateCollegeData(2006)
-	populateCollegeData(2005)
-	populateCollegeData(2003)
-	populateCollegeData(2002)
-	populateCollegeData(2001)
-	populateCollegeData(2011)
+	#populateCollegeData(2004)
+	#populateCollegeData(2006)
+	#populateCollegeData(2005)
+	#populateCollegeData(2003)
+	#populateCollegeData(2002)
+	#populateCollegeData(2001)
+	#populateCollegeData(2011)
 	#writeMissingSelect()
 
 	#check whether there is anything different about the schools for which people have missing data
@@ -147,6 +147,11 @@ def IPEDScheck(myYear): #look up colleges in the list in myYear's ipeds list and
 			varList = line.split('\t')
 			unitID = varList[0]
 			varVector = [0]*len(stringList)
+			for i in range(0,len(varVector)):
+				if varList[indexVector[i]] == "" or varList[indexVector[i]] == ".":
+					varVector[i]= 0
+				else:
+					varVector[i] = int(varList[indexVector[i]])
 			#old variables that are done by known index
 			unitID = varList[0]
 			colName = varList[1]
