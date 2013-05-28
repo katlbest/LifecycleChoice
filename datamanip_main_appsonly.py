@@ -62,13 +62,13 @@ def main():
 
 	#pull data needed to fill int missing selectivity (and possibly other data in the future)
 	#we only need this for the selectivity regression, so do not run every time
-	#populateCollegeData(2004)
-	#populateCollegeData(2006)
-	#populateCollegeData(2005)
-	#populateCollegeData(2003)
-	#populateCollegeData(2002)
-	#populateCollegeData(2001)
-	#populateCollegeData(2011)
+	populateCollegeData(2004)
+	populateCollegeData(2006)
+	populateCollegeData(2005)
+	populateCollegeData(2003)
+	populateCollegeData(2002)
+	populateCollegeData(2001)
+	populateCollegeData(2011)
 	#writeMissingSelect()
 
 	#check whether there is anything different about the schools for which people have missing data
@@ -117,15 +117,20 @@ def collegeListSetup(): #extract list of colleges people have attended
 	missedCollegeList = list(set(missedCollegeList)) #de-dupe
 	print "Total number of unique IDs: " + str(len(missedCollegeList))
 
+def getStateCode(stateName): #get state number from state name
+	stateLookup = {"AL":1,"AK":2,"AZ":4,"AR":5,"CA":6,"CO":8,"CT":9,"DE":10,"DC":11,"FL":12,"GA":13,"HI":15,"ID":16,"IL":17,"IN":18,"IA":19,"KS":20,"KY":21,"LA":22,"ME":23,"MD":24,"MA":25,"MI":26,"MN":27,"MS":28,"MO":29,"MT":30,"NE":31,"NV":32,"NH":33,"NJ":34,"NM":35,"NY":36,"NC":37,"ND":38,"OH":39,"OK":40,"OR":41,"PA":42,"RI":44,"SC":45,"SD":46,"TN":47,"TX":48,"UT":49,"VT":50,"VA":51,"WA":53,"WV":54,"WI":55,"WY":56, "AS" : -3, "FM": -3, "GU": -3, "MH": -3, "MP": -3, "PW" : -3, "PR" : -3, "VI": -3}
+	stateNumber = stateLookup[stateName]
+	return stateNumber
+
 def IPEDScheck(myYear): #look up colleges in the list in myYear's ipeds list and this year's OPEID list; create OPEID lookup table based on this year's data
 	global collegeList
 	global missedCollegeList
 	global OPEIDcrosswalkLookup
 	global collegeDataLookup
 	if (myYear ==2011):
-		stringList = ['STABBR', 'LOCALE']
+		stringList = ['FIPS', 'LOCALE']
 	else:
-		stringList = ['stabbr', 'locale']
+		stringList = ['fips', 'locale']
 	indexVector = [0]*len(stringList)
 	curIPEDS = open('C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/hd' + str(myYear) + '.txt', 'rb')
 	linecount = 1
@@ -150,6 +155,8 @@ def IPEDScheck(myYear): #look up colleges in the list in myYear's ipeds list and
 			for i in range(0,len(varVector)):
 				if varList[indexVector[i]] == "" or varList[indexVector[i]] == ".":
 					varVector[i]= 0
+				#elif stringList[i] in ('STABBR', 'stabbr'):
+				#	varVector[i]= int(getStateCode(varList[indexVector[i]]))
 				else:
 					varVector[i] = int(varList[indexVector[i]])
 			#old variables that are done by known index
