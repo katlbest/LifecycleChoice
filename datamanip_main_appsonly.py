@@ -17,7 +17,7 @@ studentLookup = {} #Lookup table for personal information by PUBID_1997
 
 #define classes========================================================================================
 class CollegeData: #class storing college data
-	def __init__(self, colName, bachFlag, control, selectivity, sat25, sat75, admitperc, carnegie, tuivary, relaffil, ft_ug, ft_gd, enrlftm, enrlftw, confno1, state, locale):
+	def __init__(self, colName= -3, bachFlag= -3, control= -3, selectivity= -3, sat25=-3, sat75=-3, admitperc=-3, carnegie=-3, tuivary=-3, relaffil=-3, ft_ug=-3, ft_gd=-3, enrlftm=-3, enrlftw=-3, confno1=-3, state=-3, locale=-3):
 		self.colName, self.bachFlag, self.control, self.selectivity, self.sat25, self.sat75, self.admitperc, self.carnegie, self.tuivary, self.relaffil, self.ft_ug, self.ft_gd, self.enrlftm, self.enrlftw, self.confno1, self.state, self.locale = colName, bachFlag, control, selectivity, sat25, sat75, admitperc, carnegie, tuivary, relaffil, ft_ug, ft_gd, enrlftm, enrlftw, confno1, state, locale
 
 	def __str__(self):
@@ -148,6 +148,8 @@ def IPEDScheck(myYear): #look up colleges in the list in myYear's ipeds list and
 						j = len(stringList)
 					else: 
 						j = j+1
+			#print  str(myYear) 
+			#print indexVector
 		else: #other lines, so get info on schools
 			varList = line.split('\t')
 			unitID = varList[0]
@@ -158,6 +160,7 @@ def IPEDScheck(myYear): #look up colleges in the list in myYear's ipeds list and
 				#elif stringList[i] in ('STABBR', 'stabbr'):
 				#	varVector[i]= int(getStateCode(varList[indexVector[i]]))
 				else:
+					#print(varList[indexVector[i]])
 					varVector[i] = int(varList[indexVector[i]])
 			#old variables that are done by known index
 			unitID = varList[0]
@@ -185,8 +188,10 @@ def IPEDScheck(myYear): #look up colleges in the list in myYear's ipeds list and
 				curCarnegie = varList[49]
 			else:
 				curCarnegie = -3
+			if unitID in collegeDataLookup: #we already have an entry, update previously missing data, note that ony curLocale is sometimes missing, so we only update this
+				if collegeDataLookup[unitID].locale<0 and curLocale>0:
+					collegeDataLookup[unitID].locale= curLocale
 			if unitID not in collegeDataLookup: #update current known IPED IDs#
-				#TBD we are not adding data here if the school already exists but has missing information. may need to be fixed if data missingness is an issue
 				curSelectivity = -3  #we haven't done this yet
 				curColData = CollegeData(colName, curBachFlag, curControl, curSelectivity, curSat25, curSat75, curAdmitperc, curCarnegie, curTuivary, curRelaffil, curFt_ug, curFt_gd, curEnrlftm, curEnrlftw, curConfno1, curState, curLocale)
 				collegeDataLookup[unitID] = curColData
