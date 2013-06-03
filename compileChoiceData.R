@@ -263,3 +263,38 @@
 
 
   #check whether missing 2003 schools appear in the PREV roster
+
+
+#create merged data files for college data, by year
+myYear= 2011
+#SFA
+  SFA.dat = read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/ycoc/schooldata/2011/sfa2011.csv")
+  SFA.dat = SFA.dat[,c("UNITID", "UFLOANT", "UPGRNTP")]
+#GR
+  GR.dat = read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/ycoc/schooldata/2011/gr2011.csv") #gr files are already filtered by type
+  GR.dat = GR.dat[GR.dat$GRTYPE == 3,]
+  GR.dat = GR.dat[,c("UNITID", "GRTOTLT")]
+#F
+  F1A.dat = read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/ycoc/schooldata/2011/f1a2011.csv") 
+  F1A.dat = F1A.dat[,c("UNITID","F1C011", "F1C191")]
+  colnames(F1A.dat)= c("UNITID","INSTSPEND", "TOTALEXP")
+  F2.dat = read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/ycoc/schooldata/2011/f22011.csv") 
+  F2.dat = F2.dat[,c("UNITID","F2E011", "F2E131")]
+  colnames(F2.dat)= c("UNITID","INSTSPEND", "TOTALEXP")
+  F3.dat = read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/ycoc/schooldata/2011/f32011.csv") 
+  F3.dat = F3.dat[,c("UNITID","F3E01","F3E07")]
+  colnames(F3.dat)= c("UNITID","INSTSPEND", "TOTALEXP")
+  FAll.dat = rbind(F1A.dat, F2.dat, F3.dat)
+  #check for duplicates, max should be 1
+    if(max(table(FAll.dat$UNITID))>1){
+      print("ERROR: Duplicate entries in F tables")
+    }
+#ICAY
+  ICAY.dat = read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/ycoc/schooldata/2011/icay2011.csv") 
+  ICAY.dat= ICAY.dat[,c("UNITID", "TUITION2", "FEE2", "TUITION3", "FEE3", "CHG2AY3")]
+#SAL
+  SAL.dat = read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/ycoc/schooldata/2011/sal2011.csv") 
+  SAL.dat = SAL.dat[,c("UNITID", "CONTRACT", "ARANK", "AVESALT", "EMPCNTT")]
+  #aggregate by UNITID
+  outSAL.dat = ddply(SAL.dat,"UNITID",function(X) data.frame(AVESALT=weighted.mean(X$AVESALT,X$EMPCNTT), EMPCNTT=sum(X$EMPCNTT)))
+#aggregate all
