@@ -609,11 +609,9 @@ def populateCollegeData2(myYear):
 	global collegeDataLookup
 	curAggFile = open('C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/schooldata/'+str(myYear)+'/agg'+ str(myYear) + '.txt', 'rb')
 	linecount = 1
-	stringListAll = ['fgrnt_p','loan_p','instspend','totalexp','tuition2','fee2','tuition3','fee3','chg2ay3','avesalt','empcntt']
-	oldGR = 'grrace24'
-	newGR = 'grtotlt'
-	newFedLoan = 'uploanp'
+	stringListAll = ['grrace24','fgrnt_p','loan_p','instspend','totalexp','tuition2','fee2','tuition3','fee3','chg2ay3','avesalt','empcntt', 'uploanp']
 	indexVector = [0]*len(stringListAll)
+	curFedLoan = -3
 	for line in curAggFile.readlines():
 		#find index for each item we want
 		if linecount ==1:
@@ -628,8 +626,27 @@ def populateCollegeData2(myYear):
 						j = len(stringListAll)
 					else: 
 						j = j+1
+			if indexVector[-1]==0:
+				#then we do not have the last variable, which is in later years only
+				indexVector.pop(-1)
 			print indexVector
 		#get info on each school
+		else:
+			varList = line.split('\t')
+			unitID = varList[0]
+			varVector = [0]*len(indexVector)
+			for i in range(0,len(varVector)):
+				if varList[indexVector[i]] == "" or varList[indexVector[i]] == ".":
+					varVector[i]= 0
+				else:
+					varVector[i] = varList[indexVector[i]]
+			if unitID in collegeDataLookup:
+				curCollege = collegeDataLookup[unitID]
+				#if curCollege.sat25 == -3:
+				#	if varVector[0] >0: #have SAT scores
+				#		curCollege.sat25 = varVector[0]+ varVector[2]
+				#	elif varVector[4] >0: #have ACT scores
+				#		curCollege.sat25 = 41.084*(varVector[4]+varVector[6]) +116.45
 		curAggFile.close()
 
 if __name__ == '__main__':
