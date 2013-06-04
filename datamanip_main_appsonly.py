@@ -17,8 +17,8 @@ studentLookup = {} #Lookup table for personal information by PUBID_1997
 
 #define classes========================================================================================
 class CollegeData: #class storing college data
-	def __init__(self, colName= -3, bachFlag= -3, control= -3, selectivity= -3, sat25=-3, sat75=-3, admitperc=-3, carnegie=-3, tuivary=-3, relaffil=-3, ft_ug=-3, ft_gd=-3, enrlftm=-3, enrlftw=-3, confno1=-3, state=-3, locale=-3, gradrate = -3, fedgrantp = -3, loanp = -3, instspend = -3, totalexp= -3, tuiin = -3, feein = -3, tuiout = -3, feeout = -3, tuiinlist = -3, tuioutlist = -3, avgsal = -3,numfaculty = -3, feloanp = -3):
-		self.colName, self.bachFlag, self.control, self.selectivity, self.sat25, self.sat75, self.admitperc, self.carnegie, self.tuivary, self.relaffil, self.ft_ug, self.ft_gd, self.enrlftm, self.enrlftw, self.confno1, self.state, self.locale, self.gradrate, self.fedgrantp, self.loanp, self.instspend, self.totalexp, self.tuiin, self.feein, self.tuiout, self.feeout, self.tuiinlist, self.tuioutlist, self.avgsal,self.numfaculty, self.feloanp = colName, bachFlag, control, selectivity, sat25, sat75, admitperc, carnegie, tuivary, relaffil, ft_ug, ft_gd, enrlftm, enrlftw, confno1, state, locale, gradrate, fedgrantp, loanp, instspend, totalexp, tuiin, feein, tuiout, feeout, tuiinlist, tuioutlist, avgsal,numfaculty, feloanp
+	def __init__(self, colName= -3, bachFlag= -3, control= -3, selectivity= -3, sat25=-3, sat75=-3, admitperc=-3, carnegie=-3, tuivary=-3, relaffil=-3, ft_ug=-3, ft_gd=-3, enrlftm=-3, enrlftw=-3, confno1=-3, state=-3, locale=-3, gradrate = -3, fedgrantp = -3, loanp = -3, instspend = -3, totalexp= -3, tuiin = -3, feein = -3, tuiout = -3, feeout = -3, tuiinlist = -3, tuioutlist = -3, avgsal = -3,numfaculty = -3, fedloanp = -3):
+		self.colName, self.bachFlag, self.control, self.selectivity, self.sat25, self.sat75, self.admitperc, self.carnegie, self.tuivary, self.relaffil, self.ft_ug, self.ft_gd, self.enrlftm, self.enrlftw, self.confno1, self.state, self.locale, self.gradrate, self.fedgrantp, self.loanp, self.instspend, self.totalexp, self.tuiin, self.feein, self.tuiout, self.feeout, self.tuiinlist, self.tuioutlist, self.avgsal,self.numfaculty, self.fedloanp = colName, bachFlag, control, selectivity, sat25, sat75, admitperc, carnegie, tuivary, relaffil, ft_ug, ft_gd, enrlftm, enrlftw, confno1, state, locale, gradrate, fedgrantp, loanp, instspend, totalexp, tuiin, feein, tuiout, feeout, tuiinlist, tuioutlist, avgsal,numfaculty, fedloanp
 
 	def __str__(self):
 		return str(self.colName) + "\t" + str(self.bachFlag) + "\t" + str(self.control) +  "\t" + str(self.selectivity)
@@ -579,12 +579,12 @@ def setupIndividualData():
 def saveCollegeData():
 	global collegeList
 	global collegeDataLookup
-	headerstr = "collegeID" + "\t"+ "control"+"\t"+ "selectivity" + "\t"+ "tuivaryIndicator" +  "\t" + "religAffiliation" + "\t" +"fulltime_UG" + "\t" + "fulltime_GRAD" + "\t" + "male_enrolled" + "\t" + "female_enrolled" + "\t" + "conference_no" +"\t" + "state" + "\t"+"locale" +"\n"
+	headerstr = "collegeID" + "\t"+ "control"+"\t"+ "selectivity" + "\t"+ "tuivaryIndicator" +  "\t" + "religAffiliation" + "\t" +"fulltime_UG" + "\t" + "fulltime_GRAD" + "\t" + "male_enrolled" + "\t" + "female_enrolled" + "\t" + "conference_no" +"\t" + "state" + "\t"+"locale" + "\t"+"gradrate" + "\t"+ "fedgrantp"+ "\t"+ "loanp"+ "\t"+ "instspend" + "\t"+ "totalexp" + "\t"+"tuiin"+ "\t"+ "feein"+ "\t"+ "tuiout" +"\t"+"feeout"+"\t"+ "tuiinlist"+"\t"+ "tuioutlist"+"\t"+ "avgsal"+"\t"+"numfaculty"+"\n"
 	open("C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/collegedataoutput.txt","wb").write(headerstr)
 	for i in collegeList:
 		if i in collegeDataLookup:
 			curCollege = collegeDataLookup[i]
-			curOutput = str(i) + "\t" + str(curCollege.control) +  "\t" + str(curCollege.selectivity) + "\t" + str(curCollege.tuivary) +  "\t" + str(curCollege.relaffil) + "\t" + str(curCollege.ft_ug) + "\t" + str(curCollege.ft_gd) + "\t" + str(curCollege.enrlftm) + "\t" + str(curCollege.enrlftw) + "\t" + str(curCollege.confno1) + "\t" + str(curCollege.state) + "\t" + str(curCollege.locale) + "\n"
+			curOutput = str(i) + "\t" + str(curCollege.control) +  "\t" + str(curCollege.selectivity) + "\t" + str(curCollege.tuivary) +  "\t" + str(curCollege.relaffil) + "\t" + str(curCollege.ft_ug) + "\t" + str(curCollege.ft_gd) + "\t" + str(curCollege.enrlftm) + "\t" + str(curCollege.enrlftw) + "\t" + str(curCollege.confno1) + "\t" + str(curCollege.state) + "\t" + str(curCollege.locale) + str(curCollege.gradrate)+ "\t" + str(curCollege.fedgrantp)+ "\t" + str(curCollege.loanp)+ "\t" + str(curCollege.instspend)+ "\t" + str(curCollege.totalexp)+ "\t" + str(curCollege.tuiin)+ "\t" + str(curCollege.feein)+ "\t" + str(curCollege.tuiout)+ "\t" + str(curCollege.feeout)+ "\t" + str(curCollege.tuiinlist)+ "\t" + str(curCollege.tuioutlist)+ "\t" + str(curCollege.avgsal)+ "\t" +str(curCollege.numfaculty)+ "\t" + str(curCollege.fedloanp) + "\n"
 		else:
 			outStr3 = str(i) + "\n"
 		open("C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/collegedataoutput.txt","a").write(curOutput)
@@ -640,8 +640,13 @@ def populateCollegeData2(myYear):
 					varVector[i]= 0
 				else:
 					varVector[i] = varList[indexVector[i]]
-			if unitID in collegeDataLookup:
+			if unitID in collegeDataLookup: #only add information to existing colleges
 				curCollege = collegeDataLookup[unitID]
+				attrNameList = ['gradrate', 'fedgrantp', 'loanp', 'instspend', 'totalexp', 'tuiin', 'feein', 'tuiout', 'feeout', 'tuiinlist', 'tuioutlist', 'avgsal','numfaculty']
+				for j in range(1,len(attrNameList)):
+					if getattr(curCollege, attrNameList[j])==-3:
+						setattr(curCollege, attrNameList[j], varVector[j])
+				#must deal with 'fedloanp'
 				#if curCollege.sat25 == -3:
 				#	if varVector[0] >0: #have SAT scores
 				#		curCollege.sat25 = varVector[0]+ varVector[2]
