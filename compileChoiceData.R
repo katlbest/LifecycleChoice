@@ -266,35 +266,92 @@
 
 
 #create merged data files for college data, by year
-myYear= 2011
-#SFA
-  SFA.dat = read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/ycoc/schooldata/2011/sfa2011.csv")
-  SFA.dat = SFA.dat[,c("UNITID", "UFLOANT", "UPGRNTP")]
-#GR
-  GR.dat = read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/ycoc/schooldata/2011/gr2011.csv") #gr files are already filtered by type
-  GR.dat = GR.dat[GR.dat$GRTYPE == 3,]
-  GR.dat = GR.dat[,c("UNITID", "GRTOTLT")]
-#F
-  F1A.dat = read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/ycoc/schooldata/2011/f1a2011.csv") 
-  F1A.dat = F1A.dat[,c("UNITID","F1C011", "F1C191")]
-  colnames(F1A.dat)= c("UNITID","INSTSPEND", "TOTALEXP")
-  F2.dat = read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/ycoc/schooldata/2011/f22011.csv") 
-  F2.dat = F2.dat[,c("UNITID","F2E011", "F2E131")]
-  colnames(F2.dat)= c("UNITID","INSTSPEND", "TOTALEXP")
-  F3.dat = read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/ycoc/schooldata/2011/f32011.csv") 
-  F3.dat = F3.dat[,c("UNITID","F3E01","F3E07")]
-  colnames(F3.dat)= c("UNITID","INSTSPEND", "TOTALEXP")
-  FAll.dat = rbind(F1A.dat, F2.dat, F3.dat)
-  #check for duplicates, max should be 1
-    if(max(table(FAll.dat$UNITID))>1){
-      print("ERROR: Duplicate entries in F tables")
+yearVect = c(2011,2002,2003,2004,2005,2006)
+for(i in 1:length(yearVect)){
+  myYear= yearVect[i]  
+  #SFA
+    readStr = paste("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/ycoc/schooldata/",myYear,"/sfa", myYear, ".csv", sep = "")
+    SFA.dat = read.csv(readStr)
+    if (("ufloanp" %in% colnames(SFA.dat))| ("UFLOANP" %in% colnames(SFA.dat))){
+      keepVect = c("unitid","ufloanp","fgrnt_p", "loan_p")
+    }else{
+      keepVect = c("unitid","fgrnt_p", "loan_p")
     }
-#ICAY
-  ICAY.dat = read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/ycoc/schooldata/2011/icay2011.csv") 
-  ICAY.dat= ICAY.dat[,c("UNITID", "TUITION2", "FEE2", "TUITION3", "FEE3", "CHG2AY3")]
-#SAL
-  SAL.dat = read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/ycoc/schooldata/2011/sal2011.csv") 
-  SAL.dat = SAL.dat[,c("UNITID", "CONTRACT", "ARANK", "AVESALT", "EMPCNTT")]
-  #aggregate by UNITID
-  outSAL.dat = ddply(SAL.dat,"UNITID",function(X) data.frame(AVESALT=weighted.mean(X$AVESALT,X$EMPCNTT), EMPCNTT=sum(X$EMPCNTT)))
-#aggregate all
+    if (myYear >2010){
+      keepVect = toupper(keepVect)
+    }
+    SFA.dat = SFA.dat[,keepVect]
+  #GR
+    readStr = paste("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/ycoc/schooldata/",myYear,"/gr", myYear, ".csv", sep = "")
+    GR.dat = read.csv(readStr)
+    if (("grtotlt" %in% colnames(GR.dat))| ("GRTOTLT" %in% colnames(GR.dat))){
+      keepVect = c("unitid", "grtotlt")
+    } else{
+      keepVect = c("unitid", "grrace24")
+    }
+    selectVar = "grtype"
+    if (myYear >2010){
+      keepVect = toupper(keepVect)
+      selectVar = toupper(selectVar)
+    }
+    GR.dat = GR.dat[GR.dat[,selectVar] == 3,]
+    GR.dat = GR.dat[,keepVect]
+  #F
+    readStr = paste("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/ycoc/schooldata/",myYear,"/f1a", myYear, ".csv", sep = "")  
+    F1A.dat = read.csv(readStr)
+    keepVect1 = c("unitid","f1c011", "f1c191")
+    nameVect1 = c("unitid", "instspend", "totalexp")
+    keepVect2 = c("unitid", "f2e011", "f2e131")
+    keepVect3 = c("unitid", "f3e01", "f3e07")
+    idName = "unitid"
+    if (myYear >2010){
+      keepVect1 = toupper(keepVect1)
+      nameVect1 = toupper(nameVect1)
+      keepVect2 = toupper(keepVect2)
+      keepVect3 = toupper(keepVect3)
+      idName = toupper(idName)
+    }
+    F1A.dat = F1A.dat[,keepVect1]
+    colnames(F1A.dat)= nameVect1
+    readStr = paste("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/ycoc/schooldata/",myYear,"/f2", myYear, ".csv", sep = "")
+    F2.dat = read.csv(readStr)
+    F2.dat = F2.dat[,keepVect2]
+    colnames(F2.dat)= nameVect1
+    readStr = paste("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/ycoc/schooldata/",myYear,"/f3", myYear, ".csv", sep = "")
+    F3.dat = read.csv(readStr) 
+    F3.dat = F3.dat[,keepVect3]
+    colnames(F3.dat)= nameVect1
+    FAll.dat = rbind(F1A.dat, F2.dat, F3.dat)
+    #check for duplicates, max should be 1
+      if(max(table(FAll.dat[,idName]))>1){
+        print("ERROR: Duplicate entries in F tables")
+      }
+  #ICAY
+    readStr = paste("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/ycoc/schooldata/",myYear,"/icay", myYear, ".csv", sep = "")
+    ICAY.dat = read.csv(readStr)
+    keepVect= c("unitid", "tuition2", "fee2", "tuition3", "fee3", "chg2ay3")
+    if (myYear >2010){
+      keepVect = toupper(keepVect)
+    }
+    ICAY.dat= ICAY.dat[,keepVect]
+  #SAL
+    readStr = paste("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/ycoc/schooldata/",myYear,"/sal", myYear, ".csv", sep = "")
+    SAL.dat = read.csv(readStr)
+    keepVect= c("unitid", "contract", "arank", "avesalt", "empcntt")
+    if (myYear >2010){
+      keepVect = toupper(keepVect)
+    }
+    SAL.dat = SAL.dat[,keepVect]
+    if ("AVESALT" %in% colnames(SAL.dat)){
+      SAL.dat = rename(SAL.dat, c("AVESALT"="avesalt", "EMPCNTT"="empcntt"))
+    } 
+    outSAL.dat = ddply(SAL.dat,idName,function(X) data.frame(avesalt=weighted.mean(X$avesalt,X$empcntt), empcntt=sum(X$empcntt)))
+  #aggregate all
+    AGG.dat =  merge(x = SFA.dat, y = GR.dat, by = idName, all.x = TRUE, all.y= TRUE)
+    AGG.dat = merge(x=AGG.dat, y = FAll.dat,  by = idName, all.x = TRUE, all.y= TRUE)
+    AGG.dat = merge(x=AGG.dat, y = ICAY.dat,  by = idName, all.x = TRUE, all.y= TRUE)
+    AGG.dat = merge(x=AGG.dat, y = outSAL.dat,  by = idName, all.x = TRUE, all.y= TRUE)
+  #write
+    writeStr = paste("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/ycoc/schooldata/",myYear,"/agg", myYear, ".csv", sep = "")
+    write.csv(AGG.dat,writeStr)
+}
