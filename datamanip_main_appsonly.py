@@ -42,12 +42,12 @@ def main():
 
 	#try to fill in missing colleges using multiple years of IPEDS files and the OPEIDS crosswalk; populatecolelgedatalookup with data that comes from this file
 	IPEDScheck(2004)
-	#IPEDScheck(2006)
-	#IPEDScheck(2005)
-	#IPEDScheck(2003)
-	#IPEDScheck(2002)
-	#IPEDScheck(2001)
-	#IPEDScheck(2011)
+	IPEDScheck(2006)
+	IPEDScheck(2005)
+	IPEDScheck(2003)
+	IPEDScheck(2002)
+	IPEDScheck(2001)
+	IPEDScheck(2011)
 	BarronsSetup() #add barron's selectivity to info we have about schools
 	
 	#try to replace schools using FICE codes where possible
@@ -63,12 +63,12 @@ def main():
 	#pull data needed to fill int missing selectivity (and possibly other data in the future)
 	#we only need this for the selectivity regression, so do not run every time
 	populateCollegeData(2004)
-	#populateCollegeData(2006)
-	#populateCollegeData(2005)
-	#populateCollegeData(2003)
-	#populateCollegeData(2002)
-	#populateCollegeData(2001)
-	#populateCollegeData(2011)
+	populateCollegeData(2006)
+	populateCollegeData(2005)
+	populateCollegeData(2003)
+	populateCollegeData(2002)
+	populateCollegeData(2001)
+	populateCollegeData(2011)
 	#writeMissingSelect()
 
 	#check whether there is anything different about the schools for which people have missing data
@@ -644,14 +644,9 @@ def populateCollegeData2(myYear):
 				curCollege = collegeDataLookup[unitID]
 				attrNameList = ['gradrate', 'fedgrantp', 'loanp', 'instspend', 'totalexp', 'tuiin', 'feein', 'tuiout', 'feeout', 'tuiinlist', 'tuioutlist', 'avgsal','numfaculty']
 				for j in range(1,len(attrNameList)):
-					if getattr(curCollege, attrNameList[j])==-3:
+					if getattr(curCollege, attrNameList[j])==-3 and varVector[j] != "NA":
 						setattr(curCollege, attrNameList[j], varVector[j])
 				#must deal with 'fedloanp'
-				#if curCollege.sat25 == -3:
-				#	if varVector[0] >0: #have SAT scores
-				#		curCollege.sat25 = varVector[0]+ varVector[2]
-				#	elif varVector[4] >0: #have ACT scores
-				#		curCollege.sat25 = 41.084*(varVector[4]+varVector[6]) +116.45
 		curAggFile.close()
 
 if __name__ == '__main__':
