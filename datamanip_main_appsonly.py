@@ -629,7 +629,7 @@ def populateCollegeData2(myYear):
 			if indexVector[-1]==0:
 				#then we do not have the last variable, which is in later years only
 				indexVector.pop(-1)
-			print indexVector
+			#print indexVector
 		#get info on each school
 		else:
 			varList = line.split('\t')

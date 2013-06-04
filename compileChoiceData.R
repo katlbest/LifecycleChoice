@@ -249,23 +249,9 @@
   LONG_DATA$FINAIDEST = TOTEst
   LONG_DATA$AIDALLSCHOOL = ALLSCHOOLEst
   write.csv(LONG_DATA, "D:/longdata.csv")
+  save.image(file= "studentandint.RData")
 
-#test other improvements =========================================================
-
-  #check accuracy of aid data for attended schools
-    diffList = rep(NA, nrow(LONG_DATA))
-    for (i in 1:nrow(LONG_DATA)){
-      if (YSCHEst[i]>= 0 & YCOCEst[i]>= 0){
-        diffList[i] = YSCHEst[i]-YCOCEst[i]
-      }
-    }
-    mean(na.exclude(diffList))
-
-
-  #check whether missing 2003 schools appear in the PREV roster
-
-
-#create merged data files for college data, by year
+#create merged data files for college data, by year====================================================
 yearVect = c(2011,2002,2003,2004,2005,2006)
 for(i in 1:length(yearVect)){
   myYear= yearVect[i]  
@@ -355,3 +341,57 @@ for(i in 1:length(yearVect)){
     writeStr = paste("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/ycoc/schooldata/",myYear,"/agg", myYear, ".csv", sep = "")
     write.csv(AGG.dat,writeStr)
 }
+
+#read in school data and calculate school-specific variables================================================
+  SCHOOLDATA = read.table(file = "C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/collegedataoutput.txt", header = TRUE, sep = "\t")
+  LONG_DATA = merge(x=LONG_DATA, y = SCHOOLDATA,  by.x = "AdmittedSchool", by.y= "collegeID", all.x = TRUE)
+  LONG_DATA$expperstudent = LONG_DATA$totalexp/(LONG_DATA$fulltime_UG+LONG_DATA$fulltime_GRAD)
+  LONG_DATA$instperstudent = LONG_DATA$instspend/(LONG_DATA$fulltime_UG+LONG_DATA$fulltime_GRAD)
+  LONG_DATA$facperstudent = LONG_DATA$numfaculty/(LONG_DATA$fulltime_UG+LONG_DATA$fulltime_GRAD)
+  LONG_DATA$genderratio= LONG_DATA$male_enrolled/LONG_DATA$female_enrolled
+  urbanInputs = c(11,12,13,21,22,23,31,32,33,41,42,43,-3,1,2,3,4,5,6,7,9,-3)
+  urbanOutputs = c(1,1,1,1,2,2,2,2,2,3,3,3,-3,1,1,1,1,2,2,3,-3,-3)
+  LONG_DATA$urbanrural = -3
+  for (i in 1:nrow(LONG_DATA)){
+    LONG_DATA$urbanrural[i]= urbanOutputs[match(LONG_DATA$locale[i],urbanInputs)]
+  }
+
+#calculate interaction terms
+  #instate
+    LONG_DATA$instate = -3
+    for (i in 1:nrow(LONG_DATA)){
+      if(LONG_DATA$RES_STATE[i]>0 & LONG_DATA$state[i]>0){
+        if(LONG_DATA$RES_STATE[i] == LONG_DATA$state[i]){
+          LONG_DATA$instate[i] = 1
+        } else{
+          LONG_DATA$instate[i] = 0
+        }
+      }
+    }
+  #realtui
+    LONG_DATA$realtui = -3
+    for (i in 1:nrow(LONG_DATA)){
+      if (LONG_DATA$AIDALLSCHOOL[i]>0){ #set all school aid to zero if it is missing, since this has no relative effect anyway
+        
+        allAid = LONG_DATA$AIDALLSCHOOL[i]
+      }else{
+        allAid = 0
+      }
+      if(LONG_DATA$FINAIDEST[i]>0){ #we have aid data
+        if(LONG_DATA$instate[i]==1){
+          LONG_DATA$realtui[i] = LONG_DATA$tuiinlist[i]+ LONG_DATA$feein[i]- LONG_DATA$FINAIDEST[i]-allAid
+        }else if (LONG_DATA$instate[i]==0){
+          LONG_DATA$realtui[i] = LONG_DATA$tuioutlist[i]+ LONG_DATA$feeout[i]- LONG_DATA$FINAIDEST[i]- allAid
+        }
+      } #else we have to leave it as -3
+    }
+  #sporting division
+  #demographic (ethnic) match
+  #ability match
+  #religious match
+  #urban/rural match
+  #distance from college to home
+    
+
+
+#retrieve only relevant data points
