@@ -42,12 +42,12 @@ def main():
 
 	#try to fill in missing colleges using multiple years of IPEDS files and the OPEIDS crosswalk; populatecolelgedatalookup with data that comes from this file
 	IPEDScheck(2004)
-	IPEDScheck(2006)
-	IPEDScheck(2005)
-	IPEDScheck(2003)
-	IPEDScheck(2002)
-	IPEDScheck(2001)
-	IPEDScheck(2011)
+	#IPEDScheck(2006)
+	#IPEDScheck(2005)
+	#IPEDScheck(2003)
+	#IPEDScheck(2002)
+	#IPEDScheck(2001)
+	#IPEDScheck(2011)
 	BarronsSetup() #add barron's selectivity to infor we have about schools
 	
 	#try to replace schools using FICE codes where possible
@@ -63,12 +63,12 @@ def main():
 	#pull data needed to fill int missing selectivity (and possibly other data in the future)
 	#we only need this for the selectivity regression, so do not run every time
 	populateCollegeData(2004)
-	populateCollegeData(2006)
-	populateCollegeData(2005)
-	populateCollegeData(2003)
-	populateCollegeData(2002)
-	populateCollegeData(2001)
-	populateCollegeData(2011)
+	#populateCollegeData(2006)
+	#populateCollegeData(2005)
+	#populateCollegeData(2003)
+	#populateCollegeData(2002)
+	#populateCollegeData(2001)
+	#populateCollegeData(2011)
 	#writeMissingSelect()
 
 	#check whether there is anything different about the schools for which people have missing data
@@ -80,6 +80,14 @@ def main():
 
 	#populate accepted and admitted set for each individual (must be correct school type)
 	setupIndividualData()
+
+	#pull additonal schooling data
+	populateCollegeData2(2004)
+	populateCollegeData2(2006)
+	populateCollegeData2(2005)
+	populateCollegeData2(2003)
+	populateCollegeData2(2002)
+	populateCollegeData2(2011)
 
 	#get financial aid variables that are specific to student
 	#populateFinAidVars()
@@ -593,6 +601,37 @@ def saveCollegeData():
 #		PUBID_1997 = int(varList[0])
 #		CURSCHOOL = int(varList[1])
 #		ATTENDIND = int(varList[2])
+
+def populateCollegeData2(myYear):
+	global collegeList
+	global missedCollegeList
+	global OPEIDcrosswalkLookup
+	global collegeDataLookup
+	curAggFile = open('C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/schooldata/'+str(myYear)+'/agg'+ str(myYear) + '.txt', 'rb')
+	linecount = 1
+	stringListAll = ['fgrnt_p','loan_p','instspend','totalexp','tuition2','fee2','tuition3','fee3','chg2ay3','avesalt','empcntt']
+	oldGR = 'grrace24'
+	newGR = 'grtotlt'
+	newFedLoan = 'uploanp'
+	indexVector = [0]*len(stringListAll)
+	for line in curAggFile.readlines():
+		#find index for each item we want
+		if linecount ==1:
+			linecount = linecount+1
+			varNameList = line.split('\t')
+			for i in range(0,len(varNameList)):
+				j = 0
+				while j < len(stringListAll):
+					if varNameList[i] == stringListAll[j]:
+						#print "found "+ str(j) + "," + str(myYear)
+						indexVector[j] = i
+						j = len(stringListAll)
+					else: 
+						j = j+1
+			print indexVector
+		#get info on each school
+		curIPEDS.close()
+
 if __name__ == '__main__':
 	main()
 
