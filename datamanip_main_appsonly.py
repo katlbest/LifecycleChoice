@@ -48,7 +48,7 @@ def main():
 	#IPEDScheck(2002)
 	#IPEDScheck(2001)
 	#IPEDScheck(2011)
-	BarronsSetup() #add barron's selectivity to infor we have about schools
+	BarronsSetup() #add barron's selectivity to info we have about schools
 	
 	#try to replace schools using FICE codes where possible
 	FICEcrosswalkSetup() #set up lookup that returns an IPEDS ID for a FICE number
@@ -630,7 +630,7 @@ def populateCollegeData2(myYear):
 						j = j+1
 			print indexVector
 		#get info on each school
-		curIPEDS.close()
+		curAggFile.close()
 
 if __name__ == '__main__':
 	main()
