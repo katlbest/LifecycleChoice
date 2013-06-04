@@ -329,7 +329,7 @@ for(i in 1:length(yearVect)){
   #ICAY
     readStr = paste("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/ycoc/schooldata/",myYear,"/icay", myYear, ".csv", sep = "")
     ICAY.dat = read.csv(readStr)
-    keepVect= c("unitid", "tuition2", "fee2", "tuition3", "fee3", "chg2ay3")
+    keepVect= c("unitid", "tuition2", "fee2", "tuition3", "fee3", "chg2ay3", "chg3ay3")
     if (myYear >2010){
       keepVect = toupper(keepVect)
     }

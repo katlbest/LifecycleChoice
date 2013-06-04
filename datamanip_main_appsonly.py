@@ -17,8 +17,8 @@ studentLookup = {} #Lookup table for personal information by PUBID_1997
 
 #define classes========================================================================================
 class CollegeData: #class storing college data
-	def __init__(self, colName= -3, bachFlag= -3, control= -3, selectivity= -3, sat25=-3, sat75=-3, admitperc=-3, carnegie=-3, tuivary=-3, relaffil=-3, ft_ug=-3, ft_gd=-3, enrlftm=-3, enrlftw=-3, confno1=-3, state=-3, locale=-3):
-		self.colName, self.bachFlag, self.control, self.selectivity, self.sat25, self.sat75, self.admitperc, self.carnegie, self.tuivary, self.relaffil, self.ft_ug, self.ft_gd, self.enrlftm, self.enrlftw, self.confno1, self.state, self.locale = colName, bachFlag, control, selectivity, sat25, sat75, admitperc, carnegie, tuivary, relaffil, ft_ug, ft_gd, enrlftm, enrlftw, confno1, state, locale
+	def __init__(self, colName= -3, bachFlag= -3, control= -3, selectivity= -3, sat25=-3, sat75=-3, admitperc=-3, carnegie=-3, tuivary=-3, relaffil=-3, ft_ug=-3, ft_gd=-3, enrlftm=-3, enrlftw=-3, confno1=-3, state=-3, locale=-3, gradrate = -3, fedgrantp = -3, loanp = -3, instspend = -3, totalexp= -3, tuiin = -3, feein = -3, tuiout = -3, feeout = -3, tuiinlist = -3, tuioutlist = -3, avgsal = -3,numfaculty = -3, feloanp = -3):
+		self.colName, self.bachFlag, self.control, self.selectivity, self.sat25, self.sat75, self.admitperc, self.carnegie, self.tuivary, self.relaffil, self.ft_ug, self.ft_gd, self.enrlftm, self.enrlftw, self.confno1, self.state, self.locale, self.gradrate, self.fedgrantp, self.loanp, self.instspend, self.totalexp, self.tuiin, self.feein, self.tuiout, self.feeout, self.tuiinlist, self.tuioutlist, self.avgsal,self.numfaculty, self.feloanp = colName, bachFlag, control, selectivity, sat25, sat75, admitperc, carnegie, tuivary, relaffil, ft_ug, ft_gd, enrlftm, enrlftw, confno1, state, locale, gradrate, fedgrantp, loanp, instspend, totalexp, tuiin, feein, tuiout, feeout, tuiinlist, tuioutlist, avgsal,numfaculty, feloanp
 
 	def __str__(self):
 		return str(self.colName) + "\t" + str(self.bachFlag) + "\t" + str(self.control) +  "\t" + str(self.selectivity)
@@ -201,7 +201,7 @@ def IPEDScheck(myYear): #look up colleges in the list in myYear's ipeds list and
 					collegeDataLookup[unitID].locale= curLocale
 			if unitID not in collegeDataLookup: #update current known IPED IDs#
 				curSelectivity = -3  #we haven't done this yet
-				curColData = CollegeData(colName, curBachFlag, curControl, curSelectivity, curSat25, curSat75, curAdmitperc, curCarnegie, curTuivary, curRelaffil, curFt_ug, curFt_gd, curEnrlftm, curEnrlftw, curConfno1, curState, curLocale)
+				curColData = CollegeData(colName, curBachFlag, curControl, curSelectivity, curSat25, curSat75, curAdmitperc, curCarnegie, curTuivary, curRelaffil, curFt_ug, curFt_gd, curEnrlftm, curEnrlftw, curConfno1, curState, curLocale, -3, -3, -3, -3, -3, -3, -3, -3, -3, -3, -3, -3, -3, -3)
 				collegeDataLookup[unitID] = curColData
 			if (opeid not in OPEIDcrosswalkLookup): #update OPEID crosswalk
 				OPEIDcrosswalkLookup[opeid]= unitID
@@ -609,7 +609,7 @@ def populateCollegeData2(myYear):
 	global collegeDataLookup
 	curAggFile = open('C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/schooldata/'+str(myYear)+'/agg'+ str(myYear) + '.txt', 'rb')
 	linecount = 1
-	stringListAll = ['grrace24','fgrnt_p','loan_p','instspend','totalexp','tuition2','fee2','tuition3','fee3','chg2ay3','avesalt','empcntt', 'uploanp']
+	stringListAll = ['grrace24','fgrnt_p','loan_p','instspend','totalexp','tuition2','fee2','tuition3','fee3','chg2ay3', 'chg3ay3','avesalt','empcntt', 'uploanp']
 	indexVector = [0]*len(stringListAll)
 	curFedLoan = -3
 	for line in curAggFile.readlines():
