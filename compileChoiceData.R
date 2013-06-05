@@ -6,6 +6,7 @@
   #library(ggplot2)
   #library(MASS)
   #library(Hmisc)
+  library(zipcode)
   #library(reshape2)
 
 #clear workspace ==============================================================
@@ -386,12 +387,40 @@ for(i in 1:length(yearVect)){
       } #else we have to leave it as -3
     }
   #sporting division
-  #demographic (ethnic) match
+    confInputs = c(103,102,104,112,113,114,362,117,127,204,306,198,133,111,200,126,155,191,359,318,119,356,213,323,141,144,148,153,161,163,195,192,308,159,130,366,354,201,205,121,320,321,182,175,115,167,170,172,176,180,183,185,197,202,134,171,128,193,351,137,181,352,302,311,337,309,315,353)
+    confOutputs =c(1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,4,4,4,4,4,4,4)
+    LONG_DATA$division = -3
+    for (i in 1:nrow(LONG_DATA)){
+      matchInd = match(LONG_DATA$conference_no[i], confInputs)
+      if (!is.na(matchInd)){
+        LONG_DATA$division[i]= confOutputs[matchInd]  
+      }
+    }
   #ability match
-  #religious match
+    LONG_DATA$SATDiff = -3
+    satInput = c(1,2,3,4,5,6,0, -3)
+    satOutput = c(250,350,450,550,670,750,-3, -3)
+    LONG_DATA$SAT_MATH2 = satOutput[match(LONG_DATA$SAT_MATH, satInput)]
+    LONG_DATA$SAT_VERBAL2 = satOutput[match(LONG_DATA$SAT_VERBAL, satInput)]
+    for (i in 1:nrow(LONG_DATA)){
+      if(!is.na(LONG_DATA$SAT_MATH2[i]) & !is.na(LONG_DATA$SAT_VERBAL2[i]) & !is.na(LONG_DATA$sat75[i])){
+      LONG_DATA$SATDiff[i] = LONG_DATA$sat75[i]-sum(LONG_DATA$SAT_MATH[i], LONG_DATA$SAT_VERBAL[i])
+      }
+    }
   #urban/rural match
+    LONG_DATA$urbanruralmatch = -3
+    for (i in 1:nrow(LONG_DATA)){
+      if (!is.na(LONG_DATA$urbanrural[i]) & !is.na(LONG_DATA$URBAN_RURAL[i])){
+        if(LONG_DATA$urbanrural[i] ==3 & LONG_DATA$URBAN_RURAL[i]==0){
+          LONG_DATA$urbanruralmatch[i]==1
+        } else if (LONG_DATA$urbanrural[i] %in% c(1,2) & LONG_DATA$URBAN_RURAL[i]==1){
+          LONG_DATA$urbanruralmatch[i]==1
+        }
+      }
+    }
   #distance from college to home
-    
-
+    #not currently pulled because this is a lot of work
 
 #retrieve only relevant data points
+keepVect = c("PUBID_1997","b0", "KEYSEX_1997", "KEYRACE_ETHNICITY_1997","GRADES","SAT_MATH", "SAT_VERBAL", "MAJOR2", "DAD_ED","MOM_ED","HH_SIZE", "HH_INCOME", "URBAN_RURAL", "SCHOOL_TYPE", "AttendedIndicator", "FINAIDEST", "AIDALLSCHOOL", "instate","SATDiff","urbanruralmatch", "realtui", "tuiin", "tuiout", "tuiinlist", "tuioutlist", "sat25", "sat75", "avgsal", "control", "fulltime_UG", "fulltime_GRAD", "carnegie", "selectivity", "fedgrantp", "gradrate", "loanp", "admitperc", "expperstudent", "instperstudent", "facperstudent", "genderratio", "division", "urbanrural")
+LONG_OUT = LONG_DATA[,keepVect]
