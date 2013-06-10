@@ -42,12 +42,12 @@ def main():
 
 	#try to fill in missing colleges using multiple years of IPEDS files and the OPEIDS crosswalk; populatecolelgedatalookup with data that comes from this file
 	IPEDScheck(2004)
-	IPEDScheck(2006)
+	#IPEDScheck(2006)
 	IPEDScheck(2005)
-	IPEDScheck(2003)
-	IPEDScheck(2002)
-	IPEDScheck(2001)
-	IPEDScheck(2011)
+	#IPEDScheck(2003)
+	#IPEDScheck(2002)
+	#IPEDScheck(2001)
+	#IPEDScheck(2011)
 	BarronsSetup() #add barron's selectivity to info we have about schools
 	
 	#try to replace schools using FICE codes where possible
@@ -63,12 +63,12 @@ def main():
 	#pull data needed to fill int missing selectivity (and possibly other data in the future)
 	#we only need this for the selectivity regression, so do not run every time
 	populateCollegeData(2004)
-	populateCollegeData(2006)
+	#populateCollegeData(2006)
 	populateCollegeData(2005)
-	populateCollegeData(2003)
-	populateCollegeData(2002)
-	populateCollegeData(2001)
-	populateCollegeData(2011)
+	#populateCollegeData(2003)
+	#populateCollegeData(2002)
+	#populateCollegeData(2001)
+	#populateCollegeData(2011)
 	#writeMissingSelect()
 
 	#check whether there is anything different about the schools for which people have missing data
@@ -83,11 +83,11 @@ def main():
 
 	#pull additonal schooling data
 	populateCollegeData2(2004)
-	populateCollegeData2(2006)
+	#populateCollegeData2(2006)
 	populateCollegeData2(2005)
-	populateCollegeData2(2003)
-	populateCollegeData2(2002)
-	populateCollegeData2(2011)
+	#populateCollegeData2(2003)
+	#populateCollegeData2(2002)
+	#populateCollegeData2(2011)
 
 	#get financial aid variables that are specific to student
 	#populateFinAidVars()

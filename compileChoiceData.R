@@ -378,10 +378,10 @@ for(i in 1:length(yearVect)){
       }else{
         allAid = 0
       }
-      if(LONG_DATA$FINAIDEST[i]>0){ #we have aid data
+      if(LONG_DATA$FINAIDEST[i]>=0){ #we have aid data
         if(LONG_DATA$instate[i]==1){
           LONG_DATA$realtui[i] = LONG_DATA$tuiinlist[i]+ LONG_DATA$feein[i]- LONG_DATA$FINAIDEST[i]-allAid
-        }else if (LONG_DATA$instate[i]==0){
+        }else if (LONG_DATA$instate[i] %in% c(0, -3)){ #treat -3 missing state as in-state
           LONG_DATA$realtui[i] = LONG_DATA$tuioutlist[i]+ LONG_DATA$feeout[i]- LONG_DATA$FINAIDEST[i]- allAid
         }
       } #else we have to leave it as -3
@@ -415,6 +415,9 @@ for(i in 1:length(yearVect)){
           LONG_DATA$urbanruralmatch[i]=1
         } else if (LONG_DATA$urbanrural[i] %in% c(1,2) & LONG_DATA$URBAN_RURAL[i]==1){
           LONG_DATA$urbanruralmatch[i]=1
+        }
+        else if (LONG_DATA$urbanrural[i]>= 0 & LONG_DATA$URBAN_RURAL[i]>= 0){
+          LONG_DATA$urbanruralmatch[i]=0
         }
       }
     }
