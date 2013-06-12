@@ -13,7 +13,7 @@
   rm(list = ls())
   
 #data i/o ==========================================================================
-  choice.dat = read.csv("D:choiceinput.csv")
+  choice.dat = read.csv("D:choiceinput2.csv")
   #delete schools with selectivity 7--people make these decisions differently
   choice.dat = choice.dat[choice.dat$selectivity != 7,]
   #dataset with NAs coded correctly
@@ -48,10 +48,14 @@
           na.dat$realtui[i] = na.dat$tuioutlist[i]+ na.dat$feeout[i]- na.dat$FINAIDEST[i]-na.dat$AIDALLSCHOOL[i]
         }
     }
+  #distance
+    #lat/long sometimes filled in by state or google maps location of campuses
+    na.dat$distance = NA
+    for (i in 1:nrow(na.dat)){
+      if (na.dat$latitude[i] != -3 & !is.na(na.dat$latstudent[i]))
+        na.dat$distance[i] = sqrt((na.dat$latitude[i] -na.dat$latstudent[i])^2+ (na.dat$longitude[i] - na.dat$longstudent[i])^2)
+    }
 
-
-    missAid = na.dat[is.na(na.dat$FINAIDEST),]$FINAIDEST = 
-    na.dat$realtui = 
 
 #preliminary visualization===========================================================
   #correlation and plot

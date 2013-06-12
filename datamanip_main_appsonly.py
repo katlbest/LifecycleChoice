@@ -180,7 +180,9 @@ def IPEDScheck(myYear): #look up colleges in the list in myYear's ipeds list and
 			curState = varVector[0]
 			curLocale = varVector[1]
 			curLong = varVector[2]
+			print curLong
 			curLat = varVector[3]
+			print curLat
 			#variables from other files
 			curSat25 = -3
 			curSat75 = -3
@@ -590,7 +592,7 @@ def saveCollegeData():
 	for i in collegeList:
 		if i in collegeDataLookup:
 			curCollege = collegeDataLookup[i]
-			curOutput = str(i) + "\t" + str(curCollege.control) +  "\t" + str(curCollege.selectivity) + "\t" + str(curCollege.tuivary) +  "\t" + str(curCollege.relaffil) + "\t" + str(curCollege.ft_ug) + "\t" + str(curCollege.ft_gd) + "\t" + str(curCollege.enrlftm) + "\t" + str(curCollege.enrlftw) + "\t" + str(curCollege.confno1) + "\t" + str(curCollege.state) + "\t" + str(curCollege.locale) + "\t" +str(curCollege.gradrate)+ "\t" + str(curCollege.fedgrantp)+ "\t" + str(curCollege.loanp)+ "\t" + str(curCollege.instspend)+ "\t" + str(curCollege.totalexp)+ "\t" + str(curCollege.tuiin)+ "\t" + str(curCollege.feein)+ "\t" + str(curCollege.tuiout)+ "\t" + str(curCollege.feeout)+ "\t" + str(curCollege.tuiinlist)+ "\t" + str(curCollege.tuioutlist)+ "\t" + str(curCollege.avgsal)+ "\t" +str(curCollege.numfaculty)+ "\t" + str(curCollege.sat25) + "\t" + str(curCollege.sat75)+  "\t" + str(curCollege.carnegie) + "\t" + str(curCollege.admitperc) + "\t" + str(curCollege.longit) + "\t" + str(curCollege.latit) + "\n"
+			curOutput = str(i) + "\t" + str(curCollege.control) +  "\t" + str(curCollege.selectivity) + "\t" + str(curCollege.tuivary) +  "\t" + str(curCollege.relaffil) + "\t" + str(curCollege.ft_ug) + "\t" + str(curCollege.ft_gd) + "\t" + str(curCollege.enrlftm) + "\t" + str(curCollege.enrlftw) + "\t" + str(curCollege.confno1) + "\t" + str(curCollege.state) + "\t" + str(curCollege.locale) + "\t" +str(curCollege.gradrate)+ "\t" + str(curCollege.fedgrantp)+ "\t" + str(curCollege.loanp)+ "\t" + str(curCollege.instspend)+ "\t" + str(curCollege.totalexp)+ "\t" + str(curCollege.tuiin)+ "\t" + str(curCollege.feein)+ "\t" + str(curCollege.tuiout)+ "\t" + str(curCollege.feeout)+ "\t" + str(curCollege.tuiinlist)+ "\t" + str(curCollege.tuioutlist)+ "\t" + str(curCollege.avgsal)+ "\t" +str(curCollege.numfaculty)+ "\t" + str(curCollege.sat25) + "\t" + str(curCollege.sat75)+  "\t" + str(curCollege.carnegie) + "\t" + str(curCollege.admitperc) + "\t" + str(curCollege.latit) + "\t" + str(curCollege.longit) + "\n"
 		else:
 			outStr3 = str(i) + "\n"
 		open("C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/collegedataoutput.txt","a").write(curOutput)
