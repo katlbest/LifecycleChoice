@@ -8,6 +8,9 @@
   #library(MASS)
   #library(Hmisc)
   #library(reshape2)
+  library(descr)
+  library(glm)
+  library(mclogit)
 
 #clear workspace ===================================================================
   rm(list = ls())
@@ -36,7 +39,7 @@
     #delete 4 with remaining no selectivity
       na.dat = na.dat[!is.na(na.dat$selectivity2),]
     #fill selectivity difference
-      na.dat$selectdiff = na.dat$selectivity2-na.dat$Admitted
+      na.dat$selectdiff = na.dat$selectivity2-na.dat$Admit
   #financial aid variables
     na.dat[is.na(na.dat$AIDALLSCHOOL),]$AIDALLSCHOOL = 0
     na.dat[is.na(na.dat$FINAIDEST),]$FINAIDEST = 0
@@ -84,7 +87,7 @@
       }
     }
 
-keyVars = c("PUBID_1997", "AdmittedSchool", "tuioutlist", "realtui", "FINAIDEST", "distance", "instate", "urbanruralmatch", "selectdiff", "loanp", "fedgrantp", "genderratio", "totstudents", "control", "carnegie2", "selectivity2", "expperstudent", "instperstudent", "facperstudent", "avgsal", "division2", "gradrate", "AttendedIndicator")
+keyVars = c("PUBID_1997", "AdmittedSchool", "tuioutlist", "realtui", "FINAIDEST", "distance", "instate", "urbanruralmatch", "selectdiff", "loanp", "fedgrantp", "genderratio", "totstudents", "control", "carnegie2", "selectivity2", "expperstudent", "instperstudent", "facperstudent", "avgsal", "division2", "gradrate", "AttendedIndicator", "Attend")
 out.df = na.dat[,keyVars]
 write.csv(out.df, "D:mainvars.csv")
 
@@ -116,11 +119,38 @@ write.csv(out.df, "D:mainvars.csv")
 
 #ANONYMIZED MODEL SETUP===============================================================
   #read anon data
-  anon.dat = read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Choice Model Inputs/mainvars-anon.csv")
+    anon.dat = read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Choice Model Inputs/mainvars-anon.csv")
+  #get attenders
+    attenders.dat = anon.dat[anon.dat$attend != -10,]
+  #delete those with only 1 appearance
+    frequency.dat = data.frame(freq(ordered(attenders.dat$pubid_anon), plot=FALSE))
+    frequency.dat$pubid_anon= rownames(frequency.dat)
+    attenders.dat = merge(x = attenders.dat, y = frequency.dat, by = "pubid_anon", all.x = TRUE)
+    multi.dat = attenders.dat[attenders.dat$Frequency>1,]
+  
+  test = na.exclude(anon.dat[1:10,])
   #setup model inputs
     #create choice set information
       #pubid_anon identifies decision-maker ID
       #school_anon identifies alternative ID
       #AttendedIndicator identifies choice made
-      mlogit.anon.dat = mlogit.data(anon.dat, shape = "long", choice = "attendedIndicator", alt.var= "school_anon", chid.var = "pubid_anon")
-
+      test =attenders.dat
+      mlogit.attenders.dat = mlogit.data(na.exclude(attenders.dat), shape = "long", choice = "attendedIndicator", alt.var= "school_anon", chid.var = "pubid_anon")
+  #mlogit
+      mlogit.mod = mlogit(attendedIndicator~-1 + carnegie2+ tuioutlist + realtui + finaidest + distance + urbanruralmatch + selectdiff + loanp + fedgrantp + genderratio+ totstudents + control+ carnegie2 + selectivity2 + expperstudent +instperstudent + facperstudent + avgsal + division2+ gradrate, data = na.exclude(multi.dat), shape = "long", choice = "attendedIndicator", alt.var= "school_anon", chid.var = "pubid_anon")
+      mlogit.mod = mlogit(attendedIndicator~-1 + tuioutlist + realtui + distance + urbanruralmatch + selectdiff + loanp + fedgrantp + genderratio+ totstudents + control+ carnegie2 + expperstudent + avgsal + division2, data = na.exclude(multi.dat), shape = "long", choice = "attendedIndicator", alt.var= "school_anon", chid.var = "pubid_anon")
+      mlogit.mod = mlogit(attendedIndicator~-1 + tuioutlist  + loanp + fedgrantp + genderratio+ totstudents + control+ carnegie2 + expperstudent + avgsal + division2, data = na.exclude(multi.dat), shape = "long", choice = "attendedIndicator",  chid.var = "pubid_anon")
+      
+  #simple glm model
+      glm.mod = glm(attendedIndicator~pubid_anon+ tuioutlist  + loanp + fedgrantp + genderratio+ totstudents + control+ carnegie2 + expperstudent + avgsal + division2,data=na.exclude(multi.dat),family=binomial())
+  #mclogit
+    input.dat = na.exclude(multi.dat)
+    lhs = matrix(c(input.dat$attendedIndicator, input.dat$pubid_anon), nrow(input.dat), 2)
+    mclogit.mod = mclogit(lhs~ tuioutlist  + loanp + fedgrantp + genderratio+ totstudents + control+ carnegie2 + expperstudent + avgsal + division2,data=na.exclude(input.dat), model = TRUE, )
+  #investigating degeneracy
+    write.csv(cor(na.exclude(multi.dat)), "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/choicemodel/multicorr.csv")
+    for (i in 1:ncol(input.dat)){
+      myPlot = ggplot(data=input.dat, aes(x=attendedIndicator, y=input.dat[,i])) + geom_point()+ labs(title=colnames(input.dat)[i])
+      ggsave(paste("C:/Users/Katharina/Documents/Umich/lifecycle choice/data/plots/", i , ".pdf", sep = ""))
+    }
+    
