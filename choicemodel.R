@@ -25,7 +25,7 @@
     na.dat= choice.dat
     na.dat[na.dat==-3]=NA
 
-#fill missing variables===========================================================
+#fill missing variables and set up derived===========================================================
   #selectivity
     haveSelect = na.dat[!is.na(na.dat$selectivity2),]
     noSelect =  na.dat[is.na(na.dat$selectivity2),]
@@ -92,13 +92,31 @@
         na.dat$carnegie2[i] =4
       }
     }
+  
+  #salary
+    #create lifetime income estimate
+      tau =27.8818
+      m = -3.8149
+      b = 36241
+      n =  -0.2445
+      a = 2234.3
+      source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_getNS.R")
+      na.dat$lifeEarnings = NA
+      for (i in 1:nrow(na.dat)){
+        if(na.dat$Attend[i]==-10){#did not attned school so begin earning at 18
+          na.dat$lifeEarnings[i]= getNS(tau, m, b, n, a, na.dat$b0[i], 0)
+        } else{
+          na.dat$lifeEarnings[i]= getNS(tau, m, b, n, a, na.dat$b0[i], 1)
+        }
+      }
 
-keyVars = c("PUBID_1997", "AdmittedSchool", "tuioutlist", "realtui", "FINAIDEST", "distance", "instate", "urbanruralmatch", "selectdiff", "loanp", "fedgrantp", "genderratio", "totstudents", "control", "carnegie2", "selectivity2", "expperstudent", "instperstudent", "facperstudent", "avgsal", "division2", "gradrate", "AttendedIndicator", "Attend", "lifeEarnings")
-out.df = na.dat[,keyVars]
-write.csv(out.df, "D:mainvars.csv")
+  #output
+    keyVars = c("PUBID_1997", "AdmittedSchool", "tuioutlist", "realtui", "FINAIDEST", "distance", "instate", "urbanruralmatch", "selectdiff", "loanp", "fedgrantp", "genderratio", "totstudents", "control", "carnegie2", "selectivity2", "expperstudent", "instperstudent", "facperstudent", "avgsal", "division2", "gradrate", "AttendedIndicator", "Attend", "lifeEarnings")
+    out.df = na.dat[,keyVars]
+    write.csv(out.df, "D:mainvars.csv")
 
 #preliminary visualization===========================================================
-  #correlation and plot
+  #correlation
     write.csv(cor(na.exclude(na.dat)), "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/choicemodel/inputcorr.csv")
   #correlation of the school actually attended only with income
     attend.dat = na.dat[na.dat$AttendedIndicator == 1,]
@@ -106,24 +124,7 @@ write.csv(out.df, "D:mainvars.csv")
     attend.dat= attend.dat[,!(colnames(attend.dat) %in% drop)]
     write.csv(cor(na.exclude(attend.dat)), "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/choicemodel/inputcorrincome.csv")
 
-#handle interaction variables==========================================================================
-  #create lifetime income estimate
-    tau =27.8818
-    m = -3.8149
-    b = 36241
-    n =  -0.2445
-    a = 2234.3
-    source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_getNS.R")
-    na.dat$lifeEarnings = NA
-    for (i in 1:nrow(na.dat)){
-      if(na.dat$Attend[i]==-10){#did not attned school so begin earning at 18
-        na.dat$lifeEarnings[i]= getNS(tau, m, b, n, a, na.dat$b0[i], 0)
-      } else{
-        na.dat$lifeEarnings[i]= getNS(tau, m, b, n, a, na.dat$b0[i], 1)
-      }
-    }
-
-#ANONYMIZED MODEL SETUP===============================================================
+#Anonymized data===============================================================
   #read anon data
     anon.dat = read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Choice Model Inputs/anon_data2.csv")
   #drop nonsensical observation
@@ -135,74 +136,67 @@ write.csv(out.df, "D:mainvars.csv")
     frequency.dat$pubid_anon= rownames(frequency.dat)
     attenders.dat = merge(x = attenders.dat, y = frequency.dat, by = "pubid_anon", all.x = TRUE)
     multi.dat = attenders.dat[attenders.dat$Frequency>1,]
-    #test = na.exclude(anon.dat[1:10,])
-  #investigating degeneracy
-    write.csv(cor(na.exclude(multi.dat)), "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/choicemodel/multicorr.csv")
-    for (i in 1:ncol(input.dat)){
-      myPlot = ggplot(data=input.dat, aes(x=attendedIndicator, y=input.dat[,i])) + geom_point()+ labs(title=colnames(input.dat)[i])
+
+#Investigating degeneracy===============================================================
+  #plot data versus attended indicator
+    for (i in 1:ncol(multi.dat)){
+      myPlot = ggplot(data=multi.dat, aes(x=attendedIndicator, y=multi.dat[,i])) + geom_point()+ labs(title=colnames(multi.dat)[i])
       ggsave(paste("C:/Users/Katharina/Documents/Umich/lifecycle choice/data/plots/", i , ".pdf", sep = ""))
     }
     output= data.frame(matrix(nrow = 0, ncol = 3))
     colnames(output)= c("var", "R2", "p")
-    for (i in 1:ncol(input.dat)){
-      myMod = lm(input.dat$attendedIndicator~input.dat[,i])
-      curoutput = data.frame(var = colnames(input.dat)[i], R2 = summary(myMod)$r.squared, p = summary(myMod)$coefficients[2,4])
+    for (i in 1:ncol(multi.dat)){
+      myMod = lm(multi.dat$attendedIndicator~multi.dat[,i])
+      curoutput = data.frame(var = colnames(multi.dat)[i], R2 = summary(myMod)$r.squared, p = summary(myMod)$coefficients[2,4])
       colnames(curoutput)= colnames(output)
       output = rbind(output, curoutput)
     }
-    #kappa testing--uncorrect
-      test.dat = na.exclude(multi.dat)
-      costVars = c("tuioutlist", "realtui", "finaidest") #not colin
-      distVars = c("distance", "instate", "urbanruralmatch") #pretty bad
-      selectVars = c("selectdiff", "selectivity2", "gradrate") #not bad
-      wealthVars= c("loanp", "fedgrantp", "expperstudent", "instperstudent", "facperstudent", "avgsal") #very bad
-      wealthVars2= c("loanp", "fedgrantp", "facperstudent")#, "expperstudent", "instperstudent", "facperstudent", "avgsal") #very bad
-      wealthVars3= c("expperstudent", "instperstudent", "avgsal") #very bad
-      catVars= c("control", "carnegie2", "division2", "instate", "urbanruralmatch", "selectivity2") #also instate and urbanruralmatch and selectivity2, not bad
-        #gets a little bit bad when we include ALL categoricals
-      allVars = c("tuioutlist", "realtui", "finaidest","distance", "instate", "urbanruralmatch", "selectdiff", "selectivity2", "gradrate", "loanp", "fedgrantp", "expperstudent", "instperstudent", "facperstudent", "avgsal", "control", "carnegie2", "division2")
-      redVars = c("tuioutlist", "realtui", "finaidest","distance", "urbanruralmatch", "selectdiff", "selectivity2", "gradrate", "loanp", "fedgrantp", "expperstudent", "instperstudent", "avgsal", "control", "carnegie2", "division2")
-      buildupVars =  c("tuioutlist", "realtui", "finaidest"), "urbanruralmatch")
-    #kappa test--correct
-      kappaMatrix = matrix(nrow = ncol(test.dat), ncol = ncol(test.dat))
-      reord.dat = test.dat[c(6,7,8,9,10,11,12,14,15,16,19,21,22,23,24,13,1,2,3,4,5,17,18,20)]
-      for (i in 1:ncol(reord.dat)){
-        for (j in 1:ncol(reord.dat)){
-        #curlist = c(colnames(test.dat)[i], colnames(test.dat)[j])
-        curMod = model.matrix(~reord.dat[,i]+ reord.dat[,j])
-        #kapout = kappa(test.dat[,curlist])
-        kapout = kappa(curMod)
-        kappaMatrix[i,j]= kapout
-        }
+  #test dataset excluding na's
+    noNA.dat = na.exclude(multi.dat)
+  #kappa test
+    kappaMatrix = matrix(nrow = ncol(noNA.dat), ncol = ncol(noNA.dat))
+    reord.dat = noNA.dat[c(6,7,8,9,10,11,12,14,15,16,19,21,22,23,24,13,1,2,3,4,5,17,18,20)]
+    for (i in 1:ncol(reord.dat)){
+      for (j in 1:ncol(reord.dat)){
+      #curlist = c(colnames(noNA.dat)[i], colnames(noNA.dat)[j])
+      curMod = model.matrix(~reord.dat[,i]+ reord.dat[,j])
+      #kapout = kappa(noNA.dat[,curlist])
+      kapout = kappa(curMod)
+      kappaMatrix[i,j]= kapout
       }
-  #inputs thtat are not collinear pairwise
-    indep.dat = test.dat[,c("school_anon", "pubid_anon", "distance","instate","urbanruralmatch","selectdiff","loanp","fedgrantp","genderratio","control","carnegie2","selectivity2","facperstudent","division2","gradrate", "attendedIndicator", "attend", "totstudents")]
+    }
+  #testing with simple models
+    #glm models and VIF--do not take choice situations (distinction between individuals) into account
+      #all variables
+        glm.mod = glm(attendedIndicator~tuioutlist+realtui+finaidest+distance+instate+urbanruralmatch+selectdiff+loanp+fedgrantp+genderratio+totstudents+control+carnegie2+selectivity2+expperstudent+instperstudent+facperstudent+avgsal+division2+gradrate+attend,data=noNA.dat,family=binomial())
+        vif(glm.mod)
+      glm.reduced.mod = glm(attendedIndicator~distance+instate+urbanruralmatch+selectdiff+genderratio+control+carnegie2+selectivity2+division2+attend+loanp+fedgrantp+facperstudent+gradrate+totstudents,data=noNA.dat,family=binomial())
+      vif(glm.test.mod)
+    #mclogit models
+      lhs = matrix(c(noNA.dat$attendedIndicator, noNA.dat$pubid_anon), nrow(noNA.dat), 2)
+      mclogit.mod = mclogit(lhs~tuioutlist+loanp+fedgrantp+genderratio+totstudents+control+carnegie2+expperstudent+avgsal+division2,data=noNA.dat, model = TRUE, )
+        #yields warning that fitted rates numerically zero occurred, suggesting collinearity
+      indep.dat = noNA.dat[,c("school_anon", "pubid_anon", "distance","instate","urbanruralmatch","selectdiff","loanp","fedgrantp","genderratio","control","carnegie2","selectivity2","facperstudent","division2","gradrate", "attendedIndicator", "attend", "totstudents")]
+      mclogit.indep.mod = mclogit(lhs~0+distance+instate+urbanruralmatch+selectdiff+loanp+fedgrantp+genderratio+control+carnegie2+selectivity2+facperstudent+division2+gradrate+attend+totstudents,data=indep.dat, model = TRUE, )
+        #yields warning that fitted rates numerically zero occurred, suggesting collinearity
+      mclogit.small.mod = mclogit(lhs~0+distance,data=noNA.dat, model = TRUE, )
+  #conclusion of degeneracy testing
+    #list of variables that are not collinear on first investigation
+    indep.dat = noNA.dat[,c("school_anon", "pubid_anon", "distance","instate","urbanruralmatch","selectdiff","loanp","fedgrantp","genderratio","control","carnegie2","selectivity2","facperstudent","division2","gradrate", "attendedIndicator", "attend", "totstudents")]
 
-#models
+#mlogit models===============================================================
   #create choice set information
     #pubid_anon identifies decision-maker ID
     #school_anon identifies alternative ID
     #AttendedIndicator identifies choice made
-    mlogit.attenders.dat = mlogit.data(test.dat, shape = "long", choice = "attendedIndicator", alt.var= "school_anon", chid.var = "pubid_anon")
-    mlogit.attenders.dat = mlogit.data(indep.dat, shape = "long", choice = "attendedIndicator", alt.var= "school_anon", chid.var = "pubid_anon")
+    mlogit.attenders.dat = mlogit.data(noNA.dat, shape = "long", choice = "attendedIndicator", alt.var= "school_anon", chid.var = "pubid_anon")
   #mlogit
-    mlogit.mod = mlogit(attendedIndicator~-1 + carnegie2+ tuioutlist + realtui + finaidest + distance + urbanruralmatch + selectdiff + loanp + fedgrantp + genderratio+ totstudents + control+ carnegie2 + selectivity2 + expperstudent +instperstudent + facperstudent + avgsal + division2+ gradrate, data = na.exclude(multi.dat), shape = "long", choice = "attendedIndicator", alt.var= "school_anon", chid.var = "pubid_anon")
-    mlogit.mod = mlogit(attendedIndicator~-1 + tuioutlist + realtui + distance + urbanruralmatch + selectdiff + loanp + fedgrantp + genderratio+ totstudents + control+ carnegie2 + expperstudent + avgsal + division2, data = na.exclude(multi.dat), shape = "long", choice = "attendedIndicator", alt.var= "school_anon", chid.var = "pubid_anon")
-    mlogit.mod = mlogit(attendedIndicator~-1 + tuioutlist  + loanp + fedgrantp + genderratio+ totstudents + control+ carnegie2 + expperstudent + avgsal + division2, data = na.exclude(multi.dat), shape = "long", choice = "attendedIndicator",  chid.var = "pubid_anon")
-    mlogit.mod = mlogit(attendedIndicator~-1 + tuioutlist  + loanp + fedgrantp + genderratio+ totstudents + control+ carnegie2 + expperstudent + avgsal + division2, data = test.dat, shape = "long", choice = "attendedIndicator", chid.var = "pubid_anon", alt.var = "school_anon")
-    mlogit.reduced.mod = mlogit(attendedIndicator~-1 + distance+instate+urbanruralmatch+selectdiff+genderratio+control+division2+attend+loanp+fedgrantp+facperstudent,  data = test.dat, shape = "long", choice = "attendedIndicator", chid.var = "pubid_anon", alt.var = "school_anon") #totstudents could also be added
-    mlogit.smallestwithsing.mod = mlogit(attendedIndicator~-1+attend+facperstudent,  data = test.dat, shape = "long", choice = "attendedIndicator", chid.var = "pubid_anon", alt.var = "school_anon") #totstudents could also be added
-      #TBD: may be able to build a working model with attend and one other variable
-      #took out: totstudents, selectivity2, gradrate, carnegie2
-  #simple glm model
-    glm.mod = glm(attendedIndicator~tuioutlist  + loanp + fedgrantp + genderratio+ totstudents + control+ carnegie2 + expperstudent + avgsal + division2,data=na.exclude(multi.dat),family=binomial())
-    glm.reduced.mod = glm(attendedIndicator~distance+instate+urbanruralmatch+selectdiff+genderratio+control+carnegie2+selectivity2+division2+attend+loanp+fedgrantp+facperstudent+gradrate+totstudents,data=test.dat,family=binomial())
-    glm.test.mod = glm(attendedIndicator~distance+instate+urbanruralmatch+selectdiff+genderratio+control+division2+attend+loanp+fedgrantp+facperstudent,data=test.dat,family=binomial())
-    vif(glm.test.mod)
-  #mclogit
-    input.dat = na.exclude(multi.dat)
-    lhs = matrix(c(input.dat$attendedIndicator, input.dat$pubid_anon), nrow(input.dat), 2)
-    mclogit.mod = mclogit(lhs~ tuioutlist  + loanp + fedgrantp + genderratio+ totstudents + control+ carnegie2 + expperstudent + avgsal + division2,data=na.exclude(input.dat), model = TRUE, )
-  
-      
-    
+    #all data points
+      mlogit.all.mod=mlogit(attendedIndicator~0+tuioutlist+realtui+finaidest+distance+instate+urbanruralmatch+selectdiff+loanp+fedgrantp+genderratio+totstudents+control+carnegie2+selectivity2+expperstudent+instperstudent+facperstudent+avgsal+division2+gradrate+attend|0, data=noNA.dat,shape="long",choice="attendedIndicator",alt.var="school_anon",chid.var="pubid_anon")
+        #singular, 1.2254E-41
+      mlogit.reduced.mod=mlogit(attendedIndicator~0+distance+instate+urbanruralmatch+selectdiff+genderratio+control+division2+attend+loanp+fedgrantp+facperstudent|0,data=noNA.dat,shape="long",choice="attendedIndicator",chid.var="pubid_anon",alt.var="school_anon")#totstudentscouldalsobeadded
+        #singular, 1.10199E-34
+      mlogit.smallestwithsing.mod=mlogit(attendedIndicator~0+attend+facperstudent,data=noNA.dat,shape="long",choice="attendedIndicator",chid.var="pubid_anon",alt.var="school_anon")#totstudentscouldalsobeadded
+        #singular, 2.48956E-30
+      mlogit.indep.mod= mlogit(attendedIndicator~0+distance+instate+urbanruralmatch+selectdiff+loanp+fedgrantp+genderratio+control+carnegie2+selectivity2+facperstudent+division2+gradrate+attend+totstudents|0,data=noNA.dat,shape="long",choice="attendedIndicator",chid.var="pubid_anon",alt.var="school_anon")
+        #singular, 1.25498E-38
