@@ -147,6 +147,8 @@
     #due to differences include financial aid from admission process only as a variable
       attenders.dat[is.na(attenders.dat$nonAttendAid),]$nonAttendAid=0
       attenders.dat = attenders.dat[,-which(names(attenders.dat) %in% c("attendAid"))]
+    #create related realtui
+      #TBDattenders.dat$realtui2 = 
   #delete those with only 1 appearance
     frequency.dat = data.frame(freq(ordered(attenders.dat$pubid_anon), plot=FALSE))
     frequency.dat$pubid_anon= rownames(frequency.dat)
@@ -211,15 +213,30 @@
         mclogit.all.mod = mclogit(lhs~tuioutlist+realtui+finaidest+distance+instate+urbanruralmatch+selectdiff+loanp+fedgrantp+genderratio+totstudents+control+carnegie2+selectivity2+expperstudent+instperstudent+facperstudent+avgsal+division2+gradrate+attend+expperstudent2+instperstudent2+facperstudent2+genderratio2+totstudents2,data=noNA.dat, model = TRUE, )
           #singular
       #all with new vars only
-        mclogit.all.mod = mclogit(lhs~tuioutlist+realtui+finaidest+distance+instate+urbanruralmatch+selectdiffInt+loanp+fedgrantp+control+carnegie2+selectInt+avgsal+division2+gradrate+attend+expperstudent2+instperstudent2+facperstudent2+genderratio2+totstudents2+nonAttendAid,data=noNA.dat, model = TRUE, )
+        mclogit.all.mod = mclogit(lhs~tuioutlist+realtui+finaidest+distance+instate+urbanruralmatch+selectdiffInt+loanp+fedgrantp+control+carnegie2+selectInt+avgsal+division2+gradrate+expperstudent2+instperstudent2+facperstudent2+genderratio2+totstudents2+nonAttendAid,data=noNA.dat, model = TRUE, )
           #still singular
-      #remove obvious collinearity until a non-singular model is run
-          #finaidest bc it is linear combination of other variables
-          #instperstudent because it is highly correlated with expperstudent and info is captured by avg salary
-          #instate because distance is captured by distance, in-state by the tuition amount
-          #attend can't be in the model since we do not know its value until after attendance decision
-          #selectdiff because it is less significant that selectivity2
-          mclogit.starting.mod = mclogit(lhs~selectivity2+ tuioutlist+realtui+distance+urbanruralmatch+loanp+fedgrantp+control+carnegie2+avgsal+division2+gradrate+expperstudent2+facperstudent2+genderratio2+totstudents2,data=noNA.dat, model = TRUE, )
+      #based on choices in excel
+        mclogit.A.A.mod = mclogit(lhs~realtui+distance+instate+urbanruralmatch+loanp+fedgrantp+control+carnegie2+selectInt+avgsal+division2+gradrate+expperstudent2+instperstudent2+facperstudent2+genderratio2+totstudents2,data=noNA.dat, model = TRUE, )
+        mclogit.B.A.mod = mclogit(lhs~tuioutlist+finaidest+distance+instate+urbanruralmatch+loanp+fedgrantp+control+carnegie2+selectInt+avgsal+division2+gradrate+expperstudent2+instperstudent2+facperstudent2+genderratio2+totstudents2,data=noNA.dat, model = TRUE, )
+        mclogit.C.A.mod = mclogit(lhs~tuioutlist+nonAttendAid+distance+instate+urbanruralmatch+loanp+fedgrantp+control+carnegie2+selectInt+avgsal+division2+gradrate+expperstudent2+instperstudent2+facperstudent2+genderratio2+totstudents2,data=noNA.dat, model = TRUE, )
+        mclogit.A.B.mod = mclogit(lhs~realtui+distance+instate+urbanruralmatch+loanp+fedgrantp+control+carnegie2+selectdiffInt+avgsal+division2+gradrate+expperstudent2+instperstudent2+facperstudent2+genderratio2+totstudents2,data=noNA.dat, model = TRUE, )
+        mclogit.B.B.mod = mclogit(lhs~tuioutlist+finaidest+distance+instate+urbanruralmatch+loanp+fedgrantp+control+carnegie2+selectdiffInt+avgsal+division2+gradrate+expperstudent2+instperstudent2+facperstudent2+genderratio2+totstudents2,data=noNA.dat, model = TRUE, )
+        mclogit.C.B.mod = mclogit(lhs~tuioutlist+nonAttendAid+distance+instate+urbanruralmatch+loanp+fedgrantp+control+carnegie2+selectdiffInt+avgsal+division2+gradrate+expperstudent2+instperstudent2+facperstudent2+genderratio2+totstudents2,data=noNA.dat, model = TRUE, )
+      #remove consistently insignificant variables
+        mclogit.A.A.mod = mclogit(lhs~realtui+loanp+fedgrantp+carnegie2+selectInt+avgsal+division2+gradrate+expperstudent2+instperstudent2+facperstudent2+genderratio2+totstudents2,data=noNA.dat, model = TRUE, )
+        mclogit.B.A.mod = mclogit(lhs~tuioutlist+finaidest+loanp+fedgrantp+carnegie2+selectInt+avgsal+division2+gradrate+expperstudent2+instperstudent2+facperstudent2+genderratio2+totstudents2,data=noNA.dat, model = TRUE, )
+        mclogit.C.A.mod = mclogit(lhs~tuioutlist+nonAttendAid+loanp+fedgrantp+carnegie2+selectInt+avgsal+division2+gradrate+expperstudent2+instperstudent2+facperstudent2+genderratio2+totstudents2,data=noNA.dat, model = TRUE, )
+        mclogit.A.B.mod = mclogit(lhs~realtui+loanp+fedgrantp+carnegie2+selectdiffInt+avgsal+division2+gradrate+expperstudent2+instperstudent2+facperstudent2+genderratio2+totstudents2,data=noNA.dat, model = TRUE, )
+        mclogit.B.B.mod = mclogit(lhs~tuioutlist+finaidest+loanp+fedgrantp+carnegie2+selectdiffInt+avgsal+division2+gradrate+expperstudent2+instperstudent2+facperstudent2+genderratio2+totstudents2,data=noNA.dat, model = TRUE, )
+        mclogit.C.B.mod = mclogit(lhs~tuioutlist+nonAttendAid+loanp+fedgrantp+carnegie2+selectdiffInt+avgsal+division2+gradrate+expperstudent2+instperstudent2+facperstudent2+genderratio2+totstudents2,data=noNA.dat, model = TRUE, )
+      #model select each one
+        mclogit.A.A.mod = mclogit(lhs~realtui+fedgrantp+carnegie2+selectInt+avgsal+gradrate+expperstudent2+instperstudent2+facperstudent2,data=noNA.dat, model = TRUE, )
+        mclogit.B.A.mod = mclogit(lhs~tuioutlist+finaidest+loanp+fedgrantp+carnegie2+selectInt+avgsal+division2+gradrate+expperstudent2+instperstudent2+facperstudent2+genderratio2+totstudents2,data=noNA.dat, model = TRUE, )
+        mclogit.C.A.mod = mclogit(lhs~tuioutlist+nonAttendAid+loanp+fedgrantp+carnegie2+selectInt+avgsal+division2+gradrate+expperstudent2+instperstudent2+facperstudent2+genderratio2+totstudents2,data=noNA.dat, model = TRUE, )
+        mclogit.A.B.mod = mclogit(lhs~realtui+loanp+fedgrantp+carnegie2+selectdiffInt+avgsal+division2+gradrate+expperstudent2+instperstudent2+facperstudent2+genderratio2+totstudents2,data=noNA.dat, model = TRUE, )
+        mclogit.B.B.mod = mclogit(lhs~tuioutlist+finaidest+loanp+fedgrantp+carnegie2+selectdiffInt+avgsal+division2+gradrate+expperstudent2+instperstudent2+facperstudent2+genderratio2+totstudents2,data=noNA.dat, model = TRUE, )
+        mclogit.C.B.mod = mclogit(lhs~tuioutlist+nonAttendAid+loanp+fedgrantp+carnegie2+selectdiffInt+avgsal+division2+gradrate+expperstudent2+instperstudent2+facperstudent2+genderratio2+totstudents2,data=noNA.dat, model = TRUE, )
+
       #model selection
           #obvious
             #distance insignificant but BTL finds it significant
