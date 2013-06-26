@@ -135,8 +135,33 @@
     #anon.dat = anon.dat[anon.dat$school_anon !=174792,]
   #adjust control entry
     anon.dat[anon.dat$control==3,]$control = 2
+  #fix financial aid variables
+    #create finaidest2 using rules about when to use attended data
+      anon.dat[anon.dat$nonAttendMiss==-2,]$nonAttendMiss=0 #unknowns are treated as 0
+      for (i in 1:nrow(anon.dat)){
+        if (anon.dat$nonAttendMiss[i] %in% c(-3, -4)){ #if data is truly missing or valid skip (possibly indicating that no decision has been made)
+          #check for attended aid
+          if (is.na(anon.dat$attendAid[i])){
+            anon.dat$nonAttendMiss[i]= 0
+          }
+          else if (anon.dat$attendAid[i]>0){
+            #this is based on the model "test" below
+            #anon.dat$nonAttendMiss[i]= anon.dat$attendAid[i]*(.50291)
+            anon.dat$nonAttendMiss[i]= anon.dat$attendAid[i]*(0.44536)+963.86273
+            #print(anon.dat$pubid_anon[i])
+            #print(paste(anon.dat$nonAttendMiss[i], anon.dat$attendAid[i], sep = ","))
+          }else{
+            anon.dat$nonAttendMiss[i]= 0
+          }
+        }
+      }
+      anon.dat$finaidest2 = anon.dat$nonAttendMiss
+    #adjust both net tuition variables as necessary
+      anon.dat$costbeforeaid = anon.dat$realtui + anon.dat$finaidest
+      anon.dat$realtui2 = anon.dat$costbeforeaid- anon.dat$finaidest2
+      anon.dat$realtuiApply = anon.dat$costbeforeaid-anon.dat$nonAttendAid
   #replace negative tuition values with 0?
-    #TBD--not now
+    #not for now!
   #get attenders
     attenders.dat = anon.dat[anon.dat$attend != -10,]
   #check agreement of financial aid data and clean it
@@ -144,53 +169,49 @@
     aidcheck2.dat= aidcheck.dat[!(is.na(aidcheck.dat$attendAid)) & !(is.na(aidcheck.dat$nonAttendAid)),]
     myPlot = ggplot(data = aidcheck2.dat, aes(x=attendAid, y=nonAttendAid))+geom_point() + theme_bw() + labs(title="Aid from application versus attendance data")+ xlab("Aid from attendance data") + ylab("Aid from admissions data") +  geom_smooth(method = "lm", se=FALSE, color="black", aes(group=1))
     test = lm(aidcheck2.dat$nonAttendAid~aidcheck2.dat$attendAid)
-    #due to differences include financial aid from admission process only as a variable
-      attenders.dat[is.na(attenders.dat$nonAttendAid),]$nonAttendAid=0
-      attenders.dat = attenders.dat[,-which(names(attenders.dat) %in% c("attendAid"))]
-    #create related realtui
-      #TBDattenders.dat$realtui2 = 
   #delete those with only 1 appearance
     frequency.dat = data.frame(freq(ordered(attenders.dat$pubid_anon), plot=FALSE))
     frequency.dat$pubid_anon= rownames(frequency.dat)
     attenders.dat = merge(x = attenders.dat, y = frequency.dat, by = "pubid_anon", all.x = TRUE)
     multi.dat = attenders.dat[attenders.dat$Frequency>1,]
+  #create new selectivity variables
+    multi.dat$selectdiffInt = NA
+    multi.dat$selectInt = NA
+    lookup = data.frame(id = c(1,2,3,4,5), percent = c(33, 60, 75, 85, 100))
+    for (i in 1:nrow(multi.dat)){
+      admitInt = lookup[(1:dim(lookup)[1])[lookup[,1]==multi.dat$admit[i]],2]
+      multi.dat$selectInt[i] = lookup[(1:dim(lookup)[1])[lookup[,1]==multi.dat$selectivity2[i]],2]
+      multi.dat$selectdiffInt[i]=multi.dat$selectInt[i]-admitInt
+    } 
+  #set categorical variables
+    multi.dat$instate = as.factor(multi.dat$instate)
+    multi.dat$urbanruralmatch = as.factor(multi.dat$urbanruralmatch)
+    multi.dat$control = as.factor(multi.dat$control)
+    multi.dat$carnegie2 = as.factor(multi.dat$carnegie2)
+    multi.dat$attend = as.factor(multi.dat$attend)
+  #remove totally irrelevant variables
+    relVars.dat = multi.dat[,c("attendedIndicator","tuioutlist","realtui2","finaidest2","distance","instate","urbanruralmatch","loanp","fedgrantp","control","carnegie2","avgsal","division2","gradrate","expperstudent2","instperstudent2","facperstudent2","genderratio2","totstudents2","nonAttendAid","realtuiApply", "selectdiffInt","selectInt")]
   #test dataset excluding na's and make categoricals
-    noNA.dat = na.exclude(multi.dat)
-    #set up interval selectivities
-      noNA.dat$selectdiffInt = NA
-      noNA.dat$selectInt = NA
-      lookup = data.frame(id = c(1,2,3,4,5), percent = c(33, 60, 75, 85, 100))
-      for (i in 1:nrow(noNA.dat)){
-        admitInt = lookup[(1:dim(lookup)[1])[lookup[,1]==noNA.dat$admit[i]],2]
-        noNA.dat$selectInt[i] = lookup[(1:dim(lookup)[1])[lookup[,1]==noNA.dat$selectivity2[i]],2]
-        noNA.dat$selectdiffInt[i]=noNA.dat$selectInt[i]-admitInt
-      } #TBD need to add admit!
-    noNA.dat$instate = as.factor(noNA.dat$instate)
-    noNA.dat$urbanruralmatch = as.factor(noNA.dat$urbanruralmatch)
-    #noNA.dat$selectdiff = as.factor(noNA.dat$selectdiff)
-    noNA.dat$control = as.factor(noNA.dat$control)
-    noNA.dat$carnegie2 = as.factor(noNA.dat$carnegie2)
-    #noNA.dat$selectivity2 = as.factor(noNA.dat$selectivity2)
-    noNA.dat$attend = as.factor(noNA.dat$attend)
-  
-#Investigating degeneracy===============================================================
+    noNA.dat = na.exclude(relVars.dat)
+      
+#Investigating degeneracy and correlation===============================================================
   #plot data versus attended indicator
-    for (i in 1:ncol(multi.dat)){
-      myPlot = ggplot(data=multi.dat, aes(x=attendedIndicator, y=multi.dat[,i])) + geom_point()+ labs(title=colnames(multi.dat)[i])
+    for (i in 1:ncol(noNA.dat)){
+      myPlot = ggplot(data=noNA.dat, aes(x=attendedIndicator, y=noNA.dat[,i])) + geom_point()+ labs(title=colnames(noNA.dat)[i])
       ggsave(paste("C:/Users/Katharina/Documents/Umich/lifecycle choice/data/plots/", i , ".pdf", sep = ""))
     }
     output= data.frame(matrix(nrow = 0, ncol = 3))
     colnames(output)= c("var", "R2", "p")
-    for (i in 1:ncol(multi.dat)){
-      myMod = lm(multi.dat$attendedIndicator~multi.dat[,i])
-      curoutput = data.frame(var = colnames(multi.dat)[i], R2 = summary(myMod)$r.squared, p = summary(myMod)$coefficients[2,4])
+    for (i in 1:ncol(relVars.dat)){
+      myMod = lm(relVars.dat$attendedIndicator~relVars.dat[,i])
+      curoutput = data.frame(var = colnames(relVars.dat)[i], R2 = summary(myMod)$r.squared, p = summary(myMod)$coefficients[2,4])
       colnames(curoutput)= colnames(output)
       output = rbind(output, curoutput)
     }
   #kappa test
     kappaMatrix = matrix(nrow = ncol(noNA.dat), ncol = ncol(noNA.dat))
     #reord.dat = noNA.dat
-    reord.dat = noNA.dat[c(6,7,8,9,10,11,12,14,15,16,19,21,22,23,24,27,28,13,5,26,1,2,3,4,17,18,20, 25, 29)]
+    reord.dat = noNA.dat[c(5, 6, 7, 8, 9, 10, 11, 13, 14, 17, 18, 22, 23, 20, 16, 4, 2, 3, 12, 15, 19, 21)]
     for (i in 1:ncol(reord.dat)){
       for (j in 1:ncol(reord.dat)){
       #curlist = c(colnames(noNA.dat)[i], colnames(noNA.dat)[j])
@@ -200,7 +221,22 @@
       kappaMatrix[i,j]= kapout
       }
     }
-  #testing with simple models
+  #pairwise regressions and plots
+    outdata = data.frame(matrix(nrow = 0, ncol = 3))
+    colnames(outdata) = c("ts1", "ts2", "R2")
+    for (i in 1:ncol(noNA.dat)){
+      for (j in 1:ncol(noNA.dat)){
+        myPlot = ggplot(data=noNA.dat, aes(x= noNA.dat[,i], y = noNA.dat[,j]))+geom_point()+theme_bw()+ xlab(colnames(noNA.dat)[i])+ ylab(colnames(noNA.dat)[j])
+        nameStr = paste(colnames(noNA.dat)[i], colnames(noNA.dat)[j], sep ="")
+        ggsave(paste("C:/Users/Katharina/Documents/Umich/lifecycle choice/data/plots/pairwise",nameStr, ".pdf", sep = ""))
+        curMod = lm(noNA.dat[,j]~noNA.dat[,i])
+        curout = data.frame(ts1 = colnames(noNA.dat)[i], ts2 =colnames(noNA.dat)[j], R2 = summary(curMod)$r.squared)
+        colnames(curout)=colnames(outdata)
+        outdata = rbind(outdata, curout)
+      }
+    }
+    write.csv(outdata,"C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Choice Model Inputs/test.csv")
+  #testing with simple models--TBD starts here!
     #glm models and VIF--do not take choice situations (distinction between individuals) into account
       #all variables
         glm.mod = glm(attendedIndicator~tuioutlist+realtui+finaidest+distance+instate+urbanruralmatch+loanp+fedgrantp+control+carnegie2+avgsal+division2+gradrate+attend+expperstudent2+ instperstudent2+facperstudent2+genderratio2+totstudents2+selectdiffInt + selectInt,data=noNA.dat,family=binomial())
@@ -275,19 +311,3 @@
     # Influence Plot 
     influencePlot(mclogit.tiny.mod,   id.method="identify", main="Influence Plot", sub="Circle size is proportial to Cook's Distance" )
 
-#pairwise plots
-  outdata = data.frame(matrix(nrow = 0, ncol = 3))
-  colnames(outdata) = c("ts1", "ts2", "R2")
-  relVars.dat = noNA.dat[,c("tuioutlist","realtui","finaidest","distance","instate","urbanruralmatch","loanp","fedgrantp","control","carnegie2","avgsal","division2","gradrate","expperstudent2","instperstudent2","facperstudent2","genderratio2","totstudents2","nonAttendAid","selectdiffInt","selectInt")]
-  for (i in 1:ncol(relVars.dat)){
-    for (j in 1:ncol(relVars.dat)){
-      myPlot = ggplot(data=relVars.dat, aes(x= relVars.dat[,i], y = relVars.dat[,j]))+geom_point()+theme_bw()+ xlab(colnames(relVars.dat)[i])+ ylab(colnames(relVars.dat)[j])
-      nameStr = paste(colnames(relVars.dat)[i], colnames(relVars.dat)[j], sep ="")
-      ggsave(paste("C:/Users/Katharina/Documents/Umich/lifecycle choice/data/plots/pairwise",nameStr, ".pdf", sep = ""))
-      curMod = lm(relVars.dat[,j]~relVars.dat[,i])
-      curout = data.frame(ts1 = colnames(relVars.dat)[i], ts2 =colnames(relVars.dat)[j], R2 = summary(curMod)$r.squared)
-      colnames(curout)=colnames(outdata)
-      outdata = rbind(outdata, curout)
-    }
-  }
-  write.csv(outdata,"C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Choice Model Inputs/test.csv")
