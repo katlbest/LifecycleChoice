@@ -136,6 +136,8 @@
   #adjust control entry
     anon.dat[anon.dat$control==3,]$control = 2
   #fix financial aid variables
+    #nonattendaid is zero if not reports
+      anon.dat[is.na(anon.dat$nonAttendAid),]$nonAttendAid=0
     #create finaidest2 using rules about when to use attended data
       anon.dat[anon.dat$nonAttendMiss==-2,]$nonAttendMiss=0 #unknowns are treated as 0
       for (i in 1:nrow(anon.dat)){
@@ -149,7 +151,7 @@
             #anon.dat$nonAttendMiss[i]= anon.dat$attendAid[i]*(.50291)
             anon.dat$nonAttendMiss[i]= anon.dat$attendAid[i]*(0.44536)+963.86273
             #print(anon.dat$pubid_anon[i])
-            #print(paste(anon.dat$nonAttendMiss[i], anon.dat$attendAid[i], sep = ","))
+            #print(paste(anon.dat$nonAttendMiss[i], anon.dat$nonAttendAid[i], sep = ","))
           }else{
             anon.dat$nonAttendMiss[i]= 0
           }
@@ -190,7 +192,7 @@
     multi.dat$carnegie2 = as.factor(multi.dat$carnegie2)
     multi.dat$attend = as.factor(multi.dat$attend)
   #remove totally irrelevant variables
-    relVars.dat = multi.dat[,c("attendedIndicator","tuioutlist","realtui2","finaidest2","distance","instate","urbanruralmatch","loanp","fedgrantp","control","carnegie2","avgsal","division2","gradrate","expperstudent2","instperstudent2","facperstudent2","genderratio2","totstudents2","nonAttendAid","realtuiApply", "selectdiffInt","selectInt")]
+    relVars.dat = multi.dat[,c("pubid_anon", "school_anon","attendedIndicator","tuioutlist","realtui2","finaidest2","distance","instate","urbanruralmatch","loanp","fedgrantp","control","carnegie2","avgsal","division2","gradrate","expperstudent2","instperstudent2","facperstudent2","genderratio2","totstudents2","nonAttendAid","realtuiApply", "selectdiffInt","selectInt")]
   #test dataset excluding na's and make categoricals
     noNA.dat = na.exclude(relVars.dat)
       
@@ -236,14 +238,13 @@
       }
     }
     write.csv(outdata,"C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Choice Model Inputs/test.csv")
-  #testing with simple models--TBD starts here!
-    #glm models and VIF--do not take choice situations (distinction between individuals) into account
-      #all variables
-        glm.mod = glm(attendedIndicator~tuioutlist+realtui+finaidest+distance+instate+urbanruralmatch+loanp+fedgrantp+control+carnegie2+avgsal+division2+gradrate+attend+expperstudent2+ instperstudent2+facperstudent2+genderratio2+totstudents2+selectdiffInt + selectInt,data=noNA.dat,family=binomial())
-        vif(glm.mod)
+  #glm models and VIF--do not take choice situations (distinction between individuals) into account
+    #all variables
+      glm.mod = glm(attendedIndicator~tuioutlist+realtui2+finaidest2+distance+instate+urbanruralmatch+loanp+fedgrantp+control+carnegie2+avgsal+division2+gradrate+expperstudent2+instperstudent2+facperstudent2+genderratio2+totstudents2+nonAttendAid+realtuiApply+selectdiffInt+selectInt,data=noNA.dat,family=binomial())
+      vif(glm.mod)
       glm.reduced.mod = glm(attendedIndicator~distance+instate+urbanruralmatch+selectdiff+genderratio+control+carnegie2+selectivity2+division2+attend+loanp+fedgrantp+facperstudent+gradrate+totstudents,data=noNA.dat,family=binomial())
       vif(glm.reduced.mod)
-    #mclogit models--MODEL SELECTION
+  #mclogit models--MODEL SELECTION
       lhs = matrix(c(noNA.dat$attendedIndicator, noNA.dat$pubid_anon), nrow(noNA.dat), 2)
       #all--ld vars
         mclogit.all.mod = mclogit(lhs~tuioutlist+realtui+finaidest+distance+instate+urbanruralmatch+selectdiff+loanp+fedgrantp+genderratio+totstudents+control+carnegie2+selectivity2+expperstudent+instperstudent+facperstudent+avgsal+division2+gradrate+attend+expperstudent2+instperstudent2+facperstudent2+genderratio2+totstudents2,data=noNA.dat, model = TRUE, )
