@@ -192,7 +192,7 @@
     multi.dat$carnegie2 = as.factor(multi.dat$carnegie2)
     multi.dat$attend = as.factor(multi.dat$attend)
   #remove totally irrelevant variables
-    relVars.dat = multi.dat[,c("pubid_anon", "school_anon","attendedIndicator","tuioutlist","realtui2","finaidest2","distance","instate","urbanruralmatch","loanp","fedgrantp","control","carnegie2","avgsal","division2","gradrate","expperstudent2","instperstudent2","facperstudent2","genderratio2","totstudents2","nonAttendAid","realtuiApply", "selectdiffInt","selectInt")]
+    relVars.dat = multi.dat[,c("pubid_anon", "school_anon","attendedIndicator","tuioutlist","realtui2","finaidest2","distance","instate","urbanruralmatch","loanp","fedgrantp","control","carnegie2","avgsal","division2","gradrate","expperstudent2","instperstudent2","facperstudent2","genderratio2","totstudents2","nonAttendAid","realtuiApply", "selectdiffInt","selectInt", "fedgrantp")]
   #test dataset excluding na's and make categoricals
     noNA.dat = na.exclude(relVars.dat)
       
@@ -241,64 +241,176 @@
   #glm models and VIF--do not take choice situations (distinction between individuals) into account
     #all variables
       glm.mod = glm(attendedIndicator~tuioutlist+realtui2+finaidest2+distance+instate+urbanruralmatch+loanp+fedgrantp+control+carnegie2+avgsal+division2+gradrate+expperstudent2+instperstudent2+facperstudent2+genderratio2+totstudents2+nonAttendAid+realtuiApply+selectdiffInt+selectInt,data=noNA.dat,family=binomial())
-      vif(glm.mod)
-      glm.reduced.mod = glm(attendedIndicator~distance+instate+urbanruralmatch+selectdiff+genderratio+control+carnegie2+selectivity2+division2+attend+loanp+fedgrantp+facperstudent+gradrate+totstudents,data=noNA.dat,family=binomial())
-      vif(glm.reduced.mod)
-  #mclogit models--MODEL SELECTION
-      lhs = matrix(c(noNA.dat$attendedIndicator, noNA.dat$pubid_anon), nrow(noNA.dat), 2)
-      #all--ld vars
-        mclogit.all.mod = mclogit(lhs~tuioutlist+realtui+finaidest+distance+instate+urbanruralmatch+selectdiff+loanp+fedgrantp+genderratio+totstudents+control+carnegie2+selectivity2+expperstudent+instperstudent+facperstudent+avgsal+division2+gradrate+attend+expperstudent2+instperstudent2+facperstudent2+genderratio2+totstudents2,data=noNA.dat, model = TRUE, )
-          #singular
-      #all with new vars only
-        mclogit.all.mod = mclogit(lhs~tuioutlist+realtui+finaidest+distance+instate+urbanruralmatch+selectdiffInt+loanp+fedgrantp+control+carnegie2+selectInt+avgsal+division2+gradrate+expperstudent2+instperstudent2+facperstudent2+genderratio2+totstudents2+nonAttendAid,data=noNA.dat, model = TRUE, )
-          #still singular
-      #based on choices in excel
-        mclogit.A.A.mod = mclogit(lhs~realtui+distance+instate+urbanruralmatch+loanp+fedgrantp+control+carnegie2+selectInt+avgsal+division2+gradrate+expperstudent2+instperstudent2+facperstudent2+genderratio2+totstudents2,data=noNA.dat, model = TRUE, )
-        mclogit.B.A.mod = mclogit(lhs~tuioutlist+finaidest+distance+instate+urbanruralmatch+loanp+fedgrantp+control+carnegie2+selectInt+avgsal+division2+gradrate+expperstudent2+instperstudent2+facperstudent2+genderratio2+totstudents2,data=noNA.dat, model = TRUE, )
-        mclogit.C.A.mod = mclogit(lhs~tuioutlist+nonAttendAid+distance+instate+urbanruralmatch+loanp+fedgrantp+control+carnegie2+selectInt+avgsal+division2+gradrate+expperstudent2+instperstudent2+facperstudent2+genderratio2+totstudents2,data=noNA.dat, model = TRUE, )
-        mclogit.A.B.mod = mclogit(lhs~realtui+distance+instate+urbanruralmatch+loanp+fedgrantp+control+carnegie2+selectdiffInt+avgsal+division2+gradrate+expperstudent2+instperstudent2+facperstudent2+genderratio2+totstudents2,data=noNA.dat, model = TRUE, )
-        mclogit.B.B.mod = mclogit(lhs~tuioutlist+finaidest+distance+instate+urbanruralmatch+loanp+fedgrantp+control+carnegie2+selectdiffInt+avgsal+division2+gradrate+expperstudent2+instperstudent2+facperstudent2+genderratio2+totstudents2,data=noNA.dat, model = TRUE, )
-        mclogit.C.B.mod = mclogit(lhs~tuioutlist+nonAttendAid+distance+instate+urbanruralmatch+loanp+fedgrantp+control+carnegie2+selectdiffInt+avgsal+division2+gradrate+expperstudent2+instperstudent2+facperstudent2+genderratio2+totstudents2,data=noNA.dat, model = TRUE, )
-      #remove consistently insignificant variables
-        mclogit.A.A.mod = mclogit(lhs~realtui+loanp+fedgrantp+carnegie2+selectInt+avgsal+division2+gradrate+expperstudent2+instperstudent2+facperstudent2+genderratio2+totstudents2,data=noNA.dat, model = TRUE, )
-        mclogit.B.A.mod = mclogit(lhs~tuioutlist+finaidest+loanp+fedgrantp+carnegie2+selectInt+avgsal+division2+gradrate+expperstudent2+instperstudent2+facperstudent2+genderratio2+totstudents2,data=noNA.dat, model = TRUE, )
-        mclogit.C.A.mod = mclogit(lhs~tuioutlist+nonAttendAid+loanp+fedgrantp+carnegie2+selectInt+avgsal+division2+gradrate+expperstudent2+instperstudent2+facperstudent2+genderratio2+totstudents2,data=noNA.dat, model = TRUE, )
-        mclogit.A.B.mod = mclogit(lhs~realtui+loanp+fedgrantp+carnegie2+selectdiffInt+avgsal+division2+gradrate+expperstudent2+instperstudent2+facperstudent2+genderratio2+totstudents2,data=noNA.dat, model = TRUE, )
-        mclogit.B.B.mod = mclogit(lhs~tuioutlist+finaidest+loanp+fedgrantp+carnegie2+selectdiffInt+avgsal+division2+gradrate+expperstudent2+instperstudent2+facperstudent2+genderratio2+totstudents2,data=noNA.dat, model = TRUE, )
-        mclogit.C.B.mod = mclogit(lhs~tuioutlist+nonAttendAid+loanp+fedgrantp+carnegie2+selectdiffInt+avgsal+division2+gradrate+expperstudent2+instperstudent2+facperstudent2+genderratio2+totstudents2,data=noNA.dat, model = TRUE, )
-      #model select each one
-        mclogit.A.A.mod = mclogit(lhs~realtui+fedgrantp+carnegie2+selectInt+avgsal+gradrate+expperstudent2+instperstudent2+facperstudent2,data=noNA.dat, model = TRUE, )
-        mclogit.B.A.mod = mclogit(lhs~tuioutlist+finaidest+loanp+fedgrantp+carnegie2+selectInt+avgsal+division2+gradrate+expperstudent2+instperstudent2+facperstudent2+genderratio2+totstudents2,data=noNA.dat, model = TRUE, )
-        mclogit.C.A.mod = mclogit(lhs~tuioutlist+nonAttendAid+loanp+fedgrantp+carnegie2+selectInt+avgsal+division2+gradrate+expperstudent2+instperstudent2+facperstudent2+genderratio2+totstudents2,data=noNA.dat, model = TRUE, )
-        mclogit.A.B.mod = mclogit(lhs~realtui+loanp+fedgrantp+carnegie2+selectdiffInt+avgsal+division2+gradrate+expperstudent2+instperstudent2+facperstudent2+genderratio2+totstudents2,data=noNA.dat, model = TRUE, )
-        mclogit.B.B.mod = mclogit(lhs~tuioutlist+finaidest+loanp+fedgrantp+carnegie2+selectdiffInt+avgsal+division2+gradrate+expperstudent2+instperstudent2+facperstudent2+genderratio2+totstudents2,data=noNA.dat, model = TRUE, )
-        mclogit.C.B.mod = mclogit(lhs~tuioutlist+nonAttendAid+loanp+fedgrantp+carnegie2+selectdiffInt+avgsal+division2+gradrate+expperstudent2+instperstudent2+facperstudent2+genderratio2+totstudents2,data=noNA.dat, model = TRUE, )
+        #singular
+      #remove realtuiapply and nonattendaid
+        glm.reduced1.mod = glm(attendedIndicator~tuioutlist+realtui2+finaidest2+distance+instate+urbanruralmatch+loanp+fedgrantp+control+carnegie2+avgsal+division2+gradrate+expperstudent2+instperstudent2+facperstudent2+genderratio2+totstudents2+selectdiffInt+selectInt,data=noNA.dat,family=binomial())
+        vif(glm.reduced1.mod)
+      #remove realtui2 and finaidest2
+        glm.reduced2.mod = glm(attendedIndicator~tuioutlist+distance+instate+urbanruralmatch+loanp+fedgrantp+control+carnegie2+avgsal+division2+gradrate+expperstudent2+instperstudent2+facperstudent2+genderratio2+totstudents2+nonAttendAid+realtuiApply+selectdiffInt+selectInt,data=noNA.dat,family=binomial())
+        vif(glm.reduced2.mod)
+      #pick one of each redundant variable
+        glm.reduced3.mod = glm(attendedIndicator~tuioutlist+finaidest2+distance+instate+urbanruralmatch+loanp+fedgrantp+control+carnegie2+avgsal+division2+gradrate+expperstudent2+genderratio2+totstudents2+selectdiffInt+selectInt,data=noNA.dat,family=binomial())
+        vif(glm.reduced3.mod)
+  #running kappa again on reduced models
+    testVars = noNA.dat[c("tuioutlist","finaidest2","distance","instate","urbanruralmatch","loanp","fedgrantp","control","carnegie2","avgsal","division2","gradrate","expperstudent2","genderratio2","totstudents2","selectdiffInt","selectInt")]
+    kappaMatrix = matrix(nrow = ncol(testVars), ncol = ncol(testVars))
+    for (i in 1:ncol(testVars)){
+      for (j in 1:ncol(testVars)){
+        curMod = model.matrix(~testVars[,i]+ testVars[,j])
+        kapout = kappa(curMod)
+        kappaMatrix[i,j]= kapout
+      }
+    }
 
-      #model selection
-          #obvious
-            #distance insignificant but BTL finds it significant
-            #control not significant
-            #tuition not significant
-            #division not significant
-            #urbanruralmatch not significant
-            mclogit.small.mod = mclogit(lhs~selectivity2+realtui+loanp+fedgrantp+carnegie2+avgsal+gradrate+expperstudent2+facperstudent2+genderratio2+totstudents2,data=noNA.dat, model = TRUE, )
-          #less obvious
-            #gender ratio not significant
-            #facperstudent not significant, note that removing it increases sig. of experstudent
-            #loanp not significant, note that removing it does not increase significance of fedgrantp
-            #totstudents not siginificant, and removing it makes avgsal less significant (very slightly)
-            #expperstudent and avgsal both not significant, no matter in what order they are removed
-            #selectivity was only very slightly significant in group 5, and stops being so in smallest model
-            mclogit.tiny.mod = mclogit(lhs~realtui+fedgrantp+carnegie2+gradrate,data=noNA.dat, model = TRUE, )
-            mclogit.tiny2.mod = mclogit(lhs~tuioutlist+finaidest+fedgrantp+carnegie2+gradrate,data=noNA.dat, model = TRUE, )
-    #clogit in survival
-      #mclogit model revisitied
-      clogit.tiny.mod = clogit(attendedIndicator ~ realtui+fedgrantp+carnegie2+gradrate+ strata(pubid_anon), noNA.dat)
-    #mlogit
-      mlogit.tiny.mod = mlogit(attendedIndicator~realtui+fedgrantp+carnegie2+gradrate|0|0, data=noNA.dat,shape="long",choice="attendedIndicator",alt.var="school_anon",chid.var="pubid_anon")
-        #error missing value where TRUE/FALSE needed
-    #BTL model
-      clogit.btl.mod = clogit(attendedIndicator ~ realtui+tuioutlist+finaidest+distance+selectdiff+expperstudent+instperstudent+facperstudent+avgsal+ strata(pubid_anon), noNA.dat)
+#model selection=======================================================================================
+  #reduce dataset based on preliminary analysis and limit impact of NAs, keep relVars for further analysis
+    relVarsRed.dat = relVars.dat[,c("pubid_anon", "school_anon","attendedIndicator","tuioutlist","realtui2","finaidest2","distance","instate","urbanruralmatch","loanp","control","division2","gradrate","expperstudent2","instperstudent2","facperstudent2","genderratio2","totstudents2","nonAttendAid","realtuiApply", "selectdiffInt", "selectInt", "avgsal", "fedgrantp")]
+  #remove NAs for now
+    noNARed.dat = na.exclude(relVarsRed.dat)
+  #mclogit models--MODEL SELECTION
+    lhs = matrix(c(noNARed.dat$attendedIndicator, noNARed.dat$pubid_anon), nrow(noNARed.dat), 2)
+    #all variables
+      mclogit.all.mod = mclogit(lhs~tuioutlist+realtui2+finaidest2+nonAttendAid+realtuiApply+totstudents2+gradrate+expperstudent2+instperstudent2+facperstudent2+genderratio2+selectdiffInt+loanp+control+division2+distance+instate+urbanruralmatch,data=noNARed.dat, model = TRUE, )
+        #runs, warning
+    #config A.B.A
+      #all
+        mclogit.A.B.A.mod = mclogit(lhs~realtui2+totstudents2+gradrate+instperstudent2+genderratio2+selectdiffInt+loanp+control+division2+distance+instate+urbanruralmatch,data=noNARed.dat, model = TRUE, )
+        #runs, no warning
+      #take out instate
+        mclogit.A.B.A.mod = mclogit(lhs~realtui2+totstudents2+gradrate+instperstudent2+genderratio2+selectdiffInt+loanp+control+division2+distance+urbanruralmatch,data=noNARed.dat, model = TRUE, )
+        #warning
+      #take out division2
+        mclogit.A.B.A.mod = mclogit(lhs~realtui2+totstudents2+gradrate+instperstudent2+genderratio2+selectdiffInt+loanp+control+distance+urbanruralmatch,data=noNARed.dat, model = TRUE, )
+        #warning
+      #test for distance versus urban rural match effect
+        mclogit.A.B.A.mod = mclogit(lhs~realtui2+totstudents2+gradrate+instperstudent2+genderratio2+selectdiffInt+loanp+control+distance,data=noNARed.dat, model = TRUE, )
+        #warnings, neither is significant and no effect from removing one--remove both
+        mclogit.A.B.A.mod = mclogit(lhs~realtui2+totstudents2+gradrate+instperstudent2+genderratio2+selectdiffInt+loanp+control,data=noNARed.dat, model = TRUE, )
+      #remove loanp
+        mclogit.A.B.A.mod = mclogit(lhs~realtui2+totstudents2+gradrate+instperstudent2+genderratio2+selectdiffInt+control,data=noNARed.dat, model = TRUE, )
+      #remove gender ratio
+        mclogit.A.B.A.mod = mclogit(lhs~realtui2+totstudents2+gradrate+instperstudent2+selectdiffInt+control,data=noNARed.dat, model = TRUE, )
+      #remove control
+        mclogit.A.B.A.mod = mclogit(lhs~realtui2+totstudents2+gradrate+instperstudent2+selectdiffInt,data=noNARed.dat, model = TRUE, )
+      #create model mclogit.A.B.A.A (remove gradrate and keep totstudents)
+        mclogit.A.B.A.A.mod = mclogit(lhs~realtui2+totstudents2+instperstudent2+selectdiffInt,data=noNARed.dat, model = TRUE, )
+          #totstudents does not become significant
+      #create model mclogit.A.B.A.B (remove totstudends and keep gradrate)
+        mclogit.A.B.A.B.mod = mclogit(lhs~realtui2+gradrate+instperstudent2+selectdiffInt,data=noNARed.dat, model = TRUE, )
+          #significant, try in clogit
+          clogit.A.B.A.B.mod = clogit(attendedIndicator ~realtui2+gradrate+instperstudent2+selectdiffInt+ strata(pubid_anon), noNARed.dat)
+    #config A.B.B
+      #all
+        mclogit.A.B.B.mod = mclogit(lhs~realtui2+totstudents2+gradrate+expperstudent2+genderratio2+selectdiffInt+loanp+control+division2+distance+instate+urbanruralmatch,data=noNARed.dat, model = TRUE, )
+      #drop instate, division2, distance, urbanruralmatch, gender ratio, loanp, control
+        mclogit.A.B.B.mod = mclogit(lhs~realtui2+totstudents2+gradrate+expperstudent2+selectdiffInt,data=noNARed.dat, model = TRUE, )
+      #test gradrate versus totstudents
+        mclogit.A.B.B.mod = mclogit(lhs~realtui2+gradrate+expperstudent2+selectdiffInt,data=noNARed.dat, model = TRUE, )
+          #totstudents does nto become significant
+      #reduced model
+        mclogit.A.B.B.B.mod = mclogit(lhs~realtui2+gradrate+expperstudent2+selectdiffInt,data=noNARed.dat, model = TRUE, )
+          #expperstudents is NOT signidsddsdficant!!
+        clogit.A.B.B.B.mod = clogit(attendedIndicator ~realtui2+gradrate+expperstudent2+selectdiffInt+ strata(pubid_anon), noNARed.dat)
+    #config A.B.C
+      #all
+        mclogit.A.B.C.mod = mclogit(lhs~realtui2+totstudents2+gradrate+facperstudent2+genderratio2+selectdiffInt+loanp+control+division2+distance+instate+urbanruralmatch,data=noNARed.dat, model = TRUE, )
+      #drop instate, division2, distance, urbanruralmatch, gender ratio, loanp, control, totstudents2
+        mclogit.A.B.C.B.mod = mclogit(lhs~realtui2+gradrate+facperstudent2+selectdiffInt,data=noNARed.dat, model = TRUE, )
+          #facperstudent barely significant
+        clogit.A.B.C.B.mod = clogit(attendedIndicator ~realtui2+gradrate+facperstudent2+selectdiffInt+ strata(pubid_anon), noNARed.dat)
+    #config B.B.A
+      #all
+        mclogit.B.B.A.mod = mclogit(lhs~tuioutlist+finaidest2+totstudents2+gradrate+instperstudent2+genderratio2+selectdiffInt+loanp+control+division2+distance+instate+urbanruralmatch,data=noNARed.dat, model = TRUE, )
+      #drop instate, division2, distance, urbanruralmatch, gender ratio, loanp, control, totstudents2
+        mclogit.B.B.A.B.mod = mclogit(lhs~tuioutlist+finaidest2+gradrate+instperstudent2+selectdiffInt,data=noNARed.dat, model = TRUE, )
+        clogit.B.B.A.B.mod = clogit(attendedIndicator ~tuioutlist+finaidest2+gradrate+instperstudent2+selectdiffInt+strata(pubid_anon), noNARed.dat)
+        #expperstudent is not significant, facperstudent is very slightly significant
+    #config C.B.A.B
+      mclogit.C.B.A.B.mod = mclogit(lhs~tuioutlist+nonAttendAid+gradrate+gradrate+instperstudent2+selectdiffInt,data=noNARed.dat, model = TRUE, )
+      #instperstudent less significant here than other configurations
+    #config D.B.A.B
+      mclogit.D.B.A.B.mod = mclogit(lhs~realtuiApply+gradrate+gradrate+instperstudent2+selectdiffInt,data=noNARed.dat, model = TRUE, )
+  #review baseline models
+    #main
+      summary(mclogit.A.B.A.B.mod)
+      summary(mclogit.B.B.A.B.mod)
+      summary(mclogit.C.B.A.B.mod)
+      summary(mclogit.D.B.A.B.mod)
+    #alternate--show that expperstudent and facperstudent are also sometimes important    
+      summary(mclogit.A.B.B.B.mod)
+      summary(mclogit.A.B.C.B.mod)
+    #best model based on fit is mclogit.B.B.A.B.mod, so start here
+      #attempt using PCA
+        schoolqual.dat = noNARed.dat[,c("totstudents2", "gradrate", "fedgrantp", "selectInt", "avgsal")]
+        fit <- princomp(schoolqual.dat, cor=T)
+        plot(fit,type="lines") #plot
+        noNARed.dat$schoolqual = fit$scores[,1]
+        mclogit.B.B.A.C.mod = mclogit(lhs~tuioutlist+finaidest2+schoolqual+instperstudent2+selectdiffInt,data=noNARed.dat, model = TRUE, )
+        clogit.B.B.A.C.mod = clogit(attendedIndicator~tuioutlist+finaidest2+schoolqual+instperstudent2+selectdiffInt+strata(pubid_anon), noNARed.dat)
+    #test adding variables to best model
+      mclogit.add.mod = mclogit(lhs ~tuioutlist+finaidest2+gradrate+instperstudent2+selectdiffInt+selectInt+avgsal+fedgrantp,data=noNARed.dat, model = TRUE, )
+    #test adding only distance
+      mclogit.add.mod = mclogit(lhs~distance + tuioutlist+finaidest2+gradrate+instperstudent2+selectdiffInt,data=noNARed.dat, model = TRUE, )
+        #additional variables are not significant
+
+#run seleted models, do outlier tests, and do model diagnostics====================================================
+  #reduce dataset to those needed in final models and remove NAs
+    relVarsPCA.dat = relVars.dat[,c("totstudents2", "gradrate", "fedgrantp", "selectInt", "avgsal", "pubid_anon","attendedIndicator","tuioutlist","finaidest2","instperstudent2","selectdiffInt")]
+    relVarsPCA.dat = na.exclude(relVarsPCA.dat)
+    schoolqual.dat = relVarsPCA.dat[,c("totstudents2", "gradrate", "fedgrantp", "selectInt", "avgsal")]
+    fit <- princomp(schoolqual.dat, cor=T, na.action= "exclude")
+    relVarsPCA.dat$schoolqual = fit$scores[,1]
+    relVarsNoPCA.dat = relVars.dat[,c("pubid_anon","attendedIndicator","tuioutlist","finaidest2","gradrate","instperstudent2","selectdiffInt")]
+    relVarsNoPCA.dat = na.exclude(relVarsNoPCA.dat)
+  #plots for further outlier detection
+    #test.dat = relVarsPCA.dat[,c("attendedIndicator","instperstudent2", "tuioutlist", "finaidest2", "schoolqual")]
+    #test.dat = relVarsNoPCA.dat[,c("attendedIndicator","instperstudent2", "tuioutlist", "finaidest2")]
+    #for (i in 1:ncol(test.dat)){
+      #myPlot = ggplot(data=test.dat, aes(x=attendedIndicator, y=test.dat[,i])) + geom_point()+ labs(title=colnames(test.dat)[i])
+      #ggsave(paste("C:/Users/Katharina/Documents/Umich/lifecycle choice/data/plots/reduced2", i , ".pdf", sep = ""))
+    #}
+  #remove outliers
+    #instperstudent
+      #locate
+        relVarsPCA.dat$pubid_anon[which.max(relVarsPCA.dat[,c("instperstudent2"),])]
+        relVarsNoPCA.dat$pubid_anon[which.max(relVarsNoPCA.dat[,c("instperstudent2"),])]
+        #exists in both datasets
+      #remove
+        relVarsPCA.dat = relVarsPCA.dat[-(which.max(relVarsPCA.dat[,c("instperstudent2"),])),]
+        relVarsNoPCA.dat = relVarsNoPCA.dat[-(which.max(relVarsNoPCA.dat[,c("instperstudent2"),])),]
+    #tuioutlist 
+      #locate
+        relVarsPCA.dat$pubid_anon[which.max(relVarsPCA.dat[,c("tuioutlist"),])]
+        relVarsNoPCA.dat$pubid_anon[which.max(relVarsNoPCA.dat[,c("tuioutlist"),])]
+        #exists in both datasets, different from other outlier
+      #remove
+        relVarsPCA.dat = relVarsPCA.dat[-(which.max(relVarsPCA.dat[,c("tuioutlist"),])),]
+        relVarsNoPCA.dat = relVarsNoPCA.dat[-(which.max(relVarsNoPCA.dat[,c("tuioutlist"),])),]
+    #school quality 
+      #locate
+        relVarsPCA.dat$pubid_anon[which.max(relVarsPCA.dat[,c("schoolqual"),])]
+        #different from other outliers
+      #remove
+        relVarsPCA.dat = relVarsPCA.dat[-(which.max(relVarsPCA.dat[,c("schoolqual"),])),]
+    #finaidest
+      #locate
+        relVarsPCA.dat$pubid_anon[which.max(relVarsPCA.dat[,c("finaidest2"),])]
+        relVarsNoPCA.dat$pubid_anon[which.max(relVarsNoPCA.dat[,c("finaidest2"),])]
+        #in both datasets, different from other outliers
+      #remove
+        relVarsPCA.dat = relVarsPCA.dat[-(which.max(relVarsPCA.dat[,c("finaidest2"),])),]
+        relVarsNoPCA.dat = relVarsNoPCA.dat[-(which.max(relVarsNoPCA.dat[,c("finaidest2"),])),]
+
+#run models with these datasets
+#mclogit.B.B.A.B.mod
+lhsNoPCA = matrix(c(relVarsNoPCA.dat$attendedIndicator, relVarsNoPCA.dat$pubid_anon), nrow(relVarsNoPCA.dat), 2)
+mclogit.noPCA.mod = mclogit(lhsNoPCA~tuioutlist+finaidest2+gradrate+instperstudent2+selectdiffInt,data=relVarsNoPCA.dat, model = TRUE, )
+#mclogit.B.B.A.C.mod
+mclogit.PCA.mod = mclogit(lhs~tuioutlist+finaidest2+schoolqual+instperstudent2+selectdiffInt,data=relVarsPCA.dat, model = TRUE, )
+
+  
+#BTL model=================================================================
+    clogit.btl.mod = clogit(attendedIndicator~realtui2+I(realtui2^2)+distance+I(distance^2)+instperstudent2+I(instperstudent2^2)+avgsal+selectdiffInt+ strata(pubid_anon), noNARed.dat)
   
 #tests =========================================================================
   #mclogit.tiny.mod is the base model
