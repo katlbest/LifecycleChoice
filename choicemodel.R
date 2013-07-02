@@ -2,7 +2,7 @@
   #this file analyzes the choice data and runs the appropriate models
 
 #libraries ====================================================================
-  #library(plyr)
+  library(plyr)
   library(ggplot2)
   library(mlogit)
   #library(MASS)
@@ -271,6 +271,10 @@
     lhs = matrix(c(noNARed.dat$attendedIndicator, noNARed.dat$pubid_anon), nrow(noNARed.dat), 2)
     #all variables
       mclogit.all.mod = mclogit(lhs~tuioutlist+realtui2+finaidest2+nonAttendAid+realtuiApply+totstudents2+gradrate+expperstudent2+instperstudent2+facperstudent2+genderratio2+selectdiffInt+loanp+control+division2+distance+instate+urbanruralmatch,data=noNARed.dat, model = TRUE, )
+      mclogit.almostall.mod = mclogit(lhs~tuioutlist+realtui2+totstudents2+gradrate+expperstudent2+instperstudent2+facperstudent2+genderratio2+selectdiffInt+loanp+control+division2+distance+instate+urbanruralmatch,data=noNARed.dat, model = TRUE, )
+      clogit.almostall.mod = clogit(attendedIndicator~tuioutlist+realtui2+totstudents2+gradrate+expperstudent2+instperstudent2+facperstudent2+genderratio2+selectdiffInt+loanp+control+division2+distance+instate+urbanruralmatch+ strata(pubid_anon), noNARed.dat)
+        ll = clogit.almostall.mod$loglik
+        McFR2= 1-ll[2]/ll[1]
         #runs, warning
     #config A.B.A
       #all
@@ -356,6 +360,13 @@
 #run seleted models, do outlier tests, and do model diagnostics====================================================
   #reduce dataset to those needed in final models and remove NAs
     relVarsPCA.dat = relVars.dat[,c("totstudents2", "gradrate", "fedgrantp", "selectInt", "avgsal", "pubid_anon","attendedIndicator","tuioutlist","finaidest2","instperstudent2","selectdiffInt")]
+    PCAtest = data.frame(is.na(relVarsPCA.dat))
+    PCAtest$miss=FALSE
+    for (i in 1:nrow(PCAtest)){
+      myVect = PCAtest[i,]
+      PCAtest$miss[i]=any(as.logical(PCAtest[i,]))
+    }
+    missVals = relVarsPCA.dat[PCAtest$miss==TRUE,]
     relVarsPCA.dat = na.exclude(relVarsPCA.dat)
     schoolqual.dat = relVarsPCA.dat[,c("totstudents2", "gradrate", "fedgrantp", "selectInt", "avgsal")]
     fit <- princomp(schoolqual.dat, cor=T, na.action= "exclude")
@@ -400,14 +411,40 @@
       #remove
         relVarsPCA.dat = relVarsPCA.dat[-(which.max(relVarsPCA.dat[,c("finaidest2"),])),]
         relVarsNoPCA.dat = relVarsNoPCA.dat[-(which.max(relVarsNoPCA.dat[,c("finaidest2"),])),]
+  #delete those without an attended school or with only a single data point again
+    #delete without attended school
+      sumPCA.dat = ddply(relVarsPCA.dat,~pubid_anon,summarise,sum=sum(attendedIndicator))
+      relVarsPCA.dat = merge(x = relVarsPCA.dat, y = sumPCA.dat, by = "pubid_anon", all.x = TRUE)
+      relVarsPCA.dat = relVarsPCA.dat[relVarsPCA.dat$sum>0,]
+      sumNoPCA.dat= ddply(relVarsNoPCA.dat,~pubid_anon,summarise,sum=sum(attendedIndicator))
+      relVarsNoPCA.dat = merge(x = relVarsNoPCA.dat, y = sumNoPCA.dat, by = "pubid_anon", all.x = TRUE)
+      relVarsNoPCA.dat = relVarsNoPCA.dat[relVarsNoPCA.dat$sum>0,]
+    #delete with only single entry
+      frequencyPCA.dat = data.frame(freq(ordered(relVarsPCA.dat$pubid_anon), plot=FALSE))
+      frequencyPCA.dat$pubid_anon= rownames(frequencyPCA.dat)
+      relVarsPCA.dat = merge(x = relVarsPCA.dat, y = frequencyPCA.dat, by = "pubid_anon", all.x = TRUE)
+      relVarsPCA.dat = relVarsPCA.dat[relVarsPCA.dat$Frequency>1,]
+      frequencyNoPCA.dat = data.frame(freq(ordered(relVarsNoPCA.dat$pubid_anon), plot=FALSE))
+      frequencyNoPCA.dat$pubid_anon= rownames(frequencyNoPCA.dat)
+      relVarsNoPCA.dat = merge(x = relVarsNoPCA.dat, y = frequencyNoPCA.dat, by = "pubid_anon", all.x = TRUE)
+      relVarsNoPCA.dat = relVarsNoPCA.dat[relVarsNoPCA.dat$Frequency>1,]
+    #drop useless columns
+      relVarsNoPCA.dat= relVarsNoPCA.dat[,!names(relVarsNoPCA.dat) %in% c("sum", "Frequency", "Percent", "Cum.Percent")]
+      relVarsPCA.dat= relVarsPCA.dat[,!names(relVarsPCA.dat) %in% c("sum", "Frequency", "Percent", "Cum.Percent")]
+  #run models with these datasets
+      #mclogit.B.B.A.B.mod
+        lhsNoPCA = matrix(c(relVarsNoPCA.dat$attendedIndicator, relVarsNoPCA.dat$pubid_anon), nrow(relVarsNoPCA.dat), 2)
+        mclogit.noPCA.mod = mclogit(lhsNoPCA~tuioutlist+finaidest2+gradrate+instperstudent2+selectdiffInt,data=relVarsNoPCA.dat, model = TRUE, )
+        clogit.noPCA.mod = clogit(attendedIndicator~tuioutlist+finaidest2+gradrate+instperstudent2+selectdiffInt+strata(pubid_anon),relVarsNoPCA.dat)
+          ll = clogit.noPCA.mod$loglik #first entry is intercept-only model, second is full model
+          McFR2= 1-ll[2]/ll[1]
 
-#run models with these datasets
-#mclogit.B.B.A.B.mod
-lhsNoPCA = matrix(c(relVarsNoPCA.dat$attendedIndicator, relVarsNoPCA.dat$pubid_anon), nrow(relVarsNoPCA.dat), 2)
-mclogit.noPCA.mod = mclogit(lhsNoPCA~tuioutlist+finaidest2+gradrate+instperstudent2+selectdiffInt,data=relVarsNoPCA.dat, model = TRUE, )
-#mclogit.B.B.A.C.mod
-mclogit.PCA.mod = mclogit(lhs~tuioutlist+finaidest2+schoolqual+instperstudent2+selectdiffInt,data=relVarsPCA.dat, model = TRUE, )
-
+      #mclogit.B.B.A.C.mod
+        lhsPCA = matrix(c(relVarsPCA.dat$attendedIndicator, relVarsPCA.dat$pubid_anon), nrow(relVarsPCA.dat), 2)
+        mclogit.PCA.mod = mclogit(lhsPCA~tuioutlist+finaidest2+schoolqual+instperstudent2+selectdiffInt,data=relVarsPCA.dat, model = TRUE, )
+        clogit.PCA.mod = clogit(attendedIndicator~tuioutlist+finaidest2+schoolqual+instperstudent2+selectdiffInt+strata(pubid_anon),relVarsPCA.dat)
+          ll = clogit.PCA.mod$loglik #first entry is intercept-only model, second is full model
+          McFR2= 1-ll[2]/ll[1]
   
 #BTL model=================================================================
     clogit.btl.mod = clogit(attendedIndicator~realtui2+I(realtui2^2)+distance+I(distance^2)+instperstudent2+I(instperstudent2^2)+avgsal+selectdiffInt+ strata(pubid_anon), noNARed.dat)
