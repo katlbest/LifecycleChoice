@@ -357,7 +357,7 @@
       mclogit.add.mod = mclogit(lhs~distance + tuioutlist+finaidest2+gradrate+instperstudent2+selectdiffInt,data=noNARed.dat, model = TRUE, )
         #additional variables are not significant
 
-#run seleted models, do outlier tests, and do model diagnostics====================================================
+#run seleted models, do outlier tests===============================================================
   #reduce dataset to those needed in final models and remove NAs
     relVarsPCA.dat = relVars.dat[,c("totstudents2", "gradrate", "fedgrantp", "selectInt", "avgsal", "pubid_anon","attendedIndicator","tuioutlist","finaidest2","instperstudent2","selectdiffInt")]
     PCAtest = data.frame(is.na(relVarsPCA.dat))
@@ -438,14 +438,73 @@
         clogit.noPCA.mod = clogit(attendedIndicator~tuioutlist+finaidest2+gradrate+instperstudent2+selectdiffInt+strata(pubid_anon),relVarsNoPCA.dat)
           ll = clogit.noPCA.mod$loglik #first entry is intercept-only model, second is full model
           McFR2= 1-ll[2]/ll[1]
-
       #mclogit.B.B.A.C.mod
         lhsPCA = matrix(c(relVarsPCA.dat$attendedIndicator, relVarsPCA.dat$pubid_anon), nrow(relVarsPCA.dat), 2)
         mclogit.PCA.mod = mclogit(lhsPCA~tuioutlist+finaidest2+schoolqual+instperstudent2+selectdiffInt,data=relVarsPCA.dat, model = TRUE, )
         clogit.PCA.mod = clogit(attendedIndicator~tuioutlist+finaidest2+schoolqual+instperstudent2+selectdiffInt+strata(pubid_anon),relVarsPCA.dat)
           ll = clogit.PCA.mod$loglik #first entry is intercept-only model, second is full model
           McFR2= 1-ll[2]/ll[1]
-  
+
+#model diagnostics=====================================================================
+  #R2's already calculated
+  #AIC
+    extractAIC(clogit.PCA.mod) #returns equivalent dof, then AIC
+    extractAIC(clogit.noPCA.mod)
+  #count of cases classified correctly is not relevant when data is not binary
+  #predicted probabilities
+    predPCA= predict(clogit.PCA.mod, type = "expected")
+    predNoPCA= predict(clogit.noPCA.mod, type = "expected")
+  #residuals
+    resPCA=residuals(clogit.PCA.mod)
+    resNoPCA=residuals(clogit.noPCA.mod)
+    #note residual types are "martingale", "deviance", "score", "schoenfeld", "dfbeta", "dfbetas", "scaledsch", "partial"
+    devresPCA = residuals(clogit.PCA.mod, "deviance")
+    devresNoPCA = residuals(clogit.noPCA.mod, "deviance")
+    partresPCA = residuals(clogit.PCA.mod, "partial")
+    partresNoPCA = residuals(clogit.noPCA.mod, "partial")
+  #plot predicted probabilities versus attendance
+    ggplot(data = relVarsPCA.dat, aes(x=attendedIndicator, y=predPCA))+geom_point() + theme_bw() + labs(title="Predicted probability by attendance group, PCA model")+ xlab("Attended indicator") + ylab("Predicted probability") 
+    ggplot(relVarsPCA.dat, aes(factor(attendedIndicator), predPCA))+geom_boxplot()+ theme_bw() + labs(title="Predicted probability by attendance group, PCA model")+ xlab("Attended indicator") + ylab("Predicted probability") 
+    ggplot(data = relVarsNoPCA.dat, aes(x=attendedIndicator, y=predNoPCA))+geom_point() + theme_bw() + labs(title="Predicted probability by attendance group, no PCA model")+ xlab("Attended indicator") + ylab("Predicted probability") 
+    ggplot(relVarsNoPCA.dat, aes(factor(attendedIndicator), predNoPCA))+geom_boxplot()+ theme_bw() + labs(title="Predicted probability by attendance group, no PCA model")+ xlab("Attended indicator") + ylab("Predicted probability") 
+  #plot residuals versus index
+    #partial residuals
+      index = c(1:nrow(partresNoPCA))
+      for (i in 1:ncol(partresNoPCA)){
+        curPlot = ggplot() + geom_point(aes(x= index, y = partresNoPCA[,i]))+ theme_bw() + labs(title=paste("Partial residuals by index ",colnames(partresNoPCA)[i],", no PCA model", sep = ""))+ xlab("Index") + ylab("Partial residuals") 
+        ggsave(paste("C:/Users/Katharina/Documents/Umich/lifecycle choice/data/plots/partresVindex", colnames(partresNoPCA)[i] , ".pdf", sep = ""))
+      }
+      index = c(1:nrow(partresPCA))
+      for (i in 1:ncol(partresPCA)){
+        curPlot = ggplot() + geom_point(aes(x= index, y = partresPCA[,i]))+ theme_bw() + labs(title=paste("Partial residuals by index ",colnames(partresPCA)[i],", PCA model", sep = ""))+ xlab("Index") + ylab("Partial residuals") 
+        ggsave(paste("C:/Users/Katharina/Documents/Umich/lifecycle choice/data/plots/partresVindexPCA", colnames(partresPCA)[i] , ".pdf", sep = ""))
+      }
+    #deviance residuals
+      index = c(1:nrow(partresNoPCA))
+      curPlot = ggplot() + geom_point(aes(x= index, y = devresNoPCA))+ theme_bw() + labs(title="Deviance residuals by index")+ xlab("Index") + ylab("Deviance residuals") 
+      index = c(1:nrow(partresPCA))    
+      curPlot = ggplot() + geom_point(aes(x= index, y = devresPCA))+ theme_bw() + labs(title="Deviance residuals by index")+ xlab("Index") + ylab("Deviance residuals") 
+      
+  #plot residuals versus fitted values
+    #partial residuals
+      for (i in 1:ncol(partresNoPCA)){
+        curPlot = ggplot() + geom_point(aes(x= predNoPCA, y = partresNoPCA[,i]))+ theme_bw() + labs(title=paste("Partial residuals by predicted probabilities ",colnames(partresNoPCA)[i],", no PCA model", sep = ""))+ xlab("Predicted probability") + ylab("Partial residuals") 
+        ggsave(paste("C:/Users/Katharina/Documents/Umich/lifecycle choice/data/plots/partresVfit", colnames(partresNoPCA)[i] , ".pdf", sep = ""))
+      }
+      for (i in 1:ncol(partresPCA)){
+        curPlot = ggplot() + geom_point(aes(x= predPCA, y = partresPCA[,i]))+ theme_bw() + labs(title=paste("Partial residuals by predicted probabilities ",colnames(partresPCA)[i],", PCA model", sep = ""))+ xlab("Predicted probability") + ylab("Partial residuals") 
+        ggsave(paste("C:/Users/Katharina/Documents/Umich/lifecycle choice/data/plots/partresVfitnoPCA", colnames(partresPCA)[i] , ".pdf", sep = ""))
+      }
+    #deviance residuals
+      curPlot = ggplot() + geom_point(aes(x= predNoPCA, y = devresNoPCA))+ theme_bw() + labs(title="Deviance residuals by predicated probability")+ xlab("Predicted proability") + ylab("Deviance residuals") 
+      curPlot = ggplot() + geom_point(aes(x= predPCA, y = devresPCA))+ theme_bw() + labs(title="Deviance residuals by predicated probability")+ xlab("Predicted proability") + ylab("Deviance residuals") 
+      
+
+     #partial residuals versus attended indicator
+
+                       
+                    
+    
 #BTL model=================================================================
     clogit.btl.mod = clogit(attendedIndicator~realtui2+I(realtui2^2)+distance+I(distance^2)+instperstudent2+I(instperstudent2^2)+avgsal+selectdiffInt+ strata(pubid_anon), noNARed.dat)
   
