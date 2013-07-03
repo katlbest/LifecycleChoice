@@ -162,6 +162,7 @@
       anon.dat$costbeforeaid = anon.dat$realtui + anon.dat$finaidest
       anon.dat$realtui2 = anon.dat$costbeforeaid- anon.dat$finaidest2
       anon.dat$realtuiApply = anon.dat$costbeforeaid-anon.dat$nonAttendAid
+      anon.dat$finaidwstatedisc = anon.dat$tuioutlist-anon$realtui+ anon.dat$finaidest- anon.dat$finaidest2
   #replace negative tuition values with 0?
     #not for now!
   #get attenders
@@ -192,7 +193,7 @@
     multi.dat$carnegie2 = as.factor(multi.dat$carnegie2)
     multi.dat$attend = as.factor(multi.dat$attend)
   #remove totally irrelevant variables
-    relVars.dat = multi.dat[,c("pubid_anon", "school_anon","attendedIndicator","tuioutlist","realtui2","finaidest2","distance","instate","urbanruralmatch","loanp","fedgrantp","control","carnegie2","avgsal","division2","gradrate","expperstudent2","instperstudent2","facperstudent2","genderratio2","totstudents2","nonAttendAid","realtuiApply", "selectdiffInt","selectInt", "fedgrantp")]
+    relVars.dat = multi.dat[,c("pubid_anon", "school_anon","attendedIndicator","tuioutlist","realtui2","finaidest2","distance","instate","urbanruralmatch","loanp","fedgrantp","control","carnegie2","avgsal","division2","gradrate","expperstudent2","instperstudent2","facperstudent2","genderratio2","totstudents2","nonAttendAid","realtuiApply", "selectdiffInt","selectInt", "fedgrantp", "finaidwstatedisc")]
   #test dataset excluding na's and make categoricals
     noNA.dat = na.exclude(relVars.dat)
       
@@ -264,7 +265,7 @@
 
 #model selection=======================================================================================
   #reduce dataset based on preliminary analysis and limit impact of NAs, keep relVars for further analysis
-    relVarsRed.dat = relVars.dat[,c("pubid_anon", "school_anon","attendedIndicator","tuioutlist","realtui2","finaidest2","distance","instate","urbanruralmatch","loanp","control","division2","gradrate","expperstudent2","instperstudent2","facperstudent2","genderratio2","totstudents2","nonAttendAid","realtuiApply", "selectdiffInt", "selectInt", "avgsal", "fedgrantp")]
+    relVarsRed.dat = relVars.dat[,c("pubid_anon", "school_anon","attendedIndicator","tuioutlist","realtui2","finaidest2","distance","instate","urbanruralmatch","loanp","control","division2","gradrate","expperstudent2","instperstudent2","facperstudent2","genderratio2","totstudents2","nonAttendAid","realtuiApply", "selectdiffInt", "selectInt", "avgsal", "fedgrantp", "finaidwstatedisc")]
   #remove NAs for now
     noNARed.dat = na.exclude(relVarsRed.dat)
   #mclogit models--MODEL SELECTION
