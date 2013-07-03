@@ -162,11 +162,12 @@
       anon.dat$costbeforeaid = anon.dat$realtui + anon.dat$finaidest
       anon.dat$realtui2 = anon.dat$costbeforeaid- anon.dat$finaidest2
       anon.dat$realtuiApply = anon.dat$costbeforeaid-anon.dat$nonAttendAid
-      anon.dat$finaidwstatedisc = anon.dat$tuioutlist-anon$realtui+ anon.dat$finaidest- anon.dat$finaidest2
+      anon.dat$finaidwstatedisc = anon.dat$tuioutlist-anon.dat$realtui+ anon.dat$finaidest- anon.dat$finaidest2
   #replace negative tuition values with 0?
     #not for now!
   #get attenders
     attenders.dat = anon.dat[anon.dat$attend != -10,]
+    #attenders.dat = anon.dat
   #check agreement of financial aid data and clean it
     aidcheck.dat = attenders.dat[,c("pubid_anon", "school_anon", "finaidest", "nonAttendAid", "attendAid")]
     aidcheck2.dat= aidcheck.dat[!(is.na(aidcheck.dat$attendAid)) & !(is.na(aidcheck.dat$nonAttendAid)),]
@@ -177,6 +178,7 @@
     frequency.dat$pubid_anon= rownames(frequency.dat)
     attenders.dat = merge(x = attenders.dat, y = frequency.dat, by = "pubid_anon", all.x = TRUE)
     multi.dat = attenders.dat[attenders.dat$Frequency>1,]
+    #multi.dat = attenders.dat
   #create new selectivity variables
     multi.dat$selectdiffInt = NA
     multi.dat$selectInt = NA
@@ -194,6 +196,8 @@
     multi.dat$attend = as.factor(multi.dat$attend)
   #remove totally irrelevant variables
     relVars.dat = multi.dat[,c("pubid_anon", "school_anon","attendedIndicator","tuioutlist","realtui2","finaidest2","distance","instate","urbanruralmatch","loanp","fedgrantp","control","carnegie2","avgsal","division2","gradrate","expperstudent2","instperstudent2","facperstudent2","genderratio2","totstudents2","nonAttendAid","realtuiApply", "selectdiffInt","selectInt", "fedgrantp", "finaidwstatedisc")]
+  #if you are running this without the deletion of non-attenders, save input data for second stage
+    #write.csv(relVars.dat, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Choice Model Inputs/anon_dat_mergedata.csv")
   #test dataset excluding na's and make categoricals
     noNA.dat = na.exclude(relVars.dat)
       
@@ -357,10 +361,13 @@
     #test adding only distance
       mclogit.add.mod = mclogit(lhs~distance + tuioutlist+finaidest2+gradrate+instperstudent2+selectdiffInt,data=noNARed.dat, model = TRUE, )
         #additional variables are not significant
+    #testing with the finaidwstatedisc variable
+      mclogit.newaid.mod = mclogit(lhs ~tuioutlist+finaidwstatedisc+gradrate+instperstudent2+selectdiffInt,data=noNARed.dat, model = TRUE, )
+        #yes this is better
 
 #run seleted models, do outlier tests===============================================================
   #reduce dataset to those needed in final models and remove NAs
-    relVarsPCA.dat = relVars.dat[,c("totstudents2", "gradrate", "fedgrantp", "selectInt", "avgsal", "pubid_anon","attendedIndicator","tuioutlist","finaidest2","instperstudent2","selectdiffInt")]
+    relVarsPCA.dat = relVars.dat[,c("totstudents2", "gradrate", "fedgrantp", "selectInt", "avgsal", "pubid_anon","attendedIndicator","tuioutlist","finaidest2","instperstudent2","selectdiffInt", "finaidwstatedisc")]
     PCAtest = data.frame(is.na(relVarsPCA.dat))
     PCAtest$miss=FALSE
     for (i in 1:nrow(PCAtest)){
@@ -369,10 +376,10 @@
     }
     missVals = relVarsPCA.dat[PCAtest$miss==TRUE,]
     relVarsPCA.dat = na.exclude(relVarsPCA.dat)
-    schoolqual.dat = relVarsPCA.dat[,c("totstudents2", "gradrate", "fedgrantp", "selectInt", "avgsal")]
+    schoolqual.dat = relVarsPCA.dat[,c("totstudents2", "gradrate", "fedgrantp", "selectInt", "avgsal", "finaidwstatedisc")]
     fit <- princomp(schoolqual.dat, cor=T, na.action= "exclude")
     relVarsPCA.dat$schoolqual = fit$scores[,1]
-    relVarsNoPCA.dat = relVars.dat[,c("pubid_anon","attendedIndicator","tuioutlist","finaidest2","gradrate","instperstudent2","selectdiffInt")]
+    relVarsNoPCA.dat = relVars.dat[,c("pubid_anon","attendedIndicator","tuioutlist","finaidest2","gradrate","instperstudent2","selectdiffInt","finaidwstatedisc")]
     relVarsNoPCA.dat = na.exclude(relVarsNoPCA.dat)
   #plots for further outlier detection
     #test.dat = relVarsPCA.dat[,c("attendedIndicator","instperstudent2", "tuioutlist", "finaidest2", "schoolqual")]
@@ -444,6 +451,18 @@
         mclogit.PCA.mod = mclogit(lhsPCA~tuioutlist+finaidest2+schoolqual+instperstudent2+selectdiffInt,data=relVarsPCA.dat, model = TRUE, )
         clogit.PCA.mod = clogit(attendedIndicator~tuioutlist+finaidest2+schoolqual+instperstudent2+selectdiffInt+strata(pubid_anon),relVarsPCA.dat)
           ll = clogit.PCA.mod$loglik #first entry is intercept-only model, second is full model
+          McFR2= 1-ll[2]/ll[1]
+      #mclogit.E.B.A.C.mod
+        lhsPCA = matrix(c(relVarsPCA.dat$attendedIndicator, relVarsPCA.dat$pubid_anon), nrow(relVarsPCA.dat), 2)
+        mclogit.PCA2.mod = mclogit(lhsPCA~tuioutlist+finaidwstatedisc+schoolqual+instperstudent2+selectdiffInt,data=relVarsPCA.dat, model = TRUE, )
+        clogit.PCA2.mod = clogit(attendedIndicator~tuioutlist+finaidwstatedisc+schoolqual+instperstudent2+selectdiffInt+strata(pubid_anon),relVarsPCA.dat)
+          ll = clogit.PCA2.mod$loglik #first entry is intercept-only model, second is full model
+          McFR2= 1-ll[2]/ll[1]
+      #mclogit.E.B.A.B.mod
+        lhsNoPCA = matrix(c(relVarsNoPCA.dat$attendedIndicator, relVarsNoPCA.dat$pubid_anon), nrow(relVarsNoPCA.dat), 2)
+        mclogit.noPCA2.mod = mclogit(lhsNoPCA~tuioutlist+finaidwstatedisc+gradrate+instperstudent2+selectdiffInt,data=relVarsNoPCA.dat, model = TRUE, )
+        clogit.noPCA2.mod = clogit(attendedIndicator~tuioutlist+finaidwstatedisc+gradrate+instperstudent2+selectdiffInt+strata(pubid_anon),relVarsNoPCA.dat)
+          ll = clogit.noPCA2.mod$loglik #first entry is intercept-only model, second is full model
           McFR2= 1-ll[2]/ll[1]
 
 #model diagnostics=====================================================================
