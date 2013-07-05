@@ -17,12 +17,13 @@
 
 #clear workspace ===================================================================
   rm(list = ls())
+  load("finalmodels.RData")
 
 #data i/o ==========================================================================
   attend.dat = read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Choice Model Inputs/anon_attend.csv", stringsAsFactors=FALSE)
     #this is out.df from choiceModel.R with some variable choice modifications, anonimized
     #keep only relevant columns
-      attend.dat = attend.dat[,c("pubid_anon","school_anon","Admit","Attend","b0","KEYSEX_1997","KEYRACE_ETHNICITY_1997","SAT_MATH","SAT_VERBAL","MAJOR2","DAD_ED","MOM_ED","HH_SIZE","HH_INCOME","URBAN_RURAL","SCHOOL_TYPE","AttendedIndicator","AIDALLSCHOOL","SATDiff","tuiin","tuiout","tuiinlist","tuioutlist","sat25","sat75","urbanrural","lifeEarnings")]
+      attend.dat = attend.dat[,c("pubid_anon","school_anon","Admit","Attend","b0","KEYSEX_1997","KEYRACE_ETHNICITY_1997","SAT_MATH","SAT_VERBAL","MAJOR2","DAD_ED","MOM_ED","HH_SIZE","HH_INCOME","URBAN_RURAL","SCHOOL_TYPE","AttendedIndicator","AIDALLSCHOOL","SATDiff","tuiin","tuiout","tuiinlist","sat25","sat75","urbanrural","lifeEarnings")]
   merge.dat = read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Choice Model Inputs/anon_dat_mergedata.csv")
   #merge
     attend.dat$id = paste(attend.dat$pubid_anon, attend.dat$school_anon)
@@ -42,17 +43,56 @@
     frequency.dat = data.frame(freq(ordered(nonattenders.dat$pubid_anon), plot=FALSE))
     frequency.dat$pubid_anon= rownames(frequency.dat)
     nonattenders.dat = merge(x = nonattenders.dat, y = frequency.dat, by = "pubid_anon", all.x = TRUE)
-    nonattendone.dat = nonattenders.dat[nonattenders.dat$Frequency==1,]
-    nonattendone.dat=nonattendone.dat[,c(1:52)]
-    #replace the corresponding columns in model.dat
-    for (i in 1:nrow(nonattendone.dat)){
-      curID = nonattendone.dat$pubid_anon[i]
-      replaceVect = unname(unlist(nonattendone.dat[i,]))
-      model.dat[model.dat$pubid_anon==curID,]=replaceVect 
-    }
-   
-    TBD: multi.dat = attenders.dat[attenders.dat$Frequency>1,]
-
+    #those with only one school
+      nonattendone.dat = nonattenders.dat[nonattenders.dat$Frequency==1,]
+      nonattendone.dat=nonattendone.dat[,c(1:51)]
+      #replace the corresponding rows in model.dat
+      for (i in 1:nrow(nonattendone.dat)){
+        curID = nonattendone.dat$pubid_anon[i]
+        replaceVect = unname(unlist(nonattendone.dat[i,]))
+        model.dat[model.dat$pubid_anon==curID,]=replaceVect 
+      }
+    #those with multiple schools
+      nonattendmulti.dat = nonattenders.dat[nonattenders.dat$Frequency>1,]
+      predict.dat = nonattendmulti.dat[,c("pubid_anon", "tuioutlist", "finaidwstatedisc", "gradrate", "instperstudent2", "selectdiffInt")]
+      predict.dat = na.exclude(predict.dat)
+        #TBD fill missing      
+      #get models
+        mclogit.mod = mclogit.noPCA2Int.mod
+        clogit.mod = clogit.noPCA2Int.mod
+      #predict
+        predProbs= predict(mclogit.mod, newdata = predict.dat, type = "link") #gives linear predictor as expected
+        predict.dat$predProbs= exp(predProbs)
+        #other predictors for testing        
+          #testProbslp= predict(clogit2.mod, type = "lp") #should be equivalent in normal data
+          #testProbsrisk= predict(clogit2.mod, type = "risk")
+          #testProbsexpected= predict(clogit2.mod, type = "expected")
+          #testProbsterms= predict(clogit2.mod, type = "expected")
+          #clogit2.mod = clogit(attendedIndicator~tuioutlist+finaidwstatedisc+gradrate+instperstudent2+selectdiffInt+strata(pubid_anon),relVarsNoPCA.dat)
+          #mclogit2.mod = mclogit(lhsNoPCA~tuioutlist+finaidwstatedisc+gradrate+instperstudent2+selectdiffInt,data=relVarsNoPCA.dat, model = TRUE, )
+          #test = relVarsNoPCA.dat
+          #predProbs= predict(mclogit.mod, newdata = test, type = "link") #gives linear predictor as expected
+          #test$predProbs = exp(predProbs)
+          #sums.dat = ddply(test,~pubid_anon,summarise,probSum=sum(predProbs))
+          #test = merge(x = test, y = sums.dat, by = "pubid_anon", all.x = TRUE)
+          #test$prob = test$predProbs/test$probSum
+      #calculate probability of attending each for checks
+        #these are close to the "expected" type of probability when possible
+        sums.dat = ddply(predict.dat,~pubid_anon,summarise,probSum=sum(predProbs))
+        predict.dat = merge(x = predict.dat, y = sums.dat, by = "pubid_anon", all.x = TRUE)
+        predict.dat$prob = predict.dat$predProbs/predict.dat$probSum
+      #select max probability row
+        bestSchool.dat = ddply(predict.dat, .(pubid_anon), function(subdf) {subdf[which.max(subdf$prob),]})
+      #replace the corresponding rows in model.dat
+        #TBD this does not work because we do not have all the columns--must fill necessary columns or delete
+      for (i in 1:nrow(bestSchool.dat)){
+        curID = bestSchool.dat$pubid_anon[i]
+        replaceVect = unname(unlist(bestSchool.dat[i,]))
+        model.dat[model.dat$pubid_anon==curID,]=replaceVect 
+      }
+        
+      
+#TBD--set attendance indicator
 
 #set factor levels
 #set categorical variables since this information may have gotten lost

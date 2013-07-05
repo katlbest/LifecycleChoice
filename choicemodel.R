@@ -465,6 +465,27 @@
           ll = clogit.noPCA2.mod$loglik #first entry is intercept-only model, second is full model
           McFR2= 1-ll[2]/ll[1]
 
+  #attempt E.B.A.B with interaction terms
+    lhsNoPCA = matrix(c(relVarsNoPCA.dat$attendedIndicator, relVarsNoPCA.dat$pubid_anon), nrow(relVarsNoPCA.dat), 2)
+    mclogit.noPCA2.mod = mclogit(lhsNoPCA~tuioutlist+finaidwstatedisc+gradrate+instperstudent2+selectdiffInt,data=relVarsNoPCA.dat, model = TRUE, )
+    clogit.noPCA2.mod = clogit(attendedIndicator~tuioutlist+finaidwstatedisc+gradrate+instperstudent2+selectdiffInt+strata(pubid_anon),relVarsNoPCA.dat)
+    ll = clogit.noPCA2.mod$loglik #first entry is intercept-only model, second is full model
+    McFR2= 1-ll[2]/ll[1]
+    #add interactions
+      mclogit.noPCA2Int.mod = mclogit(lhsNoPCA~finaidwstatedisc/tuioutlist+tuioutlist+finaidwstatedisc+gradrate+instperstudent2+selectdiffInt,data=relVarsNoPCA.dat, model = TRUE, )
+      clogit.noPCA2Int.mod = clogit(attendedIndicator~finaidwstatedisc/tuioutlist+tuioutlist+finaidwstatedisc+gradrate+instperstudent2+selectdiffInt+strata(pubid_anon),relVarsNoPCA.dat)
+      ll = clogit.noPCA2Int.mod$loglik #first entry is intercept-only model, second is full model
+        McFR2= 1-ll[2]/ll[1]
+        save(mclogit.noPCA2Int.mod, file = "mclogit.noPCA2Int.saved")
+        save(clogit.noPCA2Int.mod, file = "clogit.noPCA2Int.saved")
+        save(relVarsNoPCA.dat, file = "stage1input.saved")
+        save.image("finalmodels.RData")
+    #add higher order
+      mclogit.noPCAHO.mod = mclogit(lhsNoPCA~finaidwstatedisc/tuioutlist+tuioutlist+finaidwstatedisc+gradrate+instperstudent2+selectdiffInt,data=relVarsNoPCA.dat, model = TRUE, )
+      clogit.noPCA2HO.mod = clogit(attendedIndicator~finaidwstatedisc/tuioutlist+tuioutlist+finaidwstatedisc+gradrate+instperstudent2+selectdiffInt+strata(pubid_anon),relVarsNoPCA.dat)
+      ll = clogit.noPCA2HO.mod$loglik #first entry is intercept-only model, second is full model
+        McFR2= 1-ll[2]/ll[1]
+
 #model diagnostics=====================================================================
   #R2's already calculated
   #AIC
@@ -472,7 +493,7 @@
     extractAIC(clogit.noPCA.mod)
   #count of cases classified correctly is not relevant when data is not binary
   #predicted probabilities
-    predPCA= predict(clogit.PCA.mod, type = "expected")
+    predPCA= predict(clogit.PCA.mod, type = "expected") #this should maybe be lp or risk type, TBD
     predNoPCA= predict(clogit.noPCA.mod, type = "expected")
   #residuals
     resPCA=residuals(clogit.PCA.mod)
