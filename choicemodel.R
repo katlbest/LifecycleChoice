@@ -163,16 +163,21 @@
       anon.dat$realtui2 = anon.dat$costbeforeaid- anon.dat$finaidest2 #this works correctly
       anon.dat$realtuiApply = anon.dat$costbeforeaid-anon.dat$nonAttendAid #this works correctly
       anon.dat$finaidwstatedisc[i]=NA
+      anon.dat$finaidwstatedisc2[i]=NA
       anon.dat[anon.dat$aidallschool==-3,]$aidallschool = 0
       for (i in 1:nrow(anon.dat)){
         if (anon.dat$instate[i]==1){
-          anon.dat$finaidwstatedisc[i] = anon.dat$tuioutlist[i]+anon.dat$feeout[i]-(anon.dat$tuiinlist[i]+anon.dat$feein[i])+ anon.dat$finaidest2[i]+ anon.dat$aidallschool[i]
+          anon.dat$finaidwstatedisc2[i] = anon.dat$tuioutlist[i]+anon.dat$feeout[i]-(anon.dat$tuiinlist[i]+anon.dat$feein[i])+ anon.dat$finaidest2[i]+ anon.dat$aidallschool[i]
+          anon.dat$finaidwstatedisc[i] = anon.dat$tuioutlist[i]+anon.dat$feeout[i]-(anon.dat$tuiinlist[i]+anon.dat$feein[i])+ anon.dat$finaidest[i]+ anon.dat$aidallschool[i]
         } else{
-          anon.dat$finaidwstatedisc[i] =anon.dat$finaidest2[i]+ anon.dat$aidallschool[i]
+          anon.dat$finaidwstatedisc2[i] =anon.dat$finaidest2[i]+ anon.dat$aidallschool[i]
+          anon.dat$finaidwstatedisc[i] =anon.dat$finaidest[i]+ anon.dat$aidallschool[i]
         }
       }
       anon.dat$listwfees = anon.dat$tuioutlist + anon.dat$feeout
       anon.dat$listminusactual = anon.dat$listwfees-anon.dat$realtui2
+      anon.dat$goodVar = anon.dat$tuioutlist-anon.dat$realtui- anon.dat$finaidest+ anon.dat$finaidest2
+      anon.dat$goodVar2 = anon.dat$tuioutlist-anon.dat$realtui+ anon.dat$finaidest- anon.dat$finaidest2
   #replace negative tuition values with 0?
     #not for now!
   #get attenders
@@ -205,7 +210,7 @@
     multi.dat$carnegie2 = as.factor(multi.dat$carnegie2)
     multi.dat$attend = as.factor(multi.dat$attend)
   #remove totally irrelevant variables
-    relVars.dat = multi.dat[,c("pubid_anon", "school_anon","attendedIndicator","tuioutlist","realtui2","finaidest2","distance","instate","urbanruralmatch","loanp","fedgrantp","control","carnegie2","avgsal","division2","gradrate","expperstudent2","instperstudent2","facperstudent2","genderratio2","totstudents2","nonAttendAid","realtuiApply", "selectdiffInt","selectInt", "fedgrantp", "finaidwstatedisc", "listminusactual", "listwfees", "realtui2", "feeout")]
+    relVars.dat = multi.dat[,c("pubid_anon", "school_anon","attendedIndicator","tuioutlist","realtui2","finaidest2","distance","instate","urbanruralmatch","loanp","fedgrantp","control","carnegie2","avgsal","division2","gradrate","expperstudent2","instperstudent2","facperstudent2","genderratio2","totstudents2","nonAttendAid","realtuiApply", "selectdiffInt","selectInt", "fedgrantp", "finaidwstatedisc", "listminusactual", "listwfees", "realtui2", "feeout", "goodVar", "goodVar2", "finaidwstatedisc2")]
   #if you are running this without the deletion of non-attenders, save input data for second stage
     #write.csv(relVars.dat, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Choice Model Inputs/anon_dat_mergedata.csv")
   #test dataset excluding na's and make categoricals
@@ -279,7 +284,7 @@
 
 #model selection=======================================================================================
   #reduce dataset based on preliminary analysis and limit impact of NAs, keep relVars for further analysis
-    relVarsRed.dat = relVars.dat[,c("pubid_anon", "school_anon","attendedIndicator","tuioutlist","realtui2","finaidest2","distance","instate","urbanruralmatch","loanp","control","division2","gradrate","expperstudent2","instperstudent2","facperstudent2","genderratio2","totstudents2","nonAttendAid","realtuiApply", "selectdiffInt", "selectInt", "avgsal", "fedgrantp", "finaidwstatedisc", "listminusactual", "listwfees", "realtui2", "feeout")]
+    relVarsRed.dat = relVars.dat[,c("pubid_anon", "school_anon","attendedIndicator","tuioutlist","realtui2","finaidest2","distance","instate","urbanruralmatch","loanp","control","division2","gradrate","expperstudent2","instperstudent2","facperstudent2","genderratio2","totstudents2","nonAttendAid","realtuiApply", "selectdiffInt", "selectInt", "avgsal", "fedgrantp", "finaidwstatedisc", "listminusactual", "listwfees", "realtui2", "feeout", "goodVar", "goodVar2", "finaidwstatedisc2")]
   #remove NAs for now
     noNARed.dat = na.exclude(relVarsRed.dat)
   #mclogit models--MODEL SELECTION
@@ -379,7 +384,7 @@
 
 #run seleted models, do outlier tests===============================================================
   #reduce dataset to those needed in final models and remove NAs
-    relVarsPCA.dat = relVars.dat[,c("totstudents2", "gradrate", "fedgrantp", "selectInt", "avgsal", "pubid_anon","attendedIndicator","tuioutlist","finaidest2","instperstudent2","selectdiffInt", "finaidwstatedisc", "distance", "listminusactual", "listwfees", "realtui2", "feeout")]
+    relVarsPCA.dat = relVars.dat[,c("totstudents2", "gradrate", "fedgrantp", "selectInt", "avgsal", "pubid_anon","attendedIndicator","tuioutlist","finaidest2","instperstudent2","selectdiffInt", "finaidwstatedisc", "distance", "listminusactual", "listwfees", "realtui2", "feeout", "goodVar", "goodVar2", "finaidwstatedisc2")]
     PCAtest = data.frame(is.na(relVarsPCA.dat))
     PCAtest$miss=FALSE
     for (i in 1:nrow(PCAtest)){
@@ -391,7 +396,7 @@
     schoolqual.dat = relVarsPCA.dat[,c("totstudents2", "gradrate", "fedgrantp", "selectInt", "avgsal")]
     fit <- princomp(schoolqual.dat, cor=T, na.action= "exclude")
     relVarsPCA.dat$schoolqual = fit$scores[,1]
-    relVarsNoPCA.dat = relVars.dat[,c("pubid_anon","attendedIndicator","tuioutlist","finaidest2","gradrate","instperstudent2","selectdiffInt","finaidwstatedisc", "distance", "listminusactual", "listwfees", "realtui2", "feeout")]
+    relVarsNoPCA.dat = relVars.dat[,c("pubid_anon","attendedIndicator","tuioutlist","finaidest2","gradrate","instperstudent2","selectdiffInt","finaidwstatedisc", "distance", "listminusactual", "listwfees", "realtui2", "feeout", "goodVar", "goodVar2", "finaidwstatedisc2")]
     relVarsNoPCA.dat = na.exclude(relVarsNoPCA.dat)
   #plots for further outlier detection
     #test.dat = relVarsPCA.dat[,c("attendedIndicator","instperstudent2", "tuioutlist", "finaidest2", "schoolqual")]
@@ -484,10 +489,10 @@
     ll = clogit.noPCA2.mod$loglik #first entry is intercept-only model, second is full model
     McFR2= 1-ll[2]/ll[1]
     #add interactions
-      relVarsNoPCA.dat$value = relVarsNoPCA.dat$realtui2*relVarsNoPCA.dat$tuioutlist
+      #relVarsNoPCA.dat$value = relVarsNoPCA.dat$realtui2*relVarsNoPCA.dat$tuioutlist
       #relVarsNoPCA.dat$realtui = relVarsNoPCA.dat$tuioutlist - relVarsNoPCA.dat$finaidwstatedisc
-      mclogit.noPCA2Int.mod = mclogit(lhsNoPCA~tuioutlist+finaidwstatedisc+gradrate+instperstudent2+selectdiffInt,data=relVarsNoPCA.dat, model = TRUE, )
-      clogit.noPCA2Int.mod = clogit(attendedIndicator~tuioutlist+finaidwstatedisc+gradrate+instperstudent2+selectdiffInt+strata(pubid_anon),relVarsNoPCA.dat)
+      mclogit.noPCA2Int.mod = mclogit(lhsNoPCA~tuioutlist+finaidwstatedisc2+gradrate+instperstudent2+selectdiffInt,data=relVarsNoPCA.dat, model = TRUE, )
+      clogit.noPCA2Int.mod = clogit(attendedIndicator~tuioutlist+finaidwstatedisc2+gradrate+instperstudent2+selectdiffInt+strata(pubid_anon),relVarsNoPCA.dat)
       #clogit.noPCA2Int.mod = clogit(attendedIndicator~listwfees+finaidwstatedisc+gradrate+instperstudent2+selectdiffInt+strata(pubid_anon),relVarsNoPCA.dat)
       ll = clogit.noPCA2Int.mod$loglik #first entry is intercept-only model, second is full model
         McFR2= 1-ll[2]/ll[1]
@@ -495,6 +500,27 @@
         save(clogit.noPCA2Int.mod, file = "clogit.noPCA2Int.saved")
         save(relVarsNoPCA.dat, file = "stage1input.saved")
         save.image("finalmodels.RData")
+    #same model with more fit and bad finaid
+       mclogit.noPCA2Intwrong.mod = mclogit(lhsNoPCA~tuioutlist*finaidwstatedisc+tuioutlist+finaidwstatedisc+gradrate+instperstudent2+selectdiffInt,data=relVarsNoPCA.dat, model = TRUE, )
+      clogit.noPCA2Intwrong.mod = clogit(attendedIndicator~tuioutlist*finaidwstatedisc+tuioutlist+finaidwstatedisc+gradrate+instperstudent2+selectdiffInt+strata(pubid_anon),relVarsNoPCA.dat)
+      #clogit.noPCA2Int.mod = clogit(attendedIndicator~listwfees+finaidwstatedisc+gradrate+instperstudent2+selectdiffInt+strata(pubid_anon),relVarsNoPCA.dat)
+        ll = clogit.noPCA2Intwrong.mod$loglik #first entry is intercept-only model, second is full model
+        McFR2= 1-ll[2]/ll[1]
+    #PCA model
+      mclogit.PCA2Int.mod = mclogit(lhsPCA~tuioutlist+finaidwstatedisc2+schoolqual+instperstudent2+selectdiffInt,data=relVarsPCA.dat, model = TRUE, )
+      clogit.PCA2Int.mod = clogit(attendedIndicator~tuioutlist+finaidwstatedisc2+schoolqual+instperstudent2+selectdiffInt+strata(pubid_anon),relVarsPCA.dat)
+      ll = clogit.PCA2Int.mod$loglik #first entry is intercept-only model, second is full model
+      McFR2= 1-ll[2]/ll[1]
+    #model with good fit that is unfortunately nonsense
+      #relVarsNoPCA.dat$goodVar = relVarsNoPCA.dat$tuioutlist-relVarsNoPCA.dat$realtui2
+      #relVarsNoPCA.dat$realtui = relVarsNoPCA.dat$tuioutlist - relVarsNoPCA.dat$finaidwstatedisc
+      mclogit.good.mod = mclogit(lhsNoPCA~goodVar2*tuioutlist +goodVar2+tuioutlist+gradrate+instperstudent2+selectdiffInt,data=relVarsNoPCA.dat, model = TRUE, )
+      clogit.good.mod = clogit(attendedIndicator~goodVar2*tuioutlist +goodVar2+tuioutlist+gradrate+instperstudent2+selectdiffInt+strata(pubid_anon),relVarsNoPCA.dat)
+      ll = clogit.good.mod$loglik #first entry is intercept-only model, second is full model
+      McFR2= 1-ll[2]/ll[1]
+    #plots to determine why good model is good
+      #TBD
+      plot(relVarsNoPCA.dat$goodVar2, relVarsNoPCA.dat$goodVar)
     #add higher order
       mclogit.noPCAHO.mod = mclogit(lhsNoPCA~finaidwstatedisc/tuioutlist+tuioutlist+finaidwstatedisc+gradrate+instperstudent2+selectdiffInt,data=relVarsNoPCA.dat, model = TRUE, )
       clogit.noPCA2HO.mod = clogit(attendedIndicator~finaidwstatedisc/tuioutlist+tuioutlist+finaidwstatedisc+gradrate+instperstudent2+selectdiffInt+strata(pubid_anon),relVarsNoPCA.dat)
@@ -502,6 +528,8 @@
         McFR2= 1-ll[2]/ll[1]
 
 #model diagnostics=====================================================================
+  clogit.noPCA.mod = clogit.noPCA2Int.mod
+  mclogit.noPCA.mod = mclogit.noPCA2Int.mod
   #R2's already calculated
   #AIC
     extractAIC(clogit.PCA.mod) #returns equivalent dof, then AIC
