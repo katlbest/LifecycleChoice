@@ -159,10 +159,19 @@
       }
       anon.dat$finaidest2 = anon.dat$nonAttendMiss
     #adjust both net tuition variables as necessary
-      anon.dat$costbeforeaid = anon.dat$realtui + anon.dat$finaidest
-      anon.dat$realtui2 = anon.dat$costbeforeaid- anon.dat$finaidest2
-      anon.dat$realtuiApply = anon.dat$costbeforeaid-anon.dat$nonAttendAid
-      anon.dat$finaidwstatedisc = anon.dat$tuioutlist-anon.dat$realtui+ anon.dat$finaidest- anon.dat$finaidest2
+      anon.dat$costbeforeaid = anon.dat$realtui + anon.dat$finaidest #this works correctly
+      anon.dat$realtui2 = anon.dat$costbeforeaid- anon.dat$finaidest2 #this works correctly
+      anon.dat$realtuiApply = anon.dat$costbeforeaid-anon.dat$nonAttendAid #this works correctly
+      anon.dat$finaidwstatedisc[i]=NA
+      anon.dat[anon.dat$aidallschool==-3,]$aidallschool = 0
+      for (i in 1:nrow(anon.dat)){
+        if (anon.dat$instate[i]==1){
+          anon.dat$finaidwstatedisc[i] = anon.dat$tuioutlist[i]+anon.dat$feeout[i]-(anon.dat$tuiinlist[i]+anon.dat$feein[i])+ anon.dat$finaidest2[i]+ anon.dat$aidallschool[i]
+        } else{
+          anon.dat$finaidwstatedisc[i] =anon.dat$finaidest2[i]+ anon.dat$aidallschool[i]
+        }
+      }
+      #anon.dat$finaidwstatedisc = anon.dat$tuioutlist-anon.dat$realtui- anon.dat$finaidest+ anon.dat$finaidest2
   #replace negative tuition values with 0?
     #not for now!
   #get attenders
@@ -182,7 +191,7 @@
   #create new selectivity variables
     multi.dat$selectdiffInt = NA
     multi.dat$selectInt = NA
-    lookup = data.frame(id = c(1,2,3,4,5), percent = c(33, 60, 75, 85, 100))
+    lookup = data.frame(id = c(1,2,3,4,5,6), percent = c(33, 60, 75, 85, 100, 100))
     for (i in 1:nrow(multi.dat)){
       admitInt = lookup[(1:dim(lookup)[1])[lookup[,1]==multi.dat$admit[i]],2]
       multi.dat$selectInt[i] = lookup[(1:dim(lookup)[1])[lookup[,1]==multi.dat$selectivity2[i]],2]
