@@ -39,6 +39,7 @@ checkPredictionAbilityAttendOnly<- function(inputDataset){
   outFile <- paste("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/byAdmitcatAttendOnly.csv", sep = "")
   write.csv(byAdmitCoeffVect, outFile)
   multiplot(plotlist = plotList, cols=2, file = "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/outPlotAttendOnly.pdf")
+  nameString = "attendercheck"
   dev.copy(pdf,paste("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/outplotAttendOnly", nameString, ".pdf", sep = ""))
   dev.off()
   

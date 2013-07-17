@@ -178,8 +178,6 @@
       anon.dat$listminusactual = anon.dat$listwfees-anon.dat$realtui2
       anon.dat$goodVar = anon.dat$tuioutlist-anon.dat$realtui- anon.dat$finaidest+ anon.dat$finaidest2
       anon.dat$goodVar2 = anon.dat$tuioutlist-anon.dat$realtui+ anon.dat$finaidest- anon.dat$finaidest2
-  #replace negative tuition values with 0?
-    #not for now!
   #get attenders
     attenders.dat = anon.dat[anon.dat$attend != -10,]
     #attenders.dat = anon.dat
@@ -297,6 +295,11 @@
       clogit.almostall.mod = clogit(attendedIndicator~tuioutlist+realtui2+totstudents2+gradrate+expperstudent2+instperstudent2+facperstudent2+genderratio2+selectdiffInt+loanp+control+division2+distance+instate+urbanruralmatch+ strata(pubid_anon), noNARed.dat)
         ll = clogit.almostall.mod$loglik
         McFR2= 1-ll[2]/ll[1]
+      #squares
+        clogit.squares.mod = clogit(attendedIndicator~I(tuioutlist^2)+I(realtui2^2)+I(totstudents2^2)+I(gradrate)^2+I(expperstudent2^2)+I(instperstudent2^2)+I(facperstudent2^2)+I(genderratio2^2)+I(selectdiffInt^2)+I(loanp^2)+control+division2+I(distance^2)+instate+urbanruralmatch+ strata(pubid_anon), noNARed.dat)
+          ll = clogit.squares.mod$loglik
+          McFR2= 1-ll[2]/ll[1]
+
         #runs, warning
     #config A.B.A
       #all
@@ -385,6 +388,8 @@
 #run seleted models, do outlier tests===============================================================
   #reduce dataset to those needed in final models and remove NAs
     relVarsPCA.dat = relVars.dat[,c("totstudents2", "gradrate", "fedgrantp", "selectInt", "avgsal", "pubid_anon","attendedIndicator","tuioutlist","finaidest2","instperstudent2","selectdiffInt", "finaidwstatedisc", "distance", "listminusactual", "listwfees", "realtui2", "feeout", "goodVar", "goodVar2", "finaidwstatedisc2")]
+    #fix selectivity errors
+      relVarsPCA.dat[relVarsPCA.dat$selectdiffInt < 0,]$selectdiffInt =0
     PCAtest = data.frame(is.na(relVarsPCA.dat))
     PCAtest$miss=FALSE
     for (i in 1:nrow(PCAtest)){
@@ -400,11 +405,11 @@
     relVarsNoPCA.dat = na.exclude(relVarsNoPCA.dat)
   #plots for further outlier detection
     #test.dat = relVarsPCA.dat[,c("attendedIndicator","instperstudent2", "tuioutlist", "finaidest2", "schoolqual")]
-    #test.dat = relVarsNoPCA.dat[,c("attendedIndicator","instperstudent2", "tuioutlist", "finaidest2")]
-    #for (i in 1:ncol(test.dat)){
-      #myPlot = ggplot(data=test.dat, aes(x=attendedIndicator, y=test.dat[,i])) + geom_point()+ labs(title=colnames(test.dat)[i])
-      #ggsave(paste("C:/Users/Katharina/Documents/Umich/lifecycle choice/data/plots/reduced2", i , ".pdf", sep = ""))
-    #}
+    test.dat = relVarsNoPCA.dat[,c("attendedIndicator","instperstudent2", "tuioutlist", "gradrate", "finaidwstatedisc", "selectdiffInt")]
+    for (i in 1:ncol(test.dat)){
+      myPlot = ggplot(data=test.dat, aes(x=attendedIndicator, y=test.dat[,i])) + geom_point()+ labs(title=colnames(test.dat)[i])
+      ggsave(paste("C:/Users/Katharina/Documents/Umich/lifecycle choice/data/plots/reduced2", i , ".pdf", sep = ""))
+    }
   #remove outliers
     #instperstudent
       #locate
@@ -414,6 +419,14 @@
       #remove
         relVarsPCA.dat = relVarsPCA.dat[-(which.max(relVarsPCA.dat[,c("instperstudent2"),])),]
         relVarsNoPCA.dat = relVarsNoPCA.dat[-(which.max(relVarsNoPCA.dat[,c("instperstudent2"),])),]
+      #throw out all those with instperstudent above 40K 
+        tooBig = relVarsNoPCA.dat[relVarsNoPCA.dat$instperstudent2>=40000,]$pubid_anon
+        relVarsNoPCA.dat= relVarsNoPCA.dat[!relVarsNoPCA.dat$pubid_anon %in% tooBig,]
+      #test if these help model--no
+        #tooBig = relVarsNoPCA.dat[relVarsNoPCA.dat$instperstudent2>=20000,]$pubid_anon
+        #relVarsNoPCA.dat= relVarsNoPCA.dat[!relVarsNoPCA.dat$pubid_anon %in% tooBig,]
+        #tooBig = relVarsNoPCA.dat[relVarsNoPCA.dat$tuioutlist>=32000,]$pubid_anon
+        #relVarsNoPCA.dat= relVarsNoPCA.dat[!relVarsNoPCA.dat$pubid_anon %in% tooBig,]
     #tuioutlist 
       #locate
         relVarsPCA.dat$pubid_anon[which.max(relVarsPCA.dat[,c("tuioutlist"),])]
@@ -488,6 +501,12 @@
     clogit.noPCA2.mod = clogit(attendedIndicator~tuioutlist+finaidwstatedisc+gradrate+instperstudent2+selectdiffInt+strata(pubid_anon),relVarsNoPCA.dat)
     ll = clogit.noPCA2.mod$loglik #first entry is intercept-only model, second is full model
     McFR2= 1-ll[2]/ll[1]
+    #all
+      mclogit.all.mod = mclogit(lhsNoPCA~tuioutlist+finaidwstatedisc+gradrate+instperstudent2+selectdiffInt + distance,data=relVarsNoPCA.dat, model = TRUE, )
+      clogit.all.mod = clogit(attendedIndicator~distance + tuioutlist+finaidwstatedisc+gradrate+instperstudent2+selectdiffInt+strata(pubid_anon),relVarsNoPCA.dat)
+        ll = clogit.all.mod$loglik #first entry is intercept-only model, second is full model
+        McFR2= 1-ll[2]/ll[1]
+    
     #add interactions
       #relVarsNoPCA.dat$value = relVarsNoPCA.dat$realtui2*relVarsNoPCA.dat$tuioutlist
       #relVarsNoPCA.dat$realtui = relVarsNoPCA.dat$tuioutlist - relVarsNoPCA.dat$finaidwstatedisc
@@ -526,6 +545,27 @@
       clogit.noPCA2HO.mod = clogit(attendedIndicator~finaidwstatedisc/tuioutlist+tuioutlist+finaidwstatedisc+gradrate+instperstudent2+selectdiffInt+strata(pubid_anon),relVarsNoPCA.dat)
       ll = clogit.noPCA2HO.mod$loglik #first entry is intercept-only model, second is full model
         McFR2= 1-ll[2]/ll[1]
+  #check outliers on 0 side seen in plot
+    #starting model is : mclogit.noPCA2Int.mod = mclogit(lhsNoPCA~tuioutlist+finaidwstatedisc2+gradrate+instperstudent2+selectdiffInt,data=relVarsNoPCA.dat, model = TRUE, )
+    #predicted probabilities
+      predPCA= predict(clogit.noPCA2Int.mod, type = "expected")
+      myRes = predPCA-relVarsNoPCA.dat$attendedIndicator
+      theirRes = residuals(mclogit.noPCA2Int.mod)
+      outData = data.frame(myRes = myRes, theirRes = theirRes, id = relVarsNoPCA.dat$pubid_anon, attend = relVarsNoPCA.dat$attendedIndicator)
+      #write.csv(outData, "C:/Users/Katharina/Documents/Umich/lifecycle choice/data/test.csv")
+    noOuts.dat = relVarsNoPCA.dat[abs(myRes) <.6,]  
+    lhsNoOuts = matrix(c(noOuts.dat$attendedIndicator, noOuts.dat$pubid_anon), nrow(noOuts.dat), 2)
+    mclogit.noOuts.mod = mclogit(lhsNoOuts~tuioutlist+finaidwstatedisc+gradrate+instperstudent2+selectdiffInt,data=noOuts.dat, model = TRUE, )
+    clogit.noOuts.mod = clogit(attendedIndicator~tuioutlist+finaidwstatedisc+gradrate+instperstudent2+selectdiffInt+strata(pubid_anon),noOuts.dat)
+      ll = clogit.noOuts.mod$loglik #first entry is intercept-only model, second is full model
+      McFR2= 1-ll[2]/ll[1]
+    #influence plot
+      influencePlot(mclogit.noPCA2Int.mod,   id.method="identify", main="Influence Plot", sub="Circle size is proportial to Cook's Distance" )
+#Dfbetas = change in the estimated coefficients divided by its SE. 
+#Dffits = change in the fitted value divided by its SE. 
+#Cook's distance = standardized sum of squares of change in all fitted values. 
+#covratio = change in covariance matrix of the estimates. 
+#Most of these can be obtained in R using influence.measures(fit), where fit contains the glm fit.
 
 #model diagnostics=====================================================================
   clogit.noPCA.mod = clogit.noPCA2Int.mod
@@ -537,7 +577,7 @@
   #count of cases classified correctly is not relevant when data is not binary
   #predicted probabilities
     predPCA= predict(clogit.PCA.mod, type = "expected") #this should maybe be lp or risk type, TBD
-    predNoPCA= predict(clogit.noPCA.mod, type = "expected")
+predPCA= predict(clogit.PCA.mod, type = "expected")
   #residuals
     resPCA=residuals(clogit.PCA.mod)
     resNoPCA=residuals(clogit.noPCA.mod)
@@ -604,3 +644,23 @@
     # Influence Plot 
     influencePlot(mclogit.tiny.mod,   id.method="identify", main="Influence Plot", sub="Circle size is proportial to Cook's Distance" )
 
+#other predictors for testing        
+#testProbslp= predict(clogit2.mod, type = "lp") #should be equivalent in normal data
+#testProbsrisk= predict(clogit2.mod, type = "risk")
+#testProbsexpected= predict(clogit2.mod, type = "expected")
+#testProbsterms= predict(clogit2.mod, type = "expected")
+#clogit2.mod = clogit(attendedIndicator~tuioutlist+finaidwstatedisc+gradrate+instperstudent2+selectdiffInt+strata(pubid_anon),relVarsNoPCA.dat)
+#mclogit2.mod = mclogit(lhsNoPCA~tuioutlist+finaidwstatedisc+gradrate+instperstudent2+selectdiffInt,data=relVarsNoPCA.dat, model = TRUE, )
+#test = relVarsNoPCA.dat
+#predProbs= predict(mclogit.mod, newdata = test, type = "link") #gives linear predictor as expected
+#test$predProbs = exp(predProbs)
+#sums.dat = ddply(test,~pubid_anon,summarise,probSum=sum(predProbs))
+#test = merge(x = test, y = sums.dat, by = "pubid_anon", all.x = TRUE)
+#test$prob = test$predProbs/test$probSum
+#model============================================================================
+
+#outliers
+for (i in 1:ncol(relVarsNoPCA.dat)){
+  myPlot = ggplot(data=relVarsNoPCA.dat, aes(x=attendedIndicator, y=relVarsNoPCA.dat[,i])) + geom_point()+ labs(title=colnames(relVarsNoPCA.dat)[i])
+  ggsave(paste("C:/Users/Katharina/Documents/Umich/lifecycle choice/data/plots/check", i , ".pdf", sep = ""))
+}

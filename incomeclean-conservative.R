@@ -588,7 +588,7 @@ source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulati
       coeff2CatEmploy = checkPredictionAbility2Cat(relDataEmploy)
 
 #check only if attending matters=========================================================================================
-  #create indicator for whether best school was attended
+#TBD  #create indicator for whether best school was attended
   relDataEmploy10K$attendInd = NA
   for (i in 1:nrow(relDataEmploy10K)){
     if(relDataEmploy10K$attend[i]==-10){
