@@ -19,7 +19,7 @@
   rm(list = ls())
 
 #data i/o=======================================================================
-  INCOME_DATA <- read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/INCOME_DATA.csv")
+  INCOME_DATA <- read.csv("INCOME_DATA.csv")
   #this file has a lot of the information necessary for projections;can always add needed columns from compileddata_allways.csv
 
 #set up income variables================================================================
@@ -42,7 +42,7 @@
   #note: use all available information, even if some info is missing (maps to old "NM variables")
 
   #load function for extracting incomes, syntax: data frame, indicator, main variable, secondary (refuser) variable, clarification question indicator or "None"
-    source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_getTotal.R")
+    source("fun_getTotal.R")
 
   #populate incomes 1996
     salary_96 = getTotal(INCOME_DATA, "P5_010_1997", "P5_016_1997", "P5_017_1997", "P5_011_1997", 1)
@@ -173,7 +173,7 @@
     }
 
 #add in attendance category data =============================================================
-  CATEGORY_DATA <- read.csv("C://Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/categories.csv")
+  CATEGORY_DATA <- read.csv("categories.csv")
   INCOME_DATA2 <- merge(x = CATEGORY_DATA, y = INCOME_DATA, by = "PUBID_1997", all.x = TRUE)
 
 #adjust timing of income data =======================================================================
@@ -217,7 +217,7 @@
   employVectListLabNmEmploy <- list()
 
   #read in employment data
-  EMPLOY_DATA <- read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/income/hrsworked.csv")
+  EMPLOY_DATA <- read.csv("hrsworked.csv")
   ENROLL_DATA <- merge(x = ENROLL_DATA, y = EMPLOY_DATA, by = "PUBID_1997", all.x = TRUE)
 
   #populate employment data
@@ -262,7 +262,7 @@
     }
 
   #set up vectors with 1200 hr employment restriction
-    source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_removeNotFT.R")
+    source("fun_removeNotFT.R")
     LabEmployReturn <-removeNotFT(incomeVectListLabNm, ageVectListLabNm, enrollVectListLabNm, employVectListLabNm)
     incomeVectListLabEmploy<-LabEmployReturn[[1]]
     ageVectListLabEmploy<-LabEmployReturn[[2]]
@@ -276,7 +276,7 @@
 #create vectors with filled middle values==================================================================
   #note: if lower than previous, set to previous, and remove entries < 10000
 
-source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_fillMissingMiddle.R")
+source("fun_fillMissingMiddle.R")
 
   LabNmReturnFilled <- fillMissingMiddle(incomeVectListLabNm, ageVectListLabNm, enrollVectListLabNm, employVectListLabNm)
   incomeVectListLabNmFilled<-LabNmReturnFilled[[1]]
@@ -293,7 +293,7 @@ source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulati
 #create employ restricted vector with 10K restriction onlys==================================================================
 #note: remove entries < 10000
 
-source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_TenKMin.R")
+source("fun_TenKMin.R")
 
 LabEmployReturn10K <-TenKMin(incomeVectListLabEmploy, ageVectListLabEmploy, enrollVectListLabEmploy, employVectListLabEmploy)
 incomeVectListLabEmploy10K<-LabEmployReturn10K[[1]]
@@ -302,7 +302,7 @@ enrollVectListLabEmploy10K<-LabEmployReturn10K[[3]]
 employVectListLabEmploy10K<- LabEmployReturn10K[[4]]
 
 #createLabEmploy10K vector starting at age 21
-source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_from21.R")
+source("fun_from21.R")
   Income21 <-from21(incomeVectListLabEmploy10K, ageVectListLabEmploy10K, enrollVectListLabEmploy10K, employVectListLabEmploy10K)
   incomeVectList21 <-Income21[[1]]
   ageVectList21 <-Income21[[2]]
@@ -318,7 +318,7 @@ source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulati
     a = 2234.3  
 
   #project
-    source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_projectIncomes.R")
+    source("fun_projectIncomes.R")
       outListLabNm <- projectIncomes(ageVectListLabNm, incomeVectListLabNm, enrollVectListLabNm, "NmNoFill")
         coeffVectLabNm<- outListLabNm[[1]]
         outMatrixLabNm<- outListLabNm[[2]]
@@ -376,8 +376,8 @@ source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulati
 
   #do check for each data set type
     #this check now excludes entries where b0 is out of range
-    source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_checkPredictionAbility.R")
-    source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/multiplot.R")
+    source("fun_checkPredictionAbility.R")
+    source("multiplot.R")
     coeffNmFilled = checkPredictionAbility(ENROLL_DATA$b0NmFilled, "b0NmFillMiddle")
     coeffEmployFilled = checkPredictionAbility(ENROLL_DATA$b0EmployFilled, "b0EmployFillMiddle")
     coeffNm = checkPredictionAbility(ENROLL_DATA$b0Nm, "b0NmNoFill")
@@ -391,11 +391,11 @@ source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulati
 #get dataset of only relevant variables==============================================================================
   #transformed and with category and b0 information, for later use
   #note only done for relevant method here. This is true from now on in this file. 
-  source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_getRelevantData.R")
+  source("fun_getRelevantData.R")
   relDataEmploy10K = getRelevantData(outMatrixLabEmploy10K, coeffVectLabEmploy10K[1])
-  write.csv(relDataEmploy10K, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/relevantOnly.csv")
+  write.csv(relDataEmploy10K, "relevantOnly.csv")
   relDataEmploy = getRelevantData(outMatrixLabEmploy, coeffVectLabEmploy[1])
-  write.csv(relDataEmploy, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/relevantOnlyEmploy.csv")
+  write.csv(relDataEmploy, "relevantOnlyEmploy.csv")
   relData21 = getRelevantData(outMatrix21, coeffVect21[[1]])
 
   #relDataEmploy10KGrad = getRelevantData(outMatrixLabEmploy10KGrad, coeffVectLabEmploy10KGrad[1])
@@ -435,15 +435,16 @@ source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulati
         ggsave(file = "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/Curve fitting/Plots/AdmitPlot.pdf")
 
   #check the importance of admission versus attendance
-    source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_compareAdmitAttend.R")
+    source("fun_compareAdmitAttend.R")
     intDataEmploy10K = compareAdmitAttend(relDataEmploy10K) #returns interval data
 
 #check for differences in salary by admission/attendance using interval/erros===============================
-  source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_checkPredictionAbilityInterval.R")
-  source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_checkPredictionAbilityIntervalErrors.R")
-  #source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/multiplot.R")
+  source("fun_checkPredictionAbilityInterval.R")
+  source("fun_checkPredictionAbilityIntervalErrors.R")
+  #source(multiplot.R")
   checkPredictionAbilityInterval(intDataEmploy10K, "employ10K")
   #checkPredictionAbilityIntervalErrors(intDataEmploy10K, "employ10K")
+  AllFactor =lm(b0~factor(attend2 +factor(collgrad) + factor(major2)+ factor(collgrad) + satm +satv , data=na.exclude(intDataEmploy10K))
 
 #check if graduation predicts b0==========================================================================
   relDataEmploy2= relDataEmploy[,c("graduated", "b0", "admit")]
@@ -459,13 +460,13 @@ source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulati
   #best strategy is NmEmploy10K
 
   #read in other relevant predictor information
-    INCOME_PREDS<- read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/incomepredictors.csv")
+    INCOME_PREDS<- read.csv("inputs/incomepredictors.csv")
     ENROLL_DATA2<- merge(x = ENROLL_DATA, y = INCOME_PREDS, by = "PUBID_1997", all.x = TRUE)
-    COLLEGE_NUM<- read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/collegenumber.csv")
+    COLLEGE_NUM<- read.csv("inputs/collegenumber.csv")
     ENROLL_DATA2<- merge(x = ENROLL_DATA2, y = COLLEGE_NUM, by = "PUBID_1997", all.x = TRUE)
-    LOC_DATA <- read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/desensitizedloc.csv")
+    LOC_DATA <- read.csv("inputs/desensitizedloc.csv")
     ENROLL_DATA2<- merge(x = ENROLL_DATA2, y = LOC_DATA, by = "PUBID_1997", all.x = TRUE)
-    SIC_DATA <- read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/sic.csv")
+    SIC_DATA <- read.csv("inputs/sic.csv")
     ENROLL_DATA2<- merge(x = ENROLL_DATA2, y = SIC_DATA, by = "PUBID_1997", all.x = TRUE)
     ENROLL_DATA<-ENROLL_DATA2
 
@@ -475,7 +476,7 @@ source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulati
     #GRADES gives highschool grades
     #COLLEGECOMPLETED says whether college has been completed; those still enrolled in original college have a value of -3
     #MAJOR2 is a categorical variable of majors
-    source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_fillIncomePredictors.R")
+    source("fun_fillIncomePredictors.R")
     PREDICT_DATA = fillIncomePredictors(ENROLL_DATA)
 
   #create prediction datasets (only for Employ10K here)
@@ -504,7 +505,7 @@ source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulati
     summary(SATMod) #math highly significant
 
   #run complete model
-    AllFactor =lm(b0~factor(cat) +factor(collgrad) + factor(major2)+ factor(collgrad) + satm +satv , data=na.exclude(b0ProjectData))
+    AllFactor =lm(b0~factor(attend) +factor(collgrad) + factor(major2)+ factor(collgrad) + satm +satv , data=na.exclude(b0ProjectData))
     summary(AllFactor)
   
   #save image
@@ -599,8 +600,17 @@ source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulati
   }
   
   #run checkPredictionAbility using this indicator
-  source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_checkPredictionAbilityAttendOnly.R")
+  source("fun_checkPredictionAbilityAttendOnly.R")
   coeffAttendOnlyEmploy10K = checkPredictionAbilityAttendOnly(relDataEmploy10K)
+
+  #make sure there is a difference in salary by admissions category
+    attenders = relDataEmploy10K[relDataEmploy10K$attendInd == 1,]
+    nonattenders = relDataEmploy10K[relDataEmploy10K$attendInd == 0,]
+    anova(lm(b0~factor(admit), data = attenders))
+    anova(lm(b0~factor(admit), data = nonattenders)) #seems there is no difference in nonattenders
+    pairwise.t.test(attenders$b0, factor(attenders$admit), p.adj = "none")
+    pairwise.t.test(nonattenders$b0, factor(nonattenders$admit), p.adj = "none")
+    qplot(factor(attenders), b0, data = na.exclude(attenders), notch= TRUE, geom = "boxplot", position = "dodge")+theme_bw()
 
   #create indicator for whether best school was attended
   relDataEmploy$attendInd = NA
@@ -627,7 +637,7 @@ source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulati
     }
   
   #run checkPredictionAbility using this indicator
-    source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_checkPredictionAbilityAttendOnly.R")
+    source("fun_checkPredictionAbilityAttendOnly.R")
     coeffAttendOnlyEmploy = checkPredictionAbilityAttendOnly(relDataEmploy)
 
   #create indicator for whether a school was attended
@@ -652,7 +662,7 @@ source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulati
     relData21Atts = relData21[relData21$attendInd==1,]
     
   #run checkPredictionAbility using this indicator
-  source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_checkPredictionAbilityAttendCats.R")
+  source("fun_checkPredictionAbilityAttendCats.R")
   coeffAttendCatsEmploy10K = checkPredictionAbilityAttendCats(relDataEmploy10KAtts)
   coeffAttendCatsEmploy = checkPredictionAbilityAttendCats(relDataEmployAtts)
   coeffAttendOnly21 = checkPredictionAbilityAttendCats(relData21Atts)

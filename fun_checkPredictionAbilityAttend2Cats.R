@@ -36,10 +36,10 @@ checkPredictionAbilityAttend2Cats<- function(inputDataset){
     }
     byAdmitCoeffVect[i,6]= curCount
   }
-  outFile <- paste("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/byAdmit2cat.csv", sep = "")
+  outFile <- paste("byAdmit2cat.csv", sep = "")
   write.csv(byAdmitCoeffVect, outFile)
-  multiplot(plotlist = plotList, cols=2, file = "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/outPlot2cat.pdf")
-  dev.copy(pdf,paste("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/outplot2cat", nameString, ".pdf", sep = ""))
+  multiplot(plotlist = plotList, cols=2, file = "outPlot2cat.pdf")
+  dev.copy(pdf,paste("outplot2cat", nameString, ".pdf", sep = ""))
   dev.off()
   
   return(coeffList)

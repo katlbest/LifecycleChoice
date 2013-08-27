@@ -19,7 +19,7 @@
   rm(list = ls())
   
 #data i/o ==========================================================================
-  choice.dat = read.csv("D:choiceinput2.csv")
+  choice.dat = read.csv("/Volumes/NO NAME/choiceinput2.csv")
   #delete schools with selectivity 7--people make these decisions differently
   choice.dat = choice.dat[choice.dat$selectivity != 7,]
   #dataset with NAs coded correctly
@@ -101,7 +101,7 @@
       b = 36241
       n =  -0.2445
       a = 2234.3
-      source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_getNS.R")
+      source("fun_getNS.R")
       na.dat$lifeEarnings = NA
       for (i in 1:nrow(na.dat)){
         if(na.dat$Attend[i]==-10){#did not attned school so begin earning at 18
@@ -127,7 +127,7 @@
 
 #Anonymized data===============================================================
   #read anon data
-    anon.dat = read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Choice Model Inputs/anon_data2.csv", stringsAsFactors=FALSE)
+    anon.dat = read.csv("inputs/anon_data2.csv", stringsAsFactors=FALSE)
     #lapply(anon.dat, class) 
   #drop nonsensical observation
     #anon.dat = anon.dat[anon.dat$school_anon != 24873,]

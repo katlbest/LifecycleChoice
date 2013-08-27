@@ -7,7 +7,7 @@
   #lookuptype chooses which scale to use in order to change categorical variables to values
 
 getTotal <- function(data, indicator, mainvar, secondvar, clarify, lookupType) { 
-  source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_lookupCategory.R")
+  source("fun_lookupCategory.R")
   totalVect <- rep(0, nrow(data))
   for (j in 1:nrow(data)){
     #if indicator is positive

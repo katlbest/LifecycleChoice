@@ -19,14 +19,14 @@
 
 #clear workspace ===================================================================
   rm(list = ls())
-  load("finalmodels.RData")
+  load("inputs/finalmodels.RData")
 
 #data i/o ==========================================================================
-  attend.dat = read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Choice Model Inputs/anon_attend.csv", stringsAsFactors=FALSE)
+  attend.dat = read.csv("inputs/anon_attend.csv", stringsAsFactors=FALSE)
     #this is out.df from choiceModel.R with some variable choice modifications, anonimized
     #keep only relevant columns
       attend.dat = attend.dat[,c("pubid_anon","school_anon","Admit","Attend","b0","KEYSEX_1997","KEYRACE_ETHNICITY_1997","SAT_MATH","SAT_VERBAL","MAJOR2","DAD_ED","MOM_ED","HH_SIZE","HH_INCOME","URBAN_RURAL","SCHOOL_TYPE","AttendedIndicator","AIDALLSCHOOL","SATDiff","tuiin","tuiout","tuiinlist","sat25","sat75","urbanrural","lifeEarnings")]
-  merge.dat = read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Choice Model Inputs/anon_dat_mergedata2.csv")
+  merge.dat = read.csv("inputs/anon_dat_mergedata2.csv")
   #merge
     attend.dat$id = paste(attend.dat$pubid_anon, attend.dat$school_anon)
     merge.dat$id = paste(merge.dat$pubid_anon, merge.dat$school_anon)
@@ -112,8 +112,10 @@
     model.dat$SCHOOL_TYPE= as.factor(model.dat$SCHOOL_TYPE)
   
   #fix lifetime earnings
-    b0NoAttendVect = c(-192515.8851,-140025.3721,-182087.547,-171195.9979) #b0 coefficients for categories 1,2,3,4,5 if attened
-    b0AttendVect = c(-276972.9751,-281219.0721,-230315.227,-214659.9479) #b0 coefficients for categories 1,2,3,4,5 if not attended
+    #b0NoAttendVect = c(-192515.8851,-140025.3721,-182087.547,-171195.9979) #b0 coefficients for categories 1,2,3,4,5 if attened
+    #b0AttendVect = c(-276972.9751,-281219.0721,-230315.227,-214659.9479) #b0 coefficients for categories 1,2,3,4,5 if not attended
+    b0AttendVect= c(-279411.3, -279411.3,-217284.7, -217284.7)
+    b0NoAttendVect = rep(-177856.4, 4)
     attendEarn = rep(NA, 4)
     nonAttendEarn = rep(NA,4)
     earnDiff = c(rep(NA, 4), 0) #the difference for the worst attendance category is 0
@@ -122,7 +124,7 @@
     b = 36241
     n =  -0.2445
     a = 2234.3
-    source("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Data manipulation/fun_getNS.R")
+    source("fun_getNS.R")
     for (i in 1:4){
       attendEarn[i] = getNS(tau, m, b, n, a, b0AttendVect[i], 1) #earnings start at age 22
       nonAttendEarn[i] = getNS(tau, m, b, n, a,b0NoAttendVect[i], 0) #earnings start at age 18
@@ -155,7 +157,7 @@
     input.dat = na.exclude(input.dat)
     #predSchoolVal= predict(mclogit.mod, newdata = input.dat, type = "link") #gives linear predictor as expected
     #input.dat$predSchoolVal= exp(predSchoolVal)
-    reduced.mod =glm(attendedIndicator ~ KEYSEX_1997+earnDiff, data = input.dat, family = "binomial")
+    reduced.mod =glm(attendedIndicator ~ KEYSEX_1997+earnDiff+ gradrate, data = input.dat, family = "binomial")
     #reduced.mod =glm(attendedIndicator ~ KEYSEX_1997+earnDiff+predSchoolVal, data = input.dat, family = "binomial")
       pR2(reduced.mod)
   #BTL
