@@ -602,6 +602,10 @@ source("fun_from21.R")
   #run checkPredictionAbility using this indicator
   source("fun_checkPredictionAbilityAttendOnly.R")
   coeffAttendOnlyEmploy10K = checkPredictionAbilityAttendOnly(relDataEmploy10K)
+  
+  se <- function(data) {
+    sqrt(var(data)/length(data))
+  }
 
   #make sure there is a difference in salary by admissions category
     attenders = relDataEmploy10K[relDataEmploy10K$attendInd == 1,]
@@ -611,8 +615,25 @@ source("fun_from21.R")
     pairwise.t.test(attenders$b0, factor(attenders$admit), p.adj = "none")
     pairwise.t.test(nonattenders$b0, factor(nonattenders$admit), p.adj = "none")
     qplot(factor(attenders), b0, data = na.exclude(attenders), notch= TRUE, geom = "boxplot", position = "dodge")+theme_bw()
+    aggregate(attenders$b0, list(gp=attenders$admit), mean)
+    means = data.frame(admit = c("1","2","3","4","5/6"),
+                       attend = -aggregate(attenders$b0, list(gp=attenders$admit), mean)$x,
+                       attendse = aggregate(attenders$b0, list(gp=attenders$admit), se)$x,
+                       nonattend = -aggregate(nonattenders$b0, list(gp=nonattenders$admit), mean)$x,
+                       nonattendse = aggregate(nonattenders$b0, list(gp=nonattenders$admit), se)$x)
+    means = within(means, {
+      diff <- attend - nonattend
+      diffse <- sqrt(attendse^2 + nonattendse^2)
+    })
+    ggplot(means, aes(x=admit, y=diff)) + geom_bar(stat='identity', fill = 'grey') +
+        geom_errorbar(aes(ymin=diff - diffse*1.96, ymax = diff+diffse*1.96))+theme_bw()+xlab("Selectivity of the top school admitted to") +ylab(expression(paste("Difference in ",beta[0],", (attenders)-(non-attenders)"))) +theme(panel.grid.major=element_blank(),panel.grid.minor=element_blank(), text = element_text(size=20))
 
-  #create indicator for whether best school was attended
+    ggplot(means, aes(x=admit, y=attend)) + geom_bar(stat='identity', fill = 'grey') +
+        geom_errorbar(aes(ymin=attend - attendse*1.96, ymax = attend+attendse*1.96))+theme_bw()+xlab("Selectivity of the top school admitted to") +ylab(expression(paste("Average ",beta[0]," for attenders")))+theme(panel.grid.major=element_blank(),panel.grid.minor=element_blank(), text = element_text(size=20))
+    
+                
+
+#create indicator for whether best school was attended
   relDataEmploy$attendInd = NA
   for (i in 1:nrow(relDataEmploy)){
     if(relDataEmploy$attend[i]==-10){

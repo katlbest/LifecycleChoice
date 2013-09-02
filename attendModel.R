@@ -155,11 +155,26 @@
     #input.dat = model.dat[,c("gradrate", "earnDiff","KEYSEX_1997", "attendedIndicator","tuioutlist", "finaidwstatedisc2","instperstudent2","selectdiffInt")]
     input.dat = model.dat[,c("gradrate", "earnDiff","KEYSEX_1997", "attendedIndicator", "b0")]
     input.dat = na.exclude(input.dat)
-    #predSchoolVal= predict(mclogit.mod, newdata = input.dat, type = "link") #gives linear predictor as expected
+    #predSchoolVƒal= predict(mclogit.mod, newdata = input.dat, type = "link") #gives linear predictor as expected
     #input.dat$predSchoolVal= exp(predSchoolVal)
     reduced.mod =glm(attendedIndicator ~ KEYSEX_1997+earnDiff+ gradrate, data = input.dat, family = "binomial")
     #reduced.mod =glm(attendedIndicator ~ KEYSEX_1997+earnDiff+predSchoolVal, data = input.dat, family = "binomial")
       pR2(reduced.mod)
+  #ok but now earnDiff doesn't matter, replace it with top school admitted
+    input.dat = model.dat[,c("gradrate", "Admit","KEYSEX_1997", "attendedIndicator", "b0")]
+    input.dat = na.exclude(input.dat)
+    reduced.mod =glm(attendedIndicator ~ KEYSEX_1997+factor(Admit)+ gradrate, data = input.dat, family = "binomial")
+    pR2(reduced.mod)
+    #use interval data
+      input.dat$admitInt = NA
+      input.dat$Admit = as.numeric(input.dat$Admit)
+      lookup = data.frame(id = c(1,2,3,4,5), percent = c(33, 60, 75, 85, 100))
+      for (i in 1:nrow(input.dat)){
+        input.dat$admitInt[i] = lookup[(1:dim(lookup)[1])[lookup[,1]==input.dat$Admit[i]],2]
+      }
+    reduced.mod =glm(attendedIndicator ~ KEYSEX_1997+admitInt+ gradrate, data = input.dat, family = "binomial")
+    pR2(reduced.mod)
+
   #BTL
     input.dat = model.dat[,c("attendedIndicator","tuioutlist", "distance","instperstudent2")]
     input.dat = na.exclude(input.dat)

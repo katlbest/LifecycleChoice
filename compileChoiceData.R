@@ -74,7 +74,6 @@
         }
       #high school type
         schoolTypeVar = paste("NEWSCH_TYPE_.ROS_ITEM._L1_", toString(CHOICE_DATA$CHOICE_YEAR[i]), sep = "")
-        if(schoolTypeVar %in% colnames(MANIP_DATA)){
           if(MANIP_DATA[i,schoolTypeVar]>0){
             CHOICE_DATA$SCHOOL_TYPE[i]= MANIP_DATA[i, schoolTypeVar]
           }else{
