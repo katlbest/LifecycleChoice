@@ -225,4 +225,24 @@ library(ggplot2)
         #geom_errorbar(aes(ymin=avgIncb - avgIncbse*1.96, ymax = avgIncb+avgIncbse*1.96))+theme_bw()+xlab("Selectivity of school attended") +ylab("Average post-college income") +theme(panel.grid.major=element_blank(),panel.grid.minor=element_blank(), text = element_text(size=20))
 
       #regression
+        #ignore non-attenders
+          plotdata_reg= plotdata[plotdata$attend != "none",]
+        #add "conditional" tag
+          plotdata_reg$conditional=1
+          plotdata_reg[plotdata_reg$type == 0,]$conditional = 0
+        #regressions
+          plotdata_reg$attend = as.numeric(plotdata_reg$attend)
+          byattend_reg=lm(avgIncb~attend+as.factor(type)+I(attend*conditional), data= plotdata_reg)
+          lapply(plotdata_reg, class)
+          byattend_noncon_reg = lm(avgIncb~attend, data = plotdata_reg[plotdata_reg$conditional == 0,])
+          byattend_con_reg = lm(avgIncb~attend, data = plotdata_reg[plotdata_reg$conditional == 1,])
+        #add conditional tag and regressions for by admit
+          plotdata_admit$conditional=1
+          plotdata_admit[plotdata_admit$type == 0,]$conditional = 0
+          plotdata_admit$admit = as.numeric(plotdata_admit$admit)
+          byadmit_reg=lm(avgIncb~admit+I(admit*conditional), data= plotdata_admit)
+          byadmit_reg=lm(avgIncb~admit+as.factor(type)+I(admit*conditional), data= plotdata_admit)
+          lapply(plotdata_reg, class)
+          byadmit_noncon_reg = lm(avgIncb~admit, data= plotdata_admit[plotdata_admit$conditional == 0,])
+          byadmit_con_reg = lm(avgIncb~admit, data= plotdata_admit[plotdata_admit$conditional == 1,])
 
