@@ -7,13 +7,13 @@ checkPredictionAbilityAttendOnly<- function(inputDataset){
   coeffList = list()
   plotList= list()
   for (i in 1:length(admit_cats)){
-    curData = inputDataset[inputDataset$admit==admit_cats[i],c("admit", "attend", "b0", "attendInd")]
+    curData = inputDataset[inputDataset$admit==admit_cats[i],c("admit", "attend", "avgb", "attendInd")]
     curCount = nrow(curData)
     if (curCount >0){
       numCoeffs <- length(levels(factor(curData$attendInd)))
       if (numCoeffs >1 & curCount > numCoeffs){
-        curData<-curData[c("b0", "attendInd")]
-        curModel = lm(b0~factor(attendInd), data = curData)
+        curData<-curData[c("avgb", "attendInd")]
+        curModel = lm(avgb~factor(attendInd), data = curData)
         numCoeffs <- length(curModel$coefficients)
         for (j in 1:numCoeffs){
           byAdmitCoeffVect[i,j]= curModel$coefficients[j]
@@ -28,20 +28,20 @@ checkPredictionAbilityAttendOnly<- function(inputDataset){
         curCoeffs$lb = curCoeffs$mean - curCoeffs$se 
         curCoeffs$ub= curCoeffs$mean + curCoeffs$se
         coeffList[[i]]=curCoeffs
-        curPlot = qplot(factor(attendInd), b0, data = na.exclude(curData), notch= TRUE, geom = "boxplot", position = "dodge")+theme_bw()+ labs(title =paste("Best admitted = ", admit_cats[i], sep=""))
-        plotList[[length(plotList)+1]]= curPlot
+        #curPlot = qplot(factor(attendInd), b0, data = na.exclude(curData), notch= TRUE, geom = "boxplot", position = "dodge")+theme_bw()+ labs(title =paste("Best admitted = ", admit_cats[i], sep=""))
+        #plotList[[length(plotList)+1]]= curPlot
       } 
     } else{
       coeffList[[i]]= NA 
     }
     byAdmitCoeffVect[i,6]= curCount
   }
-  outFile <- paste("byAdmitcatAttendOnly.csv", sep = "")
-  write.csv(byAdmitCoeffVect, outFile)
-  multiplot(plotlist = plotList, cols=2, file = "outPlotAttendOnly.pdf")
-  nameString = "attendercheck"
-  dev.copy(pdf,paste("outplotAttendOnly", nameString, ".pdf", sep = ""))
-  dev.off()
+  #outFile <- paste("byAdmitcatAttendOnly.csv", sep = "")
+  #write.csv(byAdmitCoeffVect, outFile)
+  #multiplot(plotlist = plotList, cols=2, file = "outPlotAttendOnly.pdf")
+  #nameString = "attendercheck"
+  #dev.copy(pdf,paste("outplotAttendOnly", nameString, ".pdf", sep = ""))
+  #dev.off()
   
   return(coeffList)
 }

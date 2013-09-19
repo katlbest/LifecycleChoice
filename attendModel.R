@@ -174,6 +174,17 @@
       }
     reduced.mod =glm(attendedIndicator ~ KEYSEX_1997+admitInt+ gradrate, data = input.dat, family = "binomial")
     pR2(reduced.mod)
+    #replace graduation rate with other candidates
+      input.dat = model.dat[,c("gradrate", "Admit","KEYSEX_1997", "attendedIndicator", "b0", "totstudents2", "fedgrantp", "avgsal", "selectInt")]
+      #use interval data
+      input.dat$admitInt = NA
+      input.dat$Admit = as.numeric(input.dat$Admit)
+      lookup = data.frame(id = c(1,2,3,4,5), percent = c(33, 60, 75, 85, 100))
+      for (i in 1:nrow(input.dat)){
+        input.dat$admitInt[i] = lookup[(1:dim(lookup)[1])[lookup[,1]==input.dat$Admit[i]],2]
+      }
+      reduced.mod =glm(attendedIndicator ~ KEYSEX_1997+admitInt+ selectInt, data = input.dat, family = "binomial")
+      pR2(reduced.mod)
 
   #BTL
     input.dat = model.dat[,c("attendedIndicator","tuioutlist", "distance","instperstudent2")]

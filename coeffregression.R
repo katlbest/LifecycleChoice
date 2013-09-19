@@ -1,7 +1,7 @@
 library(ggplot2)
 library(plyr)
 
-ENROLL_DATA<-read.csv("C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Income/compileddata-allways.csv")
+ENROLL_DATA<-read.csv("inputs/compileddata-allways.csv")
 
 #read in relevant predictors=================================================
 #NOTE: SHOULDNT HAVE TO RUN THIS IF READING IN FROM ABOVE
@@ -301,7 +301,12 @@ AttendMod <- lm(b0~ factor(attend), data=na.exclude(b010KEmpProjectData))
   admit_cats <- c(1,2, 3, 4, 6, 7)
   attend_cats <- c(-3,1,2, 3, 4, 6, 7)
 
+
+#TODO this is probably table 4
+admit_cats <- c(1,2, 3, 4, 6)
+attend_cats <- c(-10,1,2, 3, 4, 6)
 #get by admission
+  b010KProjectData$PUBID_1997 = ENROLL_DATA$PUBID_1997
   byAdmitCoeffVect = data.frame(matrix(ncol = 15, nrow = length(admit_cats)))
   colnames(byAdmitCoeffVect)=c("intercept","1", "2", "3", "4", "6", "intsig", "1sig", "2sig", "3sig", "4sig", "6sig","R2", "NumObservations", "levels")
   b010KProjectData[is.na(b010KProjectData)] <- -3

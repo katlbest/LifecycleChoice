@@ -387,7 +387,7 @@ source("fun_from21.R")
     #coeffEmployGrad = checkPredictionAbility(ENROLL_DATA$b0EmployGrad, "b0EmployNoFillGrad") 
       #this blows up because we do not have any -3 entries
   
-
+#todo try running from here and re-do everything
 #get dataset of only relevant variables==============================================================================
   #transformed and with category and b0 information, for later use
   #note only done for relevant method here. This is true from now on in this file. 
@@ -456,6 +456,7 @@ source("fun_from21.R")
     print(summary(curGradMod))
   }
 
+#todo test for other variables and maybe robustness checks here
 #investigate getting stronger predictor using best strategy and other variables==========================
   #best strategy is NmEmploy10K
 

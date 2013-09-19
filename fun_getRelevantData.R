@@ -16,9 +16,9 @@ getRelevantData<- function(inData, inb0){
   transData$b0 = inb0
   
   #remove those with out of range values
-    b0Min = -500000 #upper limit of about 140K top salary
-    b0Max = -100 #lower limit of about 12K top salary
-    transData = transData[transData$b0 >= -500000 & transData$b0 <= -100,]
+    #b0Min = -500000 #upper limit of about 140K top salary
+    #b0Max = -100 #lower limit of about 12K top salary
+    #transData = transData[transData$b0 >= -500000 & transData$b0 <= -100,]
   
   #remove those with category 7
     transData[transData$attend == 7,]$cat <- -3

@@ -213,7 +213,39 @@
     #write.csv(relVars.dat, "C:/Users/Katharina/Documents/Umich/Lifecycle Choice/Data/Choice Model Inputs/anon_dat_mergedata.csv")
   #test dataset excluding na's and make categoricals
     noNA.dat = na.exclude(relVars.dat)
-      
+
+#Do final model here, blurgh=====================================================================================
+  relVarsRed.dat = relVars.dat[,c("pubid_anon", "school_anon","attendedIndicator","realtui2","gradrate","selectdiffInt","fedgrantp", "instperstudent2")]
+  #remove NAs for now
+    noNARed.dat = na.exclude(relVarsRed.dat)
+    relVarsNoPCA.dat = noNARed.dat
+  #remove outliers
+    #instperstudent
+      #locate
+        #relVarsNoPCA.dat$pubid_anon[which.max(relVarsNoPCA.dat[,c("instperstudent2"),])]
+      #remove
+        #relVarsNoPCA.dat = relVarsNoPCA.dat[-(which.max(relVarsNoPCA.dat[,c("instperstudent2"),])),]
+      #throw out all those with instperstudent above 40K 
+        #tooBig = relVarsNoPCA.dat[relVarsNoPCA.dat$instperstudent2>=40000,]$pubid_anon
+        #relVarsNoPCA.dat= relVarsNoPCA.dat[!relVarsNoPCA.dat$pubid_anon %in% tooBig,]
+    #delete those without an attended school or with only a single data point again
+        #delete without attended school
+        sumNoPCA.dat= ddply(relVarsNoPCA.dat,~pubid_anon,summarise,sum=sum(attendedIndicator))
+        relVarsNoPCA.dat = merge(x = relVarsNoPCA.dat, y = sumNoPCA.dat, by = "pubid_anon", all.x = TRUE)
+        relVarsNoPCA.dat = relVarsNoPCA.dat[relVarsNoPCA.dat$sum>0,]
+      #delete with only single entry
+        frequencyNoPCA.dat = data.frame(freq(ordered(relVarsNoPCA.dat$pubid_anon), plot=FALSE))
+        frequencyNoPCA.dat$pubid_anon= rownames(frequencyNoPCA.dat)
+        relVarsNoPCA.dat = merge(x = relVarsNoPCA.dat, y = frequencyNoPCA.dat, by = "pubid_anon", all.x = TRUE)
+        relVarsNoPCA.dat = relVarsNoPCA.dat[relVarsNoPCA.dat$Frequency>1,]
+  #run model
+    lhsNoPCA = matrix(c(relVarsNoPCA.dat$attendedIndicator, relVarsNoPCA.dat$pubid_anon), nrow(relVarsNoPCA.dat), 2)
+    mclogit.final.mod = mclogit(lhsNoPCA~realtui2+fedgrantp+instperstudent2+selectdiffInt,data=relVarsNoPCA.dat, model = TRUE, )
+    clogit.final.mod = clogit(attendedIndicator~realtui2+fedgrantp+instperstudent2+selectdiffInt +strata(pubid_anon), data=relVarsNoPCA.dat)
+    clogit.final.mod = clogit(attendedIndicator~realtui2+instperstudent2+selectdiffInt+strata(pubid_anon), data=relVarsNoPCA.dat)
+    ll = clogit.final.mod$loglik
+    McFR2= 1-ll[2]/ll[1]
+
 #Investigating degeneracy and correlation===============================================================
   #plot data versus attended indicator
     for (i in 1:ncol(noNA.dat)){
@@ -387,9 +419,11 @@
 
 #run seleted models, do outlier tests===============================================================
   #reduce dataset to those needed in final models and remove NAs
-    relVarsPCA.dat = relVars.dat[,c("totstudents2", "gradrate", "fedgrantp", "selectInt", "avgsal", "pubid_anon","attendedIndicator","tuioutlist","finaidest2","instperstudent2","selectdiffInt", "finaidwstatedisc", "distance", "listminusactual", "listwfees", "realtui2", "feeout", "goodVar", "goodVar2", "finaidwstatedisc2")]
+    relVarsPCA.dat = relVars.dat[,c("totstudents2", "gradrate", "fedgrantp", "selectInt", "avgsal", "pubid_anon","attendedIndicator","realtui2","instperstudent2","selectdiffInt")]
     #fix selectivity errors
       relVarsPCA.dat[relVarsPCA.dat$selectdiffInt < 0,]$selectdiffInt =0
+
+
     PCAtest = data.frame(is.na(relVarsPCA.dat))
     PCAtest$miss=FALSE
     for (i in 1:nrow(PCAtest)){
