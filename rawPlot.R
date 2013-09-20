@@ -396,10 +396,10 @@ ggplot(plotdata_reg, aes(x=attend, y = avgIncb, color = as.factor(type))) +
       #qplot(factor(attenders), avgb, data = na.exclude(attenders), notch= TRUE, geom = "boxplot", position = "dodge")+theme_bw()
       aggregate(attenders$avgb, list(gp=attenders$admit), mean)
       means = data.frame(admit = c("1","2","3","4","5/6"),
-                         attend = aggregate(attenders$avgb, list(gp=attenders$admit), mean)$x,
-                         attendse = aggregate(attenders$avgb, list(gp=attenders$admit), se)$x,
-                         nonattend = aggregate(nonattenders$avgb, list(gp=nonattenders$admit), mean)$x,
-                         nonattendse = aggregate(nonattenders$avgb, list(gp=nonattenders$admit), se)$x)
+         attend = aggregate(attenders$avgb, list(gp=attenders$admit), mean)$x,
+         attendse = aggregate(attenders$avgb, list(gp=attenders$admit), se)$x,
+         nonattend = aggregate(nonattenders$avgb, list(gp=nonattenders$admit), mean)$x,
+         nonattendse = aggregate(nonattenders$avgb, list(gp=nonattenders$admit), se)$x)
       means = within(means, {
         diff <- attend - nonattend
         diffse <- sqrt(attendse^2 + nonattendse^2)
@@ -441,7 +441,7 @@ ggplot(plotdata_reg, aes(x=attend, y = avgIncb, color = as.factor(type))) +
   
   #check on majors====================================
     anon.dat = read.csv("personaldata.csv", stringsAsFactors=FALSE)
-    anon.dat = anon.dat[,c("pubid_anon", "MOM_ED", "HH_INCOME", "major2")]
+    anon.dat = anon.dat[,c("pubid_anon", "MOM_ED", "HH_INCOME", "major2", "major")]
     merge.dat = merge(x = inc_dat, y = anon.dat, by = "pubid_anon", all.x = TRUE)
     merge.dat$attend2 = NA
     merge.dat$admit2 = NA
@@ -452,12 +452,112 @@ ggplot(plotdata_reg, aes(x=attend, y = avgIncb, color = as.factor(type))) +
       merge.dat$admit2[i] = lookup[(1:dim(lookup)[1])[lookup[,1]==merge.dat$admit[i]],2]
     }
     #adjust major variable to be binary--1 is technical, 2 is not
-    merge.dat$major3 = NA
-    merge.dat[merge.dat$major2 %in% c(3),]$major3 = 1
-    merge.dat[merge.dat$major2 %in% c(5,2,1,4),]$major3 = 0
-    reg.dat = merge.dat[,c("pubid_anon", "HH_INCOME", "MOM_ED", "admit2", "avgb", "major3")]
+      merge.dat$major3 = NA
+      merge.dat[merge.dat$major2 %in% c(5),]$major3 = 1
+      merge.dat[merge.dat$major2 %in% c(4,1,2,3),]$major3 = 0
+    reg.dat = merge.dat[,c("pubid_anon", "HH_INCOME", "MOM_ED", "admit2", "avgb", "major3", "major2")]
     reg.dat = na.exclude(reg.dat)
     checkPred = lm(avgb~admit2+HH_INCOME+MOM_ED+ factor(major3), data = reg.dat)
-checkPred = lm(avgb~admit2+factor(KEYSEX_1997)+ factor(KEYRACE_ETHNICITY_1997)+ MOM_ED + HH_INCOME, data = merge.dat)
+    checkPred = lm(avgb~HH_INCOME+MOM_ED+ factor(major3), data = reg.dat)
+    summary(checkPred)
+    #get original major variable--that is "major"
+      #check prediction ability of each one
+        reg.dat = merge.dat[,c("pubid_anon", "admit2", "avgb", "major", "HH_INCOME","MOM_ED")]
+        reg.dat[merge.dat$major==0,]$major = NA
+        reg.dat[merge.dat$major==99,]$major = NA
+        reg.dat = na.exclude(reg.dat)
+        majList = levels(as.factor(reg.dat$major))
+        lessList = c()
+        moreList = c()
+        for (i in majList){
+          reg.dat$major3 = 0
+          reg.dat[reg.dat$major == i,]$major3 =1
+          checkPred = lm(avgb~admit2+ factor(major3), data = reg.dat)
+          getVal = summary(checkPred)$coefficients[3,1]
+          getP = summary(checkPred)$coefficients[3,4]
+          if(getP <.05){
+            if(getVal > 0){
+              moreList = c(moreList, i)
+            }
+            else{
+              lessList = c(lessList,i)
+            }
+          }
+        }
+    #convert to categorical
+      hardSci <- c(6, 21, 25)
+      softSci <- c(3, 10, 11, 31, 32)
+      bus <- c(7, 8)
+      engineering <- c(9,13)
+      health <- c(22, 23, 27, 29, 30, 28)
+      hum <- c(1,2,5,12,14,15,17,19,18,20,24,26,33,4,16)
+      reg.dat$major2 = NA
+      for (i in 1:nrow(reg.dat)){
+        if (reg.dat$major[i] %in% hardSci){
+          reg.dat$major2[i]= 1
+        }
+        else if (reg.dat$major[i] %in% softSci){
+          reg.dat$major2[i]= 2
+        }
+        else if (reg.dat$major[i] %in% bus){
+          reg.dat$major2[i]= 3
+        }
+        else if (reg.dat$major[i] %in% engineering){
+          reg.dat$major2[i]= 4
+        }
+        else if (reg.dat$major[i] %in% health){
+          reg.dat$major2[i]= 5
+        }
+        else if (reg.dat$major[i] %in% hum){
+          reg.dat$major2[i]= 6
+        }
+      }
+      majList = levels(as.factor(reg.dat$major2))
+      lessList = c()
+      moreList = c()
+      for (i in majList){
+        reg.dat$major3 = 0
+        reg.dat[reg.dat$major2 == i,]$major3 =1
+        checkPred = lm(avgb~admit2+ factor(major3), data = reg.dat)
+        getVal = summary(checkPred)$coefficients[3,1]
+        getP = summary(checkPred)$coefficients[3,4]
+        if(getP <.05){
+          if(getVal > 0){
+            moreList = c(moreList, i)
+          }
+          else{
+            lessList = c(lessList,i)
+          }
+        }
+      }
+    #get final regression
+      reg.dat = merge.dat[,c("pubid_anon", "HH_INCOME", "admit2", "avgb", "major")]
+      reg.dat = na.exclude(reg.dat)
+      reg.dat$EngInd= 0
+      reg.dat[reg.dat$major %in% engineering,]$EngInd = 1
+      reg.dat$HumInd= 0
+      reg.dat[reg.dat$major %in% hum,]$HumInd = 1
+      checkPred = lm(avgb~admit2+HH_INCOME+ factor(EngInd)+ factor(HumInd), data = reg.dat)
+    #plot
+      hum.dat = reg.dat[reg.dat$HumInd==1,]
+      eng.dat = reg.dat[reg.dat$EngInd==1,]
+      sal_byadmit_hum = data.frame(admit = c("1","2","3","4","5/6"),
+        avgIncb = aggregate(hum.dat$avgb, list(gp=hum.dat$admit2), mean)$x,
+        avgIncbse = aggregate(hum.dat$avgb, list(gp=hum.dat$admit2), se)$x)
+      sal_byadmit_eng = data.frame(admit = c("1","2","3","4","5/6"),
+        avgIncb = aggregate(eng.dat$avgb, list(gp=eng.dat$admit2), mean)$x,
+        avgIncbse = aggregate(eng.dat$avgb, list(gp=eng.dat$admit2), se)$x)
+      sal_byadmit_avg = data.frame(admit = c("1","2","3","4","5/6"),
+        avgIncb = aggregate(reg.dat$avgb, list(gp=reg.dat$admit2), mean)$x,
+        avgIncbse = aggregate(reg.dat$avgb, list(gp=reg.dat$admit2), se)$x)
+
+#plots
+#ggplot(means, aes(x=attend, y=avgInc, group =1)) + geom_line()+theme_bw()+xlab("Selectivity of school attended")+ylab("Average post-college income over sample") +theme(panel.grid.major=element_blank(),panel.grid.minor=element_blank(), text = element_text(size=20))+geom_ribbon(data=means,aes(ymin =avgInc - avgIncse*1.96, ymax = avgInc+avgIncse*1.96),alpha=0.3)
+#ggplot(meansb, aes(x=attend, y=avgIncb, group = 1)) + geom_line() +
+#geom_ribbon(data=meansb,aes(ymin =avgIncb - avgIncbse*1.96, ymax = avgIncb+avgIncbse*1.96),alpha=0.3)+xlab("Selectivity of school attended") +ylab("Average post-college income over sample") +theme(panel.grid.major=element_blank(),panel.grid.minor=element_blank(), text = element_text(size=20))
+
+      reg.dat
+      
+
 
         
