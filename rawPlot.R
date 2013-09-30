@@ -424,7 +424,7 @@ ggplot(plotdata_reg, aes(x=attend, y = avgIncb, color = as.factor(type))) +
     #merge in choice data============================================
         anon.dat = read.csv("personaldata.csv", stringsAsFactors=FALSE)
         #test = anon.dat[c("pubid_anon","KEYSEX_1997"),]
-        anon.dat = anon.dat[,c("pubid_anon", "KEYSEX_1997", "KEYRACE_ETHNICITY_1997", "MOM_ED", "HH_SIZE", "HH_INCOME", "URBAN_RURAL")]
+        anon.dat = anon.dat[,c("pubid_anon", "KEYSEX_1997", "KEYRACE_ETHNICITY_1997", "MOM_ED", "HH_SIZE", "HH_INCOME", "URBAN_RURAL", "SAT_MATH")]
         merge.dat = merge(x = inc_dat, y = anon.dat, by = "pubid_anon", all.x = TRUE)
           merge.dat$attend2 = NA
           merge.dat$admit2 = NA
@@ -441,7 +441,7 @@ ggplot(plotdata_reg, aes(x=attend, y = avgIncb, color = as.factor(type))) +
   
   #check on majors====================================
     anon.dat = read.csv("personaldata.csv", stringsAsFactors=FALSE)
-    anon.dat = anon.dat[,c("pubid_anon", "MOM_ED", "HH_INCOME", "major2", "major")]
+    anon.dat = anon.dat[,c("pubid_anon", "MOM_ED", "HH_INCOME", "major2", "major", "SAT_MATH")]
     merge.dat = merge(x = inc_dat, y = anon.dat, by = "pubid_anon", all.x = TRUE)
     merge.dat$attend2 = NA
     merge.dat$admit2 = NA
@@ -455,14 +455,14 @@ ggplot(plotdata_reg, aes(x=attend, y = avgIncb, color = as.factor(type))) +
       merge.dat$major3 = NA
       merge.dat[merge.dat$major2 %in% c(5),]$major3 = 1
       merge.dat[merge.dat$major2 %in% c(4,1,2,3),]$major3 = 0
-    reg.dat = merge.dat[,c("pubid_anon", "HH_INCOME", "MOM_ED", "admit2", "avgb", "major3", "major2")]
+    reg.dat = merge.dat[,c("pubid_anon", "HH_INCOME", "MOM_ED", "admit2", "avgb", "major3", "major2", "SAT_MATH")]
     reg.dat = na.exclude(reg.dat)
-    checkPred = lm(avgb~admit2+HH_INCOME+MOM_ED+ factor(major3), data = reg.dat)
+    checkPred = lm(avgb~admit2+HH_INCOME+MOM_ED+ factor(major3)+SAT_MATH, data = reg.dat)
     checkPred = lm(avgb~HH_INCOME+MOM_ED+ factor(major3), data = reg.dat)
     summary(checkPred)
     #get original major variable--that is "major"
       #check prediction ability of each one
-        reg.dat = merge.dat[,c("pubid_anon", "admit2", "avgb", "major", "HH_INCOME","MOM_ED")]
+        reg.dat = merge.dat[,c("pubid_anon", "admit2", "avgb", "major", "HH_INCOME","MOM_ED", "SAT_MATH")]
         reg.dat[merge.dat$major==0,]$major = NA
         reg.dat[merge.dat$major==99,]$major = NA
         reg.dat = na.exclude(reg.dat)
@@ -531,13 +531,14 @@ ggplot(plotdata_reg, aes(x=attend, y = avgIncb, color = as.factor(type))) +
         }
       }
     #get final regression
-      reg.dat = merge.dat[,c("pubid_anon", "HH_INCOME", "admit2", "avgb", "major")]
+      reg.dat = merge.dat[,c("pubid_anon", "admit2", "avgb", "major", "SAT_MATH", "HH_INCOME")]
+reg.dat = merge.dat[,c("pubid_anon", "avgb","admit2","attend2", "major", "SAT_MATH")]
       reg.dat = na.exclude(reg.dat)
       reg.dat$EngInd= 0
       reg.dat[reg.dat$major %in% engineering,]$EngInd = 1
       reg.dat$HumInd= 0
       reg.dat[reg.dat$major %in% hum,]$HumInd = 1
-      checkPred = lm(avgb~admit2+HH_INCOME+ factor(EngInd)+ factor(HumInd), data = reg.dat)
+      checkPred = lm(avgb~SAT_MATH+attend2+SAT_MATH, data = reg.dat)
     #plot
       hum.dat = reg.dat[reg.dat$HumInd==1,]
       eng.dat = reg.dat[reg.dat$EngInd==1,]
@@ -551,13 +552,138 @@ ggplot(plotdata_reg, aes(x=attend, y = avgIncb, color = as.factor(type))) +
         avgIncb = aggregate(reg.dat$avgb, list(gp=reg.dat$admit2), mean)$x,
         avgIncbse = aggregate(reg.dat$avgb, list(gp=reg.dat$admit2), se)$x)
 
-#plots
-#ggplot(means, aes(x=attend, y=avgInc, group =1)) + geom_line()+theme_bw()+xlab("Selectivity of school attended")+ylab("Average post-college income over sample") +theme(panel.grid.major=element_blank(),panel.grid.minor=element_blank(), text = element_text(size=20))+geom_ribbon(data=means,aes(ymin =avgInc - avgIncse*1.96, ymax = avgInc+avgIncse*1.96),alpha=0.3)
-#ggplot(meansb, aes(x=attend, y=avgIncb, group = 1)) + geom_line() +
-#geom_ribbon(data=meansb,aes(ymin =avgIncb - avgIncbse*1.96, ymax = avgIncb+avgIncbse*1.96),alpha=0.3)+xlab("Selectivity of school attended") +ylab("Average post-college income over sample") +theme(panel.grid.major=element_blank(),panel.grid.minor=element_blank(), text = element_text(size=20))
+#get info on number applied to
+  anon.dat = read.csv("inputs/anon_data2.csv", stringsAsFactors=FALSE)
+  library(descr)
+  frequency.dat = data.frame(freq(ordered(anon.dat$pubid_anon), plot=FALSE))
+  frequency.dat$pubid_anon= rownames(frequency.dat)
+  withfreq.dat = merge(x = merge.dat, y = frequency.dat, by = "pubid_anon", all.x = TRUE)
+  reg.dat = withfreq.dat[,c("pubid_anon", "admit2", "avgb", "major", "SAT_MATH", "HH_INCOME", "Frequency")]
+  reg.dat = na.exclude(reg.dat)
+  reg.dat$EngInd= 0
+  reg.dat[reg.dat$major %in% engineering,]$EngInd = 1
+  reg.dat$HumInd= 0
+  reg.dat[reg.dat$major %in% hum,]$HumInd = 1
+  checkPred = lm(avgb~admit2+ Frequency+factor(EngInd)+ factor(HumInd)+ SAT_MATH, data = reg.dat)
 
-      reg.dat
-      
+#plots based SAT instead of top admitted
+  #merge SAT into inc_datb
+    satplot.dat = read.csv("satplotin.csv")
+    satplot.dat = satplot.dat[,c("pubid_anon", "attend", "admit", "avg", "avgb", "SAT_MATH")]
+    satplot.dat = na.exclude(satplot.dat)
+  #find variance of average salary
+  meansb = data.frame(attend = c("none","1","2","3","4","5/6"),
+    avgIncb = aggregate(satplot.dat$avgb, list(gp=satplot.dat$attend), mean)$x,
+    avgIncbse = aggregate(satplot.dat$avgb, list(gp=satplot.dat$attend), se)$x)
+  meansb_bysat = data.frame(sat = c("1","2","3","4","5","6"),
+    avgIncb = aggregate(satplot.dat$avgb, list(gp=satplot.dat$SAT_MATH), mean)$x,
+    avgIncbse = aggregate(satplot.dat$avgb, list(gp=satplot.dat$SAT_MATH), se)$x)
+  
+  #plotdata 
+    plotdata= data.frame(attend = meansb$attend, avgIncb= meansb$avgIncb, avgIncbse = meansb$avgIncbse, type = 0)
+    plotdata_sat = data.frame(sat = meansb_bysat$sat, avgIncb= meansb_bysat$avgIncb, avgIncbse = meansb_bysat$avgIncbse, type = 0)
 
+  #repeat analysis by type and store--by attendance
+    #1
+      satplot.dat_temp = satplot.dat[satplot.dat$SAT_MATH ==1,]
+      myvect = levels(as.factor(satplot.dat_temp$attend))
+      meansb_temp = data.frame(attend = myvect,
+        avgIncb = aggregate(satplot.dat_temp$avgb, list(gp=satplot.dat_temp$attend), mean)$x,
+        avgIncbse = aggregate(satplot.dat_temp$avgb, list(gp=satplot.dat_temp$attend), se)$x)
+      curPlot = data.frame(attend = myvect, avgIncb = meansb_temp$avgIncb, avgIncbse = meansb_temp$avgIncbse, type = 1)
+      plotdata = rbind(plotdata, curPlot)
 
-        
+    #2
+      satplot.dat_temp = satplot.dat[satplot.dat$SAT_MATH ==2,]
+      myvect = levels(as.factor(satplot.dat_temp$attend))
+      meansb_temp = data.frame(attend = myvect,
+       avgIncb = aggregate(satplot.dat_temp$avgb, list(gp=satplot.dat_temp$attend), mean)$x,
+       avgIncbse = aggregate(satplot.dat_temp$avgb, list(gp=satplot.dat_temp$attend), se)$x)
+      curPlot = data.frame(attend = myvect, avgIncb = meansb_temp$avgIncb, avgIncbse = meansb_temp$avgIncbse, type = 2)
+      plotdata = rbind(plotdata, curPlot)
+
+    #3
+      satplot.dat_temp = satplot.dat[satplot.dat$SAT_MATH ==3,]
+      myvect = levels(as.factor(satplot.dat_temp$attend))
+      meansb_temp = data.frame(attend = myvect,
+       avgIncb = aggregate(satplot.dat_temp$avgb, list(gp=satplot.dat_temp$attend), mean)$x,
+       avgIncbse = aggregate(satplot.dat_temp$avgb, list(gp=satplot.dat_temp$attend), se)$x)
+      curPlot = data.frame(attend = myvect, avgIncb = meansb_temp$avgIncb, avgIncbse = meansb_temp$avgIncbse, type = 3)
+      plotdata = rbind(plotdata, curPlot)
+
+    #4
+      satplot.dat_temp = satplot.dat[satplot.dat$SAT_MATH ==4,]
+      myvect = levels(as.factor(satplot.dat_temp$attend))
+      meansb_temp = data.frame(attend = myvect,
+       avgIncb = aggregate(satplot.dat_temp$avgb, list(gp=satplot.dat_temp$attend), mean)$x,
+       avgIncbse = aggregate(satplot.dat_temp$avgb, list(gp=satplot.dat_temp$attend), se)$x)
+      curPlot = data.frame(attend = myvect, avgIncb = meansb_temp$avgIncb, avgIncbse = meansb_temp$avgIncbse, type = 4)
+      plotdata = rbind(plotdata, curPlot)
+
+    #5
+      satplot.dat_temp = satplot.dat[satplot.dat$SAT_MATH ==5,]
+      myvect = levels(as.factor(satplot.dat_temp$attend))
+      meansb_temp = data.frame(attend = myvect,
+       avgIncb = aggregate(satplot.dat_temp$avgb, list(gp=satplot.dat_temp$attend), mean)$x,
+       avgIncbse = aggregate(satplot.dat_temp$avgb, list(gp=satplot.dat_temp$attend), se)$x)
+      curPlot = data.frame(attend = myvect, avgIncb = meansb_temp$avgIncb, avgIncbse = meansb_temp$avgIncbse, type = 5)
+      plotdata = rbind(plotdata, curPlot)
+
+    #6
+      satplot.dat_temp = satplot.dat[satplot.dat$SAT_MATH ==6,]
+      myvect = levels(as.factor(satplot.dat_temp$attend))
+      meansb_temp = data.frame(attend = myvect,
+       avgIncb = aggregate(satplot.dat_temp$avgb, list(gp=satplot.dat_temp$attend), mean)$x,
+       avgIncbse = aggregate(satplot.dat_temp$avgb, list(gp=satplot.dat_temp$attend), se)$x)
+      curPlot = data.frame(attend = myvect, avgIncb = meansb_temp$avgIncb, avgIncbse = meansb_temp$avgIncbse, type = 6)
+      plotdata = rbind(plotdata, curPlot)
+
+    #repeat analysis by type and store--by sat
+    #-3
+      inc_datb_temp = satplot.dat[satplot.dat$attend == -10,]
+      myvect = levels(as.factor(inc_datb_temp$SAT_MATH))
+      meansb_bysat_temp = data.frame(sat = myvect,
+         avgIncb = aggregate(inc_datb_temp$avgb, list(gp=inc_datb_temp$SAT_MATH), mean)$x,
+         avgIncbse = aggregate(inc_datb_temp$avgb, list(gp=inc_datb_temp$SAT_MATH), se)$x)
+      curPlot = data.frame(sat = myvect, avgIncb = meansb_bysat_temp$avgIncb, avgIncbse = meansb_bysat_temp$avgIncbse, type = -10)
+      plotdata_sat = rbind(plotdata_sat, curPlot)
+    #1
+      inc_datb_temp = satplot.dat[satplot.dat$attend == -1,]
+      myvect = levels(as.factor(inc_datb_temp$SAT_MATH))
+      meansb_bysat_temp = data.frame(sat = myvect,
+       avgIncb = aggregate(inc_datb_temp$avgb, list(gp=inc_datb_temp$SAT_MATH), mean)$x,
+       avgIncbse = aggregate(inc_datb_temp$avgb, list(gp=inc_datb_temp$SAT_MATH), se)$x)
+      curPlot = data.frame(sat = myvect, avgIncb = meansb_bysat_temp$avgIncb, avgIncbse = meansb_bysat_temp$avgIncbse, type = 1)
+      plotdata_sat = rbind(plotdata_sat, curPlot)
+    #2
+      inc_datb_temp = satplot.dat[satplot.dat$attend == 2,]
+      myvect = levels(as.factor(inc_datb_temp$SAT_MATH))
+      meansb_bysat_temp = data.frame(sat = myvect,
+       avgIncb = aggregate(inc_datb_temp$avgb, list(gp=inc_datb_temp$SAT_MATH), mean)$x,
+       avgIncbse = aggregate(inc_datb_temp$avgb, list(gp=inc_datb_temp$SAT_MATH), se)$x)
+      curPlot = data.frame(sat = myvect, avgIncb = meansb_bysat_temp$avgIncb, avgIncbse = meansb_bysat_temp$avgIncbse, type = 2)
+      plotdata_sat = rbind(plotdata_sat, curPlot)
+    #3
+      inc_datb_temp = satplot.dat[satplot.dat$attend == 3,]
+      myvect = levels(as.factor(inc_datb_temp$SAT_MATH))
+      meansb_bysat_temp = data.frame(sat = myvect,
+       avgIncb = aggregate(inc_datb_temp$avgb, list(gp=inc_datb_temp$SAT_MATH), mean)$x,
+       avgIncbse = aggregate(inc_datb_temp$avgb, list(gp=inc_datb_temp$SAT_MATH), se)$x)
+      curPlot = data.frame(sat = myvect, avgIncb = meansb_bysat_temp$avgIncb, avgIncbse = meansb_bysat_temp$avgIncbse, type = 3)
+      plotdata_sat = rbind(plotdata_sat, curPlot)
+    #4
+      inc_datb_temp = satplot.dat[satplot.dat$attend == 4,]
+      myvect = levels(as.factor(inc_datb_temp$SAT_MATH))
+      meansb_bysat_temp = data.frame(sat = myvect,
+       avgIncb = aggregate(inc_datb_temp$avgb, list(gp=inc_datb_temp$SAT_MATH), mean)$x,
+       avgIncbse = aggregate(inc_datb_temp$avgb, list(gp=inc_datb_temp$SAT_MATH), se)$x)
+      curPlot = data.frame(sat = myvect, avgIncb = meansb_bysat_temp$avgIncb, avgIncbse = meansb_bysat_temp$avgIncbse, type = 4)
+      plotdata_sat = rbind(plotdata_sat, curPlot)
+    #5
+      inc_datb_temp = satplot.dat[satplot.dat$attend == 5,]
+      myvect = levels(as.factor(inc_datb_temp$SAT_MATH))
+      meansb_bysat_temp = data.frame(sat = myvect,
+       avgIncb = aggregate(inc_datb_temp$avgb, list(gp=inc_datb_temp$SAT_MATH), mean)$x,
+       avgIncbse = aggregate(inc_datb_temp$avgb, list(gp=inc_datb_temp$SAT_MATH), se)$x)
+      curPlot = data.frame(sat = myvect, avgIncb = meansb_bysat_temp$avgIncb, avgIncbse = meansb_bysat_temp$avgIncbse, type = 5)
+      plotdata_sat = rbind(plotdata_sat, curPlot)
