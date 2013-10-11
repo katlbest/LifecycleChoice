@@ -9,6 +9,7 @@
   library(mclogit)
   #library(car)
   library(survival)
+  library(pscl)
 
 #clear workspace ===================================================================
   rm(list = ls())
@@ -757,6 +758,7 @@
     inc_dat = inc_dat2[,keepCols]
     inc_dat[inc_dat==-3]=NA
     inc_dat[inc_dat==-4]=NA
+    inc_dat[inc_dat==-5]=NA
   #make sure inc_dat is correctly set up
     inc_dat$attend2 = NA
     inc_dat$admit2 = NA
@@ -930,15 +932,10 @@
       ALLSCHOOLEst[ALLSCHOOLEst==-4]=0
     #set -2's to zero since htey don't know their aid amount, so does not factor into decision
       ALLSCHOOLEst[ALLSCHOOLEst==-2]=0
-    #set missings to zero
-      for (i in 1:nrow(LONG_DATA)){
-        if (TOTEst[i] %in% c(-1,-2,-3, -4)){ #these people don't know, -1's are missing but treat as don't know/zero
-          TOTEst[i]= 0
-        }
-      }
-      YSCHEst[YSCHEst <0] = 0
+    #set attendAid to zero if it is not know
+      YSCHEst[YSCHEst <0]= 0
       LONG_DATA$attendAid = YSCHEst
-      LONG_DATA$nonAttendAid = TOTEst
+      LONG_DATA$nonAttendAid = TOTEst  #note YTOT still has missing values, coded as -1 and -3 (missing) and -2 and -4 (don't know)
       LONG_DATA$allSchoolAid = ALLSCHOOLEst
     save.image("finAid.RData")
   #get school data--note that these generally have -3 missingness indicators
@@ -959,8 +956,8 @@
       #instate
         LONG_DATA$instate = -3
         for (i in 1:nrow(LONG_DATA)){
-          if(is.na(LONG_DATA$RES_STATE[i])){ #if we don't know residence state, theyare out of state
-            LONG_DATA$instate = 0
+          if(is.na(LONG_DATA$RES_STATE[i])){ #if we don't know residence state, they are out of state
+            LONG_DATA$instate[i] = 0
           } else if(LONG_DATA$RES_STATE[i]>0 & LONG_DATA$state[i]>0){
             if(LONG_DATA$RES_STATE[i] == LONG_DATA$state[i]){
               LONG_DATA$instate[i] = 1
@@ -969,68 +966,24 @@
             }
           }
         }
-      #realtui-TBD
+      #get true financial aid and tuition
+        LONG_DATA$finaidest = -3
         LONG_DATA$realtui = -3
         for (i in 1:nrow(LONG_DATA)){
-          if (LONG_DATA$AIDALLSCHOOL[i]>0){ #set all school aid to zero if it is missing, since this has no relative effect anyway
-            allAid = LONG_DATA$AIDALLSCHOOL[i]
-          }else{
-            allAid = 0
+          if (LONG_DATA$nonAttendAid[i]<0 & LONG_DATA$attendAid[i]>0){ #replace nonattend aid with modeled non-attendaid for those who dont report it
+            LONG_DATA$nonAttendAid[i]= LONG_DATA$attendAid[i]*(0.44536)+963.86273
+          } 
+          if (LONG_DATA$nonAttendAid[i]<0){ #if it is still less than zero, set to zero
+            LONG_DATA$nonAttendAid[i]= 0
           }
-          if(LONG_DATA$FINAIDEST[i]>=0){ #we have aid data
-              if(LONG_DATA$instate[i]==1){
-                LONG_DATA$realtui[i] = LONG_DATA$tuiinlist[i]+ LONG_DATA$feein[i]- LONG_DATA$FINAIDEST[i]-allAid
-              }else if (LONG_DATA$instate[i] %in% c(0, -3)){ #treat -3 missing state as in-state
-                LONG_DATA$realtui[i] = LONG_DATA$tuioutlist[i]+ LONG_DATA$feeout[i]- LONG_DATA$FINAIDEST[i]- allAid
-              }
-          } #else we have to leave it as -3
+          LONG_DATA$finaidest[i]= LONG_DATA$allSchoolAid[i] + LONG_DATA$nonAttendAid[i]
+          if(LONG_DATA$instate[i]==1){
+            LONG_DATA$realtui[i] = LONG_DATA$tuiinlist[i]+ LONG_DATA$feein[i]- LONG_DATA$finaidest[i]
+          }else if (LONG_DATA$instate[i] ==0){
+            LONG_DATA$realtui[i] = LONG_DATA$tuioutlist[i]+ LONG_DATA$feeout[i]- LONG_DATA$finaidest[i]
+          }
         }
-        ALSO HERE TBD
-#fix financial aid variables
-#nonattendaid is zero if not reports
-out.df[is.na(out.df$nonAttendAid),]$nonAttendAid=-3
-out.df[out.df$nonAttendAid<0,]$nonAttendAid=NA
-out.df[is.na(out.df$nonAttendAid),]$nonAttendAid=0
-#create finaidest2 using rules about when to use attended data 
-if (is.na(out.df$nonAttendAid[i]) & out.df$attendAid[i]>0){
-  out.df$nonAttendAid[i]= out.df$attendAid[i]*(0.44536)+963.86273
-  #print(out.df$pubid_anon[i])
-  #print(paste(out.df$nonAttendMiss[i], out.df$nonAttendAid[i], sep = ","))
-}else{
-  out.df$nonAttendAid[i]= 0
-}
-out.df$finaidest2 = out.df$nonAttendAid
-#adjust both net tuition variables as necessary
-out.df$costbeforeaid = out.df$realtui + out.df$finaidest #this works correctly
-out.df$realtui2 = out.df$costbeforeaid- out.df$finaidest2 #this works correctly
-out.df$realtuiApply = out.df$costbeforeaid-out.df$nonAttendAid #this works correctly
-out.df$finaidwstatedisc[i]=NA
-out.df$finaidwstatedisc2[i]=NA
-out.df[out.df$AIDALLSCHOOL<0,]$AIDALLSCHOOL = 0
-for (i in 1:nrow(out.df)){
-  if (out.df$instate[i]==1){
-    out.df$finaidwstatedisc2[i] = out.df$tuioutlist[i]+out.df$feeout[i]-(out.df$tuiinlist[i]+out.df$feein[i])+ out.df$finaidest2[i]+ out.df$aidallschool[i]
-    out.df$finaidwstatedisc[i] = out.df$tuioutlist[i]+out.df$feeout[i]-(out.df$tuiinlist[i]+out.df$feein[i])+ out.df$finaidest[i]+ out.df$aidallschool[i]
-  } else{
-    out.df$finaidwstatedisc2[i] =out.df$finaidest2[i]+ out.df$AIDALLSCHOOL[i]
-    out.df$finaidwstatedisc[i] =out.df$finaidest[i]+ out.df$AIDALLSCHOOL[i]
-  }
-}
-out.df$listwfees = out.df$tuioutlist + out.df$feeout
-out.df$listminusactual = out.df$listwfees-out.df$realtui2
-out.df$goodVar = out.df$tuioutlist-out.df$realtui- out.df$finaidest+ out.df$finaidest2
-out.df$goodVar2 = out.df$tuioutlist-out.df$realtui+ out.df$finaidest- out.df$finaidest2
-#financial aid variables
-#LONG_OUT[is.na(LONG_OUT$AIDALLSCHOOL),]$AIDALLSCHOOL = 0
-LONG_OUT[is.na(LONG_OUT$FINAIDEST),]$FINAIDEST = 0
-#LONG_OUT[is.na(LONG_OUT$instate),]$instate = 0
-for (i in 1:nrow(LONG_OUT)){
-  if(LONG_OUT$instate[i]==1){
-    LONG_OUT$realtui[i] = LONG_OUT$tuiinlist[i]+ LONG_OUT$feein[i]- LONG_OUT$FINAIDEST[i]-LONG_OUT$AIDALLSCHOOL[i]
-  }else if (LONG_OUT$instate[i] == 0){ #treat -3 missing state as in-state
-    LONG_OUT$realtui[i] = LONG_OUT$tuioutlist[i]+ LONG_OUT$feeout[i]- LONG_OUT$FINAIDEST[i]-LONG_OUT$AIDALLSCHOOL[i]
-  }
-}
+        #note thie yields some tuition less than 0
       #sporting division
         confInputs = c(103,102,104,112,113,114,362,117,127,204,306,198,133,111,200,126,155,191,359,318,119,356,213,323,141,144,148,153,161,163,195,192,308,159,130,366,354,201,205,121,320,321,182,175,115,167,170,172,176,180,183,185,197,202,134,171,128,193,351,137,181,352,302,311,337,309,315,353)
         confOutputs =c(1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,4,4,4,4,4,4,4)
@@ -1045,10 +998,10 @@ for (i in 1:nrow(LONG_OUT)){
         LONG_DATA$SATDiff = -3
         satInput = c(1,2,3,4,5,6,0, -3)
         satOutput = c(250,350,450,550,670,750,-3, -3)
-        LONG_DATA$SAT_MATH2 = satOutput[match(LONG_DATA$sat_math, satInput)]
-        LONG_DATA$SAT_VERBAL2 = satOutput[match(LONG_DATA$sat_verbal, satInput)]
+        LONG_DATA$sat_math2 = satOutput[match(LONG_DATA$sat_math, satInput)]
+        LONG_DATA$sat_verbal2 = satOutput[match(LONG_DATA$sat_verbal, satInput)]
         for (i in 1:nrow(LONG_DATA)){
-          if(!is.na(LONG_DATA$SAT_MATH2[i]) & !is.na(LONG_DATA$SAT_VERBAL2[i]) & !is.na(LONG_DATA$sat75[i])){
+          if(!is.na(LONG_DATA$sat_math2[i]) & !is.na(LONG_DATA$sat_verbal2[i]) & !is.na(LONG_DATA$sat75[i])){
             LONG_DATA$SATDiff[i] = LONG_DATA$sat75[i]-sum(LONG_DATA$sat_math[i], LONG_DATA$sat_verbal[i])
           }
         }
@@ -1087,10 +1040,16 @@ for (i in 1:nrow(LONG_OUT)){
             }
           }
   #write and recode NAs
-    keepVect = c("attendAid","nonAttendAid","AdmittedSchool","feeout","feein","admit", "attend","PUBID_1997","average", "gender","GRADES","sat_math", "sat_verbal", "MAJOR2", "DAD_ED","MOM_ED","HH_SIZE", "HH_INCOME", "URBAN_RURAL", "SCHOOL_TYPE", "AttendedIndicator", "FINAIDEST", "AIDALLSCHOOL", "instate","SATDiff","urbanruralmatch", "realtui", "tuiin", "tuiout", "tuiinlist", "tuioutlist", "sat25", "sat75", "avgsal", "control", "carnegie", "selectivity", "fedgrantp", "gradrate", "loanp", "admitperc", "expperstudent", "instperstudent", "facperstudent", "genderratio", "division", "urbanrural", "distance", "totstudents")
+    keepVect = c("finaidest","realtui","AdmittedSchool","admit", "attend","PUBID_1997","average", "gender","GRADES","sat_math", "sat_verbal", "MAJOR2", "DAD_ED","MOM_ED","HH_SIZE", "HH_INCOME", "URBAN_RURAL", "SCHOOL_TYPE", "AttendedIndicator", "instate","SATDiff","urbanruralmatch","sat25", "sat75", "avgsal", "control", "selectivity", "fedgrantp", "gradrate", "loanp", "admitperc", "expperstudent", "instperstudent", "facperstudent", "genderratio", "division", "urbanrural", "distance", "totstudents", "attend2", "admit2", "carnegie")
     LONG_OUT = LONG_DATA[,keepVect]
+    LONG_OUT[LONG_OUT$totstudents<0,]$totstudents= NA
+    LONG_OUT[LONG_OUT$expperstudent<0,]$expperstudent= NA
+    LONG_OUT[LONG_OUT$instperstudent<0,]$instperstudent= NA
+    LONG_OUT[LONG_OUT$facperstudent<0,]$facperstudent= NA
+    LONG_OUT[LONG_OUT$genderratio<0,]$genderratio= NA
+    LONG_OUT[LONG_OUT$SATDiff<0,]$SATDiff= NA
+    LONG_OUT[LONG_OUT$realtui==-6,]$realtui= NA
     LONG_OUT[LONG_OUT==-3]= NA
-    LONG_OUT=LONG_OUT[!is.na(LONG_OUT$admit),] #this shouldn't happen--we may want to fix it TBD
     write.csv(LONG_OUT, "longdataout.csv")
   #simplify datapoints
     #selectivity
@@ -1105,52 +1064,40 @@ for (i in 1:nrow(LONG_OUT)){
       selectPred.mod = lm(selectivity ~ avgsal+carnegie, data = haveSelect)
       select2Pred = round(predict(selectPred.mod,preAll))
       LONG_OUT[is.na(LONG_OUT$selectivity)&!is.na(LONG_OUT$avgsal)&!is.na(LONG_OUT$carnegie),]$selectivity = select2Pred
-    #delete 19 with remaining no selectivity
-      LONG_OUT = LONG_OUT[!is.na(LONG_OUT$selectivity),]
-    #fill selectivity difference
-      LONG_OUT$selectdiff = LONG_OUT$selectivity-LONG_OUT$admit
-      print(LONG_OUT[LONG_OUT$selectdiff<0,]$selectivity)
-      print(LONG_OUT[LONG_OUT$selectdiff<0,]$admit)
-      print(LONG_OUT[LONG_OUT$selectdiff<0,]$PUBID_1997)
-      LONG_OUT[LONG_OUT$selectdiff<0,]$selectdiff =0 #set these selectivity differences to 0
-    #distance--skip for now because lots of manual labor
-      #lat/long sometimes filled in by state or google maps location of campuses
-        #na.dat$distance = NA
-        #for (i in 1:nrow(na.dat)){
-          #if {(na.dat$latitude[i] != -3 & !is.na(na.dat$latstudent[i]))
-              #na.dat$distance[i] = sqrt((na.dat$latitude[i] -na.dat$latstudent[i])^2+ (na.dat$longitude[i] - na.dat$longstudent[i])^2)
-          #}
-        #}
+      #delete 19 with remaining no selectivity
+        LONG_OUT = LONG_OUT[!is.na(LONG_OUT$selectivity),]
+      #delete those with selectivity = 7
+        LONG_OUT = LONG_OUT[LONG_OUT$selectivity!=7,]
+      #fill selectivity difference
+        LONG_OUT$selectdiff = LONG_OUT$selectivity-LONG_OUT$admit
+        LONG_OUT[LONG_OUT$selectdiff<0,]$selectivity =LONG_OUT[LONG_OUT$selectdiff<0,]$admit #fix selectivity errors
+        LONG_OUT[LONG_OUT$selectdiff<0,]$selectdiff =0 
+      #interval selectivity difference
+        LONG_OUT$selectdiffInt = NA
+        LONG_OUT$selectInt = NA
+        lookup = data.frame(id = c(1,2,3,4,5,6), percent = c(33, 60, 75, 85, 100, 100))
+        for (i in 1:nrow(LONG_OUT)){
+          LONG_OUT$selectInt[i] = lookup[(1:dim(lookup)[1])[lookup[,1]==LONG_OUT$selectivity[i]],2]
+          LONG_OUT$selectdiffInt[i]=LONG_OUT$selectInt[i]-LONG_OUT$admit2[i]
+        } 
     #simplified sports variable
       LONG_OUT$division2 = LONG_OUT$division
       LONG_OUT[is.na(LONG_OUT$division2),]$division2 = 0
-      LONG_OUT[LONG_OUT$division2>1,]$division2 = 0    
-  #fix gradrates (manual fills)
-    LONG_OUT[LONG_OUT$AdmittedSchool == 186399,]$gradrate = .51
-    LONG_OUT[LONG_OUT$AdmittedSchool == 228644,]$gradrate = 1
-  #simplified carnegie
-    #LONG_OUT[is.na(LONG_OUT$carnegie),]$carnegie = c(32, 32, 32, 32, 54, 15) #manual fill no longer works
-    LONG_OUT$carnegie2 = NA
-    for (i in 1:nrow(LONG_OUT)){
-      if (LONG_OUT$carnegie[i] %in% c(15, 16)){
-        LONG_OUT$carnegie2[i] =1
-      } else if(LONG_OUT$carnegie[i] %in% c(22, 21)){
-        LONG_OUT$carnegie2[i] =2
-      } else if(LONG_OUT$carnegie[i] %in% c(31, 32, 33)){
-        LONG_OUT$carnegie2[i] =3
-      } else if(LONG_OUT$carnegie[i] %in% c(40, 51, 52:59)){ #associates schools with some bach, specialty, seminary
-        LONG_OUT$carnegie2[i] =4
-      }
-    }
-  #salary premium/indicator for top tier school
-    LONG_OUT$eliteInd = 0
-    LONG_OUT[LONG_OUT$selectivity==1,]$eliteInd = 1
-  #output
-    keyVars = c("PUBID_1997", "AdmittedSchool", "tuioutlist", "realtui", "FINAIDEST", "instate", "urbanruralmatch", "selectdiff", "loanp", "fedgrantp", "genderratio", "control", "carnegie2", "selectivity", "expperstudent", "instperstudent", "facperstudent", "avgsal", "division2", "gradrate", "AttendedIndicator", "attend", "eliteInd","attendAid","nonAttendAid","AIDALLSCHOOL","feeout","feein", "totstudents")
-    out.df = LONG_OUT[,keyVars]
-    write.csv(out.df, "test.csv")
-  #adjust control entry
-    out.df[out.df$control==3,]$control = 2
+      LONG_OUT[LONG_OUT$division2>1,]$division2 = 0
+    #fix gradrates (manual fills--there may be more TBD)
+      LONG_OUT[LONG_OUT$AdmittedSchool == 186399,]$gradrate = .51
+      LONG_OUT[LONG_OUT$AdmittedSchool == 228644,]$gradrate = 1
+    #salary premium/indicator for top tier school
+      LONG_OUT$eliteInd = 0
+      LONG_OUT[LONG_OUT$selectivity==1,]$eliteInd = 1
+    #adjust control entry
+      LONG_OUT[LONG_OUT$control==3,]$control = 2
+    #output
+      keyVars = c("PUBID_1997", "AdmittedSchool", "realtui","finaidest","admit","attend","average" ,"gender","GRADES", "sat_math","sat_verbal","MAJOR2","DAD_ED", "MOM_ED","HH_SIZE","HH_INCOME",  "SCHOOL_TYPE", "AttendedIndicator", "instate", "SATDiff", "urbanruralmatch", "sat25", "sat75", "avgsal", "control", "selectivity", "fedgrantp", "gradrate","loanp", "admitperc", "expperstudent", "instperstudent", "facperstudent", "genderratio", "division", "urbanrural","distance", "totstudents", "attend2", "admit2", "selectdiff", "selectdiffInt", "selectInt", "division2", "eliteInd")
+      out.df = LONG_OUT[,keyVars]
+      write.csv(out.df, "test.csv")
+    save.image("dataset.RData")
+#run first stage models==========================================================
   #get attenders
     attenders.dat = out.df[out.df$attend != -10,]
   #delete those with only 1 appearance
@@ -1162,21 +1109,93 @@ for (i in 1:nrow(LONG_OUT)){
     multi.dat$instate = as.factor(multi.dat$instate)
     multi.dat$urbanruralmatch = as.factor(multi.dat$urbanruralmatch)
     multi.dat$control = as.factor(multi.dat$control)
-    multi.dat$carnegie2 = as.factor(multi.dat$carnegie2)
     multi.dat$attend = as.factor(multi.dat$attend)
-  #remove totally irrelevant variables
-    relVars.dat = multi.dat[,c("PUBID_1997","AdmittedSchool","AttendedIndicator","realtui2","finaidest2","instate","urbanruralmatch","loanp","fedgrantp","control","carnegie2","division2","gradrate","nonAttendAid", "fedgrantp", "finaidwstatedisc", "listminusactual", "listwfees", "realtui2", "feeout", "goodVar", "goodVar2", "finaidwstatedisc2", "selectdiff")]
-#run first stage models==========================================================
-    relVarsNoPCA.dat = relVars.dat[,c("PUBID_1997","AttendedIndicator","realtui2","selectdiff")]
-    relVarsNoPCA.dat = na.exclude(relVarsNoPCA.dat)
-    lhsNoPCA = matrix(c(relVarsNoPCA.dat$AttendedIndicator, relVarsNoPCA.dat$PUBID_1997), nrow(relVarsNoPCA.dat), 2)  
-    mclogit.noPCA2Int.mod = mclogit(lhsNoPCA~realtui2+selectdiff,data=relVarsNoPCA.dat, model = TRUE, )
-    clogit.noPCA2Int.mod = clogit(attendedIndicator~tuioutlist+finaidwstatedisc2+gradrate+instperstudent2+selectdiffInt+strata(pubid_anon),relVarsNoPCA.dat)
-    ll = clogit.noPCA2Int.mod$loglik #first entry is intercept-only model, second is full model
-    McFR2= 1-ll[2]/ll[1]
-    save(mclogit.noPCA2Int.mod, file = "mclogit.noPCA2Int.saved2")
-    save(clogit.noPCA2Int.mod, file = "clogit.noPCA2Int.saved2")
-    save(relVarsNoPCA.dat, file = "stage1input.saved2")
-    save.image("finalmodels2.RData")
+  #set up LHS
+    #keep most relevant variables
+      relVarsNoPCA.dat = multi.dat[,c("PUBID_1997","AttendedIndicator","realtui","instate","selectivity","gradrate","selectdiffInt","eliteInd","instperstudent","avgsal","expperstudent", "selectdiff", "selectInt")]
+      relVarsNoPCA.dat = na.exclude(relVarsNoPCA.dat)
+      lhsNoPCA = matrix(c(relVarsNoPCA.dat$AttendedIndicator, relVarsNoPCA.dat$PUBID_1997), nrow(relVarsNoPCA.dat), 2)  
+      mclogit.mod = mclogit(lhsNoPCA~realtui+gradrate+instperstudent+selectdiffInt+eliteInd,data=relVarsNoPCA.dat, model = TRUE, )
+      clogit.mod = clogit(AttendedIndicator~realtui+gradrate+selectdiff+strata(PUBID_1997),relVarsNoPCA.dat)
+      ll = clogit.mod$loglik #first entry is intercept-only model, second is full model
+      McFR2= 1-ll[2]/ll[1]
+    #reduce model to the final variables
+      relVarsNoPCA.dat = multi.dat[,c("PUBID_1997","AttendedIndicator","realtui","gradrate")]
+      relVarsNoPCA.dat = na.exclude(relVarsNoPCA.dat)
+      lhsNoPCA = matrix(c(relVarsNoPCA.dat$AttendedIndicator, relVarsNoPCA.dat$PUBID_1997), nrow(relVarsNoPCA.dat), 2)  
+      mclogit.mod = mclogit(lhsNoPCA~I(realtui^2)+realtui+gradrate,data=relVarsNoPCA.dat, model = TRUE, )
+      clogit.mod = clogit(AttendedIndicator~I(realtui^2)+realtui+gradrate+strata(PUBID_1997),relVarsNoPCA.dat)
+        ll = clogit.mod$loglik #first entry is intercept-only model, second is full model
+        McFR2= 1-ll[2]/ll[1]
+        save(mclogit.mod, file = "mclogit.saved2")
+        save(clogit.mod, file = "clogit.saved2")
+        save(relVarsNoPCA.dat, file = "stage1input.saved2")
+        save.image("finalmodels2.RData")
+    #BTL model
+      BTLdat =  multi.dat[,c("PUBID_1997","AttendedIndicator","realtui","distance","instperstudent","avgsal","selectdiffInt")]
+      BTLdat= na.exclude(BTLdat)
+      lhsBTL = matrix(c(BTLdat$AttendedIndicator, BTLdat$PUBID_1997), nrow(BTLdat), 2)  
+      mclogit.btl.mod = mclogit(lhsBTL~realtui+I(realtui^2)+distance+I(distance^2)+instperstudent+I(instperstudent^2)+avgsal+selectdiffInt, model = TRUE,data= BTLdat )
+      clogit.btl.mod = clogit(AttendedIndicator~realtui+I(realtui^2)+distance+I(distance^2)+instperstudent+I(instperstudent^2)+avgsal+selectdiffInt+ strata(PUBID_1997), BTLdat)
+      pR2(clogit.btl.mod)
 #run second stage models==========================================================
-#get BTL models===================================================================
+  #create dataset
+    studentList = as.numeric(levels(as.factor(out.df$PUBID_1997)))
+    model.dat = data.frame(PUBID_1997 = studentList)
+    #select attended where possible
+      attendSchools.dat = attenders.dat[attenders.dat$AttendedIndicator==1,]
+      attenderList = as.numeric(levels(as.factor(attendSchools.dat$PUBID_1997)))
+      model.dat = merge(x = model.dat, y = attendSchools.dat, by = "PUBID_1997", all.x = TRUE)
+    #project attended school for non-attenders
+      nonattenders.dat = out.df[!(out.df$PUBID_1997 %in% attenderList),]
+      frequency.dat = data.frame(freq(ordered(nonattenders.dat$PUBID_1997), plot=FALSE))
+      frequency.dat$PUBID_1997= rownames(frequency.dat)
+      nonattenders.dat = merge(x = nonattenders.dat, y = frequency.dat, by = "PUBID_1997", all.x = TRUE)
+    #those with only one school
+      nonattendone.dat = nonattenders.dat[nonattenders.dat$Frequency==1,]
+      #replace the corresponding rows in model.dat
+      for (i in 1:nrow(nonattendone.dat)){
+        curID = nonattendone.dat$PUBID_1997[i]
+        for (j in 1:length(nonattendone.dat[i,])){
+          model.dat[model.dat$PUBID_1997==curID,j]= nonattendone.dat[i,j]
+        }
+      }
+    #those with multiple schools
+      nonattendmulti.dat = nonattenders.dat[nonattenders.dat$Frequency>1,]
+      predict.dat = nonattendmulti.dat
+      #predict.dat = predict.dat[predict.dat$PUBID_1997 != 43204,] #drop bad observation
+      #predict
+        #remove two problematic observations
+        predict.dat = predict.dat[!is.na(predict.dat$gradrate),]
+        predProbs= predict(mclogit.mod, newdata = predict.dat, type = "link") #gives linear predictor as expected
+        predict.dat$predProbs= exp(predProbs)
+        sums.dat = ddply(predict.dat,~PUBID_1997,summarise,probSum=sum(predProbs))
+        predict.dat = merge(x = predict.dat, y = sums.dat, by = "PUBID_1997", all.x = TRUE)
+        predict.dat$prob = predict.dat$predProbs/predict.dat$probSum
+      #select max probability row
+        bestSchool.dat = ddply(predict.dat, .(PUBID_1997), function(subdf) {subdf[which.max(subdf$prob),]})
+        bestSchool.dat = bestSchool.dat[,c(1:48)]
+      #replace the corresponding rows in model.dat
+        for (i in 1:nrow(bestSchool.dat)){
+          curID = bestSchool.dat$PUBID_1997[i]
+          for (j in 1:length(bestSchool.dat[i,])){
+            model.dat[model.dat$PUBID_1997==curID,j]= bestSchool.dat[i,j]
+          }
+        }
+    #set factors (there may be more relevant ones)
+      model.dat$instate = as.factor(model.dat$instate)
+      model.dat$urbanruralmatch = as.factor(model.dat$urbanruralmatch)
+      model.dat$control = as.factor(model.dat$control)
+      model.dat$attend = as.factor(model.dat$attend)
+      model.dat$admit = as.factor(model.dat$admit)
+      model.dat$gender = as.factor(model.dat$gender)
+  #estimate model
+      reducedDat = model.dat[,c( "AttendedIndicator", "gradrate", "admit2","distance")]
+      reducedDat = na.exclude(reducedDat)
+      reduced.mod =glm(AttendedIndicator ~distance +I(distance^2)+admit2+ gradrate, data = reducedDat, family = "binomial")
+      pR2(reduced.mod)
+  #BTL model    
+      input.dat = model.dat[,c("AttendedIndicator","realtui", "distance","instperstudent")]
+      input.dat = na.exclude(input.dat)
+      btl.mod =glm(AttendedIndicator ~ realtui+I(realtui^2)+distance+I(distance^2)+instperstudent+I(instperstudent^2), data = input.dat, family = "binomial")
+      pR2(btl.mod)
