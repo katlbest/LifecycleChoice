@@ -55,6 +55,7 @@ library(ggplot2)
       meansb = data.frame(attend = c("none","1","2","3","4","5/6"),
         avgIncb = aggregate(inc_datb$avgb, list(gp=inc_datb$attend), mean)$x,
         avgIncbse = aggregate(inc_datb$avgb, list(gp=inc_datb$attend), se)$x)
+      #inc_datb= inc_datb[inc_datb$attend != -10,]
       meansb_byadmit = data.frame(admit = c("1","2","3","4","5/6"),
         avgIncb = aggregate(inc_datb$avgb, list(gp=inc_datb$admit), mean)$x,
         avgIncbse = aggregate(inc_datb$avgb, list(gp=inc_datb$admit), se)$x)
@@ -532,7 +533,7 @@ ggplot(plotdata_reg, aes(x=attend, y = avgIncb, color = as.factor(type))) +
       }
     #get final regression
       reg.dat = merge.dat[,c("pubid_anon", "admit2", "avgb", "major", "SAT_MATH", "HH_INCOME")]
-reg.dat = merge.dat[,c("pubid_anon", "avgb","admit2","attend2", "major", "SAT_MATH")]
+      reg.dat = merge.dat[,c("pubid_anon", "avgb","admit2","attend2", "major", "SAT_MATH")]
       reg.dat = na.exclude(reg.dat)
       reg.dat$EngInd= 0
       reg.dat[reg.dat$major %in% engineering,]$EngInd = 1
@@ -687,3 +688,63 @@ reg.dat = merge.dat[,c("pubid_anon", "avgb","admit2","attend2", "major", "SAT_MA
        avgIncbse = aggregate(inc_datb_temp$avgb, list(gp=inc_datb_temp$SAT_MATH), se)$x)
       curPlot = data.frame(sat = myvect, avgIncb = meansb_bysat_temp$avgIncb, avgIncbse = meansb_bysat_temp$avgIncbse, type = 5)
       plotdata_sat = rbind(plotdata_sat, curPlot)
+
+#plots using conditional on major as well===========================================
+  #this will be added to existing my attended plotdata that is already aggregated in the excel
+  #get data
+    inc_datb = merge.dat[,c("pubid_anon", "admit2", "attend","avgb", "major")]
+    inc_datb = na.exclude(inc_datb)
+    inc_datb$EngInd= 0
+    inc_datb[inc_datb$major %in% engineering,]$EngInd = 1
+    inc_datb$HumInd= 0
+    inc_datb[inc_datb$major %in% hum,]$HumInd = 1
+  #plotdata 
+    plotdata= data.frame(attend = meansb$attend, avgIncb= meansb$avgIncb, avgIncbse = meansb$avgIncbse, type = 0, major = 0)
+  #1
+    hum.dat = inc_datb[inc_datb$HumInd==1,]
+    eng.dat = inc_datb[inc_datb$EngInd==1,]
+    inc_datb_temp_hum = hum.dat[hum.dat$admit ==33,]
+    inc_datb_temp_eng = eng.dat[eng.dat$admit ==33,]
+    meansb_temp_hum = data.frame(attend = c("1", "2","3","4"),
+        avgIncb = aggregate(inc_datb_temp_hum$avgb, list(gp=inc_datb_temp_hum$attend), mean)$x,
+        avgIncbse = aggregate(inc_datb_temp_hum$avgb, list(gp=inc_datb_temp_hum$attend), se)$x)
+    curPlot = data.frame(attend = c("1","2","3","4"), avgIncb = meansb_temp_hum$avgIncb, avgIncbse = meansb_temp_hum$avgIncbse, type = 1, major = 1)
+    meansb_temp_eng = data.frame(attend = c( "2","3","4"),
+         avgIncb = aggregate(inc_datb_temp_eng$avgb, list(gp=inc_datb_temp_eng$attend), mean)$x,
+         avgIncbse = aggregate(inc_datb_temp_eng$avgb, list(gp=inc_datb_temp_eng$attend), se)$x)
+    curPlot2 = data.frame(attend = c("2","3","4"), avgIncb = meansb_temp_eng$avgIncb, avgIncbse = meansb_temp_eng$avgIncbse, type = 1, major = 2)
+    plotdata = rbind(plotdata, curPlot)
+    plotdata = rbind(plotdata, curPlot2)
+
+#2
+hum.dat = inc_datb[inc_datb$HumInd==1,]
+eng.dat = inc_datb[inc_datb$EngInd==1,]
+inc_datb_temp_hum = hum.dat[hum.dat$admit ==60,]
+inc_datb_temp_eng = eng.dat[eng.dat$admit ==60,]
+meansb_temp_hum = data.frame(attend = c("2","3","4","5"),
+                             avgIncb = aggregate(inc_datb_temp_hum$avgb, list(gp=inc_datb_temp_hum$attend), mean)$x,
+                             avgIncbse = aggregate(inc_datb_temp_hum$avgb, list(gp=inc_datb_temp_hum$attend), se)$x)
+curPlot = data.frame(attend = c("2","3","4","5"), avgIncb = meansb_temp_hum$avgIncb, avgIncbse = meansb_temp_hum$avgIncbse, type = 1, major = 1)
+meansb_temp_eng = data.frame(attend = c( "2","3","4"),
+                             avgIncb = aggregate(inc_datb_temp_eng$avgb, list(gp=inc_datb_temp_eng$attend), mean)$x,
+                             avgIncbse = aggregate(inc_datb_temp_eng$avgb, list(gp=inc_datb_temp_eng$attend), se)$x)
+curPlot2 = data.frame(attend = c("2","3","4"), avgIncb = meansb_temp_eng$avgIncb, avgIncbse = meansb_temp_eng$avgIncbse, type = 1, major = 2)
+plotdata = rbind(plotdata, curPlot)
+plotdata = rbind(plotdata, curPlot2)
+
+#both
+hum.dat = inc_datb[inc_datb$HumInd==1,]
+eng.dat = inc_datb[inc_datb$EngInd==1,]
+inc_datb_temp_hum = hum.dat[hum.dat$admit %in% c(33,60),]
+inc_datb_temp_eng = eng.dat[eng.dat$admit %in% c(33,60),]
+meansb_temp_hum = data.frame(attend = c("1","2","3","4","5"),
+                             avgIncb = aggregate(inc_datb_temp_hum$avgb, list(gp=inc_datb_temp_hum$attend), mean)$x,
+                             avgIncbse = aggregate(inc_datb_temp_hum$avgb, list(gp=inc_datb_temp_hum$attend), se)$x)
+curPlot = data.frame(attend = c("1","2","3","4","5"), avgIncb = meansb_temp_hum$avgIncb, avgIncbse = meansb_temp_hum$avgIncbse, type = 1, major = 1)
+meansb_temp_eng = data.frame(attend = c("2","3","4"),
+                             avgIncb = aggregate(inc_datb_temp_eng$avgb, list(gp=inc_datb_temp_eng$attend), mean)$x,
+                             avgIncbse = aggregate(inc_datb_temp_eng$avgb, list(gp=inc_datb_temp_eng$attend), se)$x)
+curPlot2 = data.frame(attend = c("2","3","4"), avgIncb = meansb_temp_eng$avgIncb, avgIncbse = meansb_temp_eng$avgIncbse, type = 1, major = 2)
+plotdata = rbind(plotdata, curPlot)
+plotdata = rbind(plotdata, curPlot2)
+

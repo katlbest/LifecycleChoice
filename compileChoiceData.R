@@ -342,8 +342,9 @@ for(i in 1:length(yearVect)){
     write.csv(AGG.dat,writeStr)
 }
 
+#TBD START HERE!!!
 #read in school data and calculate school-specific variables================================================
-  SCHOOLDATA = read.table(file = "C:/Users/Katharina/Documents/UMICH/Lifecycle choice/Data/ycoc/collegedataoutput.txt", header = TRUE, sep = "\t")
+  SCHOOLDATA = read.table(file = "inputs/collegedataoutput.txt", header = TRUE, sep = "\t")
   LONG_DATA = merge(x=LONG_DATA, y = SCHOOLDATA,  by.x = "AdmittedSchool", by.y= "collegeID", all.x = TRUE)
   LONG_DATA$expperstudent = LONG_DATA$totalexp/(LONG_DATA$fulltime_UG+LONG_DATA$fulltime_GRAD)
   LONG_DATA$instperstudent = LONG_DATA$instspend/(LONG_DATA$fulltime_UG+LONG_DATA$fulltime_GRAD)
