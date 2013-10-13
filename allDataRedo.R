@@ -1190,9 +1190,9 @@
       model.dat$admit = as.factor(model.dat$admit)
       model.dat$gender = as.factor(model.dat$gender)
   #estimate model
-      reducedDat = model.dat[,c( "AttendedIndicator", "gradrate", "admit2","distance")]
+      reducedDat = model.dat[,c( "AttendedIndicator", "gradrate", "admit2")]
       reducedDat = na.exclude(reducedDat)
-      reduced.mod =glm(AttendedIndicator ~distance +I(distance^2)+admit2+ gradrate, data = reducedDat, family = "binomial")
+      reduced.mod =glm(AttendedIndicator ~admit2+ gradrate, data = reducedDat, family = "binomial")
       pR2(reduced.mod)
   #BTL model    
       input.dat = model.dat[,c("AttendedIndicator","realtui", "distance","instperstudent")]
