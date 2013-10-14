@@ -777,10 +777,17 @@
   reg.dat[reg.dat$MAJOR %in% engineering,]$EngInd = 1
   reg.dat$BusInd= 0
   reg.dat[reg.dat$MAJOR %in% bus,]$BusInd = 1
-  checkPred = lm(average~sat_math+HH_INCOME+factor(EngInd) +factor(BusInd), data = reg.dat)
+  reg.dat$LowInd = 0
+  reg.dat[reg.dat$MAJOR %in% c(3,11,12,16,26,31,33,32),]$LowInd = 1
+  reg.dat$HighInd = 0
+  reg.dat[reg.dat$MAJOR %in% c(engineering,bus),]$HighInd =1
+  #checkPred = lm(average~sat_math+HH_INCOME+factor(EngInd)+factor(BusInd), data = reg.dat)
+  checkPred = lm(average~sat_math+HH_INCOME+factor(LowInd)+factor(HighInd), data = reg.dat)
   #major effect plot
     bus.dat = reg.dat[reg.dat$BusInd==1,]
     eng.dat = reg.dat[reg.dat$EngInd==1,]
+    high.dat = reg.dat[reg.dat$HighInd==1,]
+    low.dat = reg.dat[reg.dat$LowInd==1,]
     sal_byadmit_bus = data.frame(admit = c("1","2","3","4","5/6"),
       avgInc = aggregate(bus.dat$average, list(gp=bus.dat$admit2), mean)$x,
       avgIncse = aggregate(bus.dat$average, list(gp=bus.dat$admit2), se)$x)
@@ -790,22 +797,36 @@
     sal_byadmit_avg = data.frame(admit = c("1","2","3","4","5/6"),
       avgInc = aggregate(reg.dat$average, list(gp=reg.dat$admit2), mean)$x,
       avgIncse = aggregate(reg.dat$average, list(gp=reg.dat$admit2), se)$x)
+    sal_byadmit_high = data.frame(admit = c("1","2","3","4","5/6"),
+      avgInc = aggregate(high.dat$average, list(gp=high.dat$admit2), mean)$x,
+      avgIncse = aggregate(high.dat$average, list(gp=high.dat$admit2), se)$x)
+    sal_byadmit_low = data.frame(admit = c("1","2","3","4","5/6"),
+      avgInc = aggregate(low.dat$average, list(gp=low.dat$admit2), mean)$x,
+      avgIncse = aggregate(low.dat$average, list(gp=low.dat$admit2), se)$x)
   #test--does major still matter for top people
     topDat = inc_dat[inc_dat$admit ==1,]
       topTest =aov(average ~ as.factor(MAJOR), data=topDat)
       topReg = lm(average~factor(attend), data = topDat) #attending 1 makes a difference
       topDat$EngInd= 0
       topDat$BusInd= 0
+      topDat$HighInd = 0
+      topDat$LowInd = 0
       topDat[topDat$MAJOR %in% engineering,]$EngInd = 1
       topDat[topDat$MAJOR %in% bus,]$BusInd = 1
-      topReg = lm(average~factor(attend)+factor(EngInd)+factor(BusInd), data = topDat)
+      topDat[topDat$MAJOR %in% c(bus,engineering),]$HighInd = 1
+      topDat[topDat$MAJOR %in% c(3,11,12,16,26,31,33,32),]$LowInd = 1
+      topReg = lm(average~factor(attend)+factor(HighInd)+factor(LowInd), data = topDat)
     topDat = inc_dat[inc_dat$attend ==1,]
       topTest =aov(average ~ as.factor(MAJOR), data=topDat)
       topDat$EngInd= 0
       topDat$BusInd= 0
+      topDat$HighInd = 0
+      topDat$LowInd= 0
       topDat[topDat$MAJOR %in% engineering,]$EngInd = 1
       topDat[topDat$MAJOR %in% bus,]$BusInd = 1
-      topReg = lm(average~factor(EngInd)+factor(BusInd), data = topDat)    
+      topDat[topDat$MAJOR %in% c(bus,engineering),]$HighInd = 1
+      topDat[topDat$MAJOR %in% c(3,11,12,16,26,31,33,32),]$LowInd = 1
+      topReg = lm(average~factor(HighInd)+factor(LowInd), data = topDat)    
   save.image("regression-income.RData")
 
 #get data for choice models=========================================================
@@ -1097,6 +1118,24 @@
       out.df = LONG_OUT[,keyVars]
       write.csv(out.df, "test.csv")
     save.image("dataset.RData")
+#check number of schools significance==============================
+  frequency.dat = data.frame(freq(ordered(LONG_OUT$PUBID_1997), plot=FALSE))
+  frequency.dat$pubid= rownames(frequency.dat)
+  withfreq.dat = merge(x = inc_dat, y = frequency.dat, by = "pubid", all.x = TRUE)
+  regNum.dat = withfreq.dat[,c("pubid", "admit2","attend2", "average", "MAJOR", "sat_math", "HH_INCOME", "Frequency")]
+  regNum.dat = na.exclude(regNum.dat)
+  engineering <- c(9,13)
+  bus <- c(7, 8)
+  regNum.dat$EngInd= 0
+  regNum.dat[regNum.dat$MAJOR %in% engineering,]$EngInd = 1
+  regNum.dat$BusInd= 0
+  regNum.dat[regNum.dat$MAJOR %in% bus,]$BusInd = 1
+  regNum.dat$LowInd = 0
+  regNum.dat[regNum.dat$MAJOR %in% c(3,11,12,16,26,31,33,32),]$LowInd = 1
+  regNum.dat$HighInd = 0
+  regNum.dat[regNum.dat$MAJOR %in% c(engineering,bus),]$HighInd =1
+  #checkPred = lm(average~sat_math+HH_INCOME+factor(EngInd)+factor(BusInd), data = reg.dat)
+  checkPred = lm(average~Frequency+sat_math+HH_INCOME+factor(LowInd)+factor(HighInd), data = regNum.dat)
 #run first stage models==========================================================
   #get attenders
     attenders.dat = out.df[out.df$attend != -10,]
